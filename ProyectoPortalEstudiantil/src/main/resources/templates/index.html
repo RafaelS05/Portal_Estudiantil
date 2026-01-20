@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+                <div th:replace="~{layout/plantilla :: hero}"></div>
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>

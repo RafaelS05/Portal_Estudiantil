@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:fragment="head">
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Portal Estudiantil</title>
+
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+        <link rel="stylesheet" th:href="@{/css/layout.css}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+        <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+    </head>
+
+    <body>
+
+        <div th:fragment="shell(content)">
+            <div class="app-shell">
+
+                <!-- Sidebar -->
+                <aside class="app-sidebar">
+                    <div class="sidebar-brand">
+                        <a th:href="@{/}" class="brand-link">
+                            <div class="logo">
+                                <img th:src="@{/img/Escuela_Neftali.png}" alt="Escuela Neftalí"/>
+                            </div>
+                            <div class="text-truncate">
+                                Portal Estudiantil <br/>y Administrativo
+                            </div>
+                        </a>
+                    </div>
+
+                    <nav class="sidebar-nav">
+                        <div class="nav-item">
+                            <a class="sidebar-link active" th:href="@{/}">
+                                <i class="fa-solid fa-house"></i> Inicio
+                            </a>
+                        </div>
+
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
+                            <a class="sidebar-link" th:href="@{/admin/usuarios}">
+                                <i class="fa-solid fa-users"></i> Usuarios
+                            </a>
+                        </div>
+
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/gestion-academica}"><i class="fa-solid fa-book"></i> Gestión Académica</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/asistencia}"><i class="fa-solid fa-clipboard-check"></i> Asistencia</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/calificaciones}"><i class="fa-solid fa-chart-line"></i> Calificaciones</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/calendario}"><i class="fa-solid fa-calendar-days"></i> Calendario</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/reportes}"><i class="fa-solid fa-file-lines"></i> Reportes</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/estadisticas}"><i class="fa-solid fa-chart-pie"></i> Estadísticas</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/eventos}"><i class="fa-solid fa-calendar-plus"></i> Gestión de Eventos</a></div>
+                        <div class="nav-item"><a class="sidebar-link" th:href="@{/feedback}"><i class="fa-solid fa-comment-dots"></i> Feedback 360</a></div>
+                    </nav>
+                </aside>
+
+                <!-- Main -->
+                <div class="app-main">
+
+                    <!-- Topbar -->
+                    <div class="app-topbar">
+                        <div class="topbar-left">
+                            <h1 class="page-title" th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">Dashboard</h1>
+                        </div>
+
+                        <div class="topbar-right d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-news">Noticias y Anuncios</button>
+
+                            <!-- Usuario -->
+                            <div class="dropdown" sec:authorize="isAuthenticated()">
+                                <a class="chip dropdown-toggle text-decoration-none" href="#" id="userDropdown"
+                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-regular fa-user"></i>
+                                    <span sec:authentication="name">Usuario</span>
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/perfil}">
+                                            <i class="fa-regular fa-id-card me-2"></i>Mi perfil
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"/></li>
+                                    <li>
+                                        <form th:action="@{/logout}" method="post" class="m-0">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Login -->
+                            <a class="chip text-decoration-none" sec:authorize="!isAuthenticated()" th:href="@{/login}">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Iniciar sesión
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="app-content">
+                        <div class="content-card" th:replace="${content}"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Fragmentos de páginas -->
+        <section th:fragment="hero">
+            <div class="p-1">
+                <h2 class="fw-bold mb-1">Bienvenido al Portal Estudiantil</h2>
+                <p class="text-muted mb-0">Seleccioná una opción del menú para comenzar.</p>
+            </div>
+        </section>
+
+        <footer th:fragment="footer" class="py-3 text-center text-muted">
+            <small>Portal Estudiantil &copy; <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span></small>
+        </footer>
+
+    </body>
+</html>
