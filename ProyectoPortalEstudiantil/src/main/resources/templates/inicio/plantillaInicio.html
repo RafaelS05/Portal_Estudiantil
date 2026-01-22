@@ -36,9 +36,10 @@
                             <a class="sidebar-link active" th:href="@{/}">
                                 <i class="fa-solid fa-house"></i> Inicio
                             </a>
+                            <span class="active" >Debe iniciar sesión para acceder al sistema</span>
                         </div>
-                        
-                        <div> <!--th:if="${session.usuarioLogueado != null}"-->
+                        <!--
+                        <div> <!--th:if="${session.usuarioLogueado != null}"
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/admin/usuarios}">
                                 <i class="fa-solid fa-users"></i> Usuarios
@@ -54,6 +55,7 @@
                         <div class="nav-item"><a class="sidebar-link" th:href="@{/eventos}"><i class="fa-solid fa-calendar-plus"></i> Gestión de Eventos</a></div>
                         <div class="nav-item"><a class="sidebar-link" th:href="@{/feedback}"><i class="fa-solid fa-comment-dots"></i> Feedback 360</a></div>
                         </div>
+            -->
                     </nav>
                 </aside>
 
@@ -63,13 +65,14 @@
                     <!-- Topbar -->
                     <div class="app-topbar">
                         <div class="topbar-left">
-                            <h1 class="page-title" th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">Dashboard</h1>
+                            <h1 class="page-title" th:text="${pageTitle != null ? pageTitle : 'Inicio'}">Inicio</h1>
                         </div>
-
+                        <!--th:if="${session.usuarioLogueado != null}" -->
                         <div class="topbar-right d-flex align-items-center gap-2">
+                            <!--
                             <button type="button" class="btn btn-news">Noticias y Anuncios</button>
 
-                            <!-- Usuario -->
+                            <!-- Usuario
                             <div class="dropdown" sec:authorize="isAuthenticated()">
                                 <a class="chip dropdown-toggle text-decoration-none" href="#" id="userDropdown"
                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -92,7 +95,7 @@
                                         </form>
                                     </li>
                                 </ul>
-                            </div>
+                            </div>-->
 
                             <!-- Login -->
                             <a class="chip text-decoration-none" sec:authorize="!isAuthenticated()" th:href="@{/login}">
@@ -109,8 +112,7 @@
                 </div>
             </div>
         </div>
-
-
+        
         <!--Fragmento de pag inicio-->
         <section th:fragment="inicio" class="p-3 p-md-4">
             <div class="row g-3 g-md-4 align-items-stretch">
@@ -129,7 +131,7 @@
                              alt="Noticia principal">
                     </article>
                 </div>
-
+                
                 <!-- Columna derecha (2 noticias) -->
                 <div class="col-12 col-lg-5">
                     <div class="row g-3 g-md-4 h-100">
@@ -161,21 +163,7 @@
                 </div>
 
             </div>
-
         </section>
-
-
-        <!-- Fragmentos de páginas -->
-        <section th:fragment="hero">
-            <div class="p-1">
-                <h2 class="fw-bold mb-1">Bienvenido al Portal Estudiantil</h2>
-                <p class="text-muted mb-0">Seleccioná una opción del menú para comenzar.</p>
-            </div>
-        </section>
-
-        <footer th:fragment="footer" class="py-3 text-center text-muted">
-            <small>Portal Estudiantil &copy; <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span></small>
-        </footer>
 
     </body>
 </html>
