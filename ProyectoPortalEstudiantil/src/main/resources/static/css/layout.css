@@ -214,14 +214,16 @@ p{ margin: 0; }
 }
 
 .btn-news{
-  background: #ff8a1f;
-  color: #fff;
+  background: #ff8a1f !important;
+  color: #fff !important;
   border-radius: 62.4375rem;
   font-weight: 700;
   padding: 0.5rem 0.875rem;
   border: none;
   cursor: pointer;
   box-shadow: 0 0.5rem 1.125rem rgba(255,138,31,.22);
+  font-size: 0.875rem;
+  display: inline-block;
 }
 
 .btn-news:hover{

@@ -89,10 +89,6 @@ END;
 /
 
 
-
-
-
-
 -- Generado automáticamente: usar CRUD del paquete PORTAL_ESCOLAR_PKG
 SET SERVEROUTPUT ON;
 DECLARE
@@ -796,3 +792,153 @@ EXCEPTION
     RAISE;
 END;
 /
+
+
+
+BEGIN
+  
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Administrador',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Profesor',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Estudiante',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Encargado',1);
+
+END;
+
+
+
+
+
+
+-- =========================================================
+-- SCRIPT DE CREACIÓN DE USUARIO ADMINISTRADOR
+-- =========================================================
+
+DECLARE
+    v_id_usuario NUMBER;
+    v_id_correo NUMBER;
+    v_id_credencial NUMBER;
+    v_password_hash VARCHAR2(255);
+BEGIN
+    -- =======================
+    -- 1. INSERTAR USUARIO
+    -- =======================
+    INSERT INTO USUARIOS_TB (
+        ID_USUARIO,
+        NOMBRE,
+        PRIMER_APELLIDO,
+        SEGUNDO_APELLIDO,
+        ID_TIPOUSUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1, -- ID_USUARIO
+        'Admin',
+        'Sistema',
+        'Portal',
+        1, -- Administrador (según tu TIPOUSUARIO_INSERTAR)
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_USUARIO INTO v_id_usuario;
+
+    -- =======================
+    -- 2. INSERTAR TELÉFONO
+    -- =======================
+    INSERT INTO TELEFONO_TB (
+        ID_TELEFONO,
+        NUMERO,
+        ID_USUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        '8888-8888',
+        v_id_usuario,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    );
+
+    -- =======================
+    -- 3. INSERTAR CORREO (ES_LOGIN = 'S')
+    -- =======================
+    INSERT INTO CORREO_TB (
+        ID_CORREO,
+        CORREO,
+        ES_LOGIN,
+        ID_USUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        'admin@escuela.com', -- ← CAMBIAR POR TU EMAIL
+        'S', -- ES_LOGIN = 'S' (este correo se usa para login)
+        v_id_usuario,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_CORREO INTO v_id_correo;
+
+    -- =======================
+    -- 4. GENERAR PASSWORD HASH
+    -- =======================
+    -- Password: Admin123! (CAMBIAR DESPUÉS DEL PRIMER LOGIN)
+    -- Hash BCrypt generado con fuerza 10
+    v_password_hash := '$2a$10$N9qo8uLOickgx2ZMRZoMye1JRvWmZQVpEQ8YQHG0J.HQZIqKWXjXC';
+    
+    -- =======================
+    -- 5. INSERTAR CREDENCIALES
+    -- =======================
+    INSERT INTO CREDENCIALES_TB (
+        ID_CREDENCIAL,
+        PASSWORD_HASH,
+        ULTIMO_LOGIN,
+        INTENTOS_FALLIDOS,
+        BLOQUEADO_HASTA,
+        ID_USUARIO_FK,
+        ID_CORREO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        v_password_hash,
+        NULL, -- Aún no ha hecho login
+        0,
+        NULL,
+        v_id_usuario,
+        v_id_correo,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_CREDENCIAL INTO v_id_credencial;
+
+    COMMIT;
+    
+    DBMS_OUTPUT.PUT_LINE('✓ Usuario administrador creado exitosamente');
+    DBMS_OUTPUT.PUT_LINE('  Email: admin@escuela.com');
+    DBMS_OUTPUT.PUT_LINE('  Password: Admin123!');
+    DBMS_OUTPUT.PUT_LINE('  ID_USUARIO: ' || v_id_usuario);
+    DBMS_OUTPUT.PUT_LINE('  ID_CREDENCIAL: ' || v_id_credencial);
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('✗ Error al crear usuario: ' || SQLERRM);
+        RAISE;
+END;
+/
+
+
+
