@@ -24,10 +24,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         Object principal = authentication.getPrincipal();
         
-        if (principal instanceof PortalUserDetails pud) {
+        if (principal instanceof PortalUserDetails pud) {    
             authRepository.loginSuccess(pud.getIdCredencial());
-        }
-        
+             }
         response.sendRedirect("/");
     }
 }
