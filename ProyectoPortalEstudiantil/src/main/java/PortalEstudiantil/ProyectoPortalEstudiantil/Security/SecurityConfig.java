@@ -20,8 +20,8 @@ public class SecurityConfig {
     private final LoginFailureHandler loginFailureHandler;
 
     public SecurityConfig(PortalUserDetailsService userDetailsService,
-                         LoginSuccessHandler loginSuccessHandler,
-                         LoginFailureHandler loginFailureHandler) {
+            LoginSuccessHandler loginSuccessHandler,
+            LoginFailureHandler loginFailureHandler) {
         this.userDetailsService = userDetailsService;
         this.loginSuccessHandler = loginSuccessHandler;
         this.loginFailureHandler = loginFailureHandler;
@@ -49,28 +49,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index", "/login", "/error").permitAll()
                 .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
+                )
+                .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email")              // ← Parámetro correcto del formulario
-                .passwordParameter("password")           // ← Parámetro de contraseña
-                .successHandler(loginSuccessHandler)     // ← AGREGADO: Handler de éxito
-                .failureHandler(loginFailureHandler)     // ← AGREGADO: Handler de fallo
-                .defaultSuccessUrl("/", true)
+                .usernameParameter("email") //
+                .passwordParameter("password") // 
+                .successHandler(loginSuccessHandler) // 
+                .failureHandler(loginFailureHandler) // 
                 .permitAll()
-            )
-            .logout(logout -> logout
+                )
+                .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-            );
+                );
 
         return http.build();
     }
