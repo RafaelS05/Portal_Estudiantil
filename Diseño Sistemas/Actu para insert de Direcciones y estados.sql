@@ -1,0 +1,944 @@
+/* =========================================================
+   PORTAL ESCOLAR - DROP TABLES
+   (Orden: dependientes -> padres)
+   ========================================================= */
+
+-- REPORTES
+DROP TABLE REPORTESLOG_TB;
+DROP TABLE REPORTESACADEMICOS_TB;
+
+-- SOPORTE
+DROP TABLE EVALUACIONSOPORTE_TB;
+DROP TABLE ADJUNTOTICKET_TB;
+DROP TABLE TICKET_TB;
+DROP TABLE CATEGORIATICKET_TB;
+
+-- MENSAJERÍA
+DROP TABLE MENSAJESARCHIVOS_TB;
+DROP TABLE MENSAJES_TB;
+DROP TABLE CONVERSACION_TB;
+
+-- EVENTOS
+DROP TABLE EVENTO_TB;
+
+-- ACADÉMICO
+DROP TABLE CALIFICACIONES_TB;
+DROP TABLE EVALUACION_TB;
+DROP TABLE JUSTIFICANTEASISTENCIA_TB;
+DROP TABLE ASISTENCIAS_TB;
+DROP TABLE HORARIO_TB;
+DROP TABLE MATRICULA_TB;
+DROP TABLE SECCIONMATERIA_TB;
+DROP TABLE AULA_TB;
+DROP TABLE SECCION_TB;
+DROP TABLE MATERIA_TB;
+DROP TABLE PERIODOS_TB;
+
+-- LOGIN / RESET
+DROP TABLE RESET_PASSWORD_TB;
+DROP TABLE CREDENCIALES_TB;
+
+-- USUARIOS / CONTACTO / DIRECCIÓN
+DROP TABLE ENCARGADOESTUDIANTE_TB;
+DROP TABLE DIRECCION_TB;
+DROP TABLE CORREO_TB;
+DROP TABLE TELEFONO_TB;
+DROP TABLE USUARIOS_TB;
+
+-- UBICACIÓN
+DROP TABLE DISTRITO_TB;
+DROP TABLE CANTON_TB;
+DROP TABLE PROVINCIA_TB;
+
+-- CATÁLOGOS BASE
+DROP TABLE TIPOCONVERSACION_TB;
+DROP TABLE TIPOREPORTE_TB;
+DROP TABLE TIPOVISIBILIDAD_TB;
+DROP TABLE TIPOUSUARIO_TB;
+DROP TABLE ESTADOS_TB;
+
+
+
+BEGIN
+  -- Estados base
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('ACTIVO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('INACTIVO');
+
+  -- Académicos
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('MATRICULADO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('RETIRADO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('APROBADO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('REPROBADO');
+
+  -- Asistencia
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('PRESENTE');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('AUSENTE');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('TARDE');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('JUSTIFICADO');
+
+  -- Soporte
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('ABIERTO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('EN_PROCESO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('RESUELTO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('CERRADO');
+
+  -- Seguridad
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('BLOQUEADO');
+  PORTAL_ESCOLAR_PKG.ESTADOS_INSERTAR('EXPIRADO');
+END;
+/
+
+
+-- Generado automáticamente: usar CRUD del paquete PORTAL_ESCOLAR_PKG
+SET SERVEROUTPUT ON;
+DECLARE
+  v_estado_activo CONSTANT NUMBER := 1;
+  TYPE t_num_map IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+  m_prov t_num_map;
+  m_cant t_num_map;
+BEGIN
+  -- =====================
+  -- PROVINCIAS (7)
+  -- =====================
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('San José', v_estado_activo);
+  m_prov(1) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Alajuela', v_estado_activo);
+  m_prov(2) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Cartago', v_estado_activo);
+  m_prov(3) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Heredia', v_estado_activo);
+  m_prov(4) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Guanacaste', v_estado_activo);
+  m_prov(5) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Puntarenas', v_estado_activo);
+  m_prov(6) := PROVINCIA_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.PROVINCIA_INSERTAR('Limón', v_estado_activo);
+  m_prov(7) := PROVINCIA_SEQ.CURRVAL;
+
+  -- =====================
+  -- CANTONES (84)
+  -- =====================
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San José', m_prov(1), v_estado_activo);
+  m_cant(101) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Escazú', m_prov(1), v_estado_activo);
+  m_cant(102) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Desamparados', m_prov(1), v_estado_activo);
+  m_cant(103) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Puriscal', m_prov(1), v_estado_activo);
+  m_cant(104) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Tarrazú', m_prov(1), v_estado_activo);
+  m_cant(105) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Aserrí', m_prov(1), v_estado_activo);
+  m_cant(106) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Mora', m_prov(1), v_estado_activo);
+  m_cant(107) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Goicoechea', m_prov(1), v_estado_activo);
+  m_cant(108) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Santa Ana', m_prov(1), v_estado_activo);
+  m_cant(109) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Alajuelita', m_prov(1), v_estado_activo);
+  m_cant(110) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Vázquez de Coronado', m_prov(1), v_estado_activo);
+  m_cant(111) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Acosta', m_prov(1), v_estado_activo);
+  m_cant(112) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Tibás', m_prov(1), v_estado_activo);
+  m_cant(113) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Moravia', m_prov(1), v_estado_activo);
+  m_cant(114) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Montes de Oca', m_prov(1), v_estado_activo);
+  m_cant(115) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Turrubares', m_prov(1), v_estado_activo);
+  m_cant(116) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Dota', m_prov(1), v_estado_activo);
+  m_cant(117) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Curridabat', m_prov(1), v_estado_activo);
+  m_cant(118) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Pérez Zeledón', m_prov(1), v_estado_activo);
+  m_cant(119) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('León Cortés Castro', m_prov(1), v_estado_activo);
+  m_cant(120) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Alajuela', m_prov(2), v_estado_activo);
+  m_cant(201) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Ramón', m_prov(2), v_estado_activo);
+  m_cant(202) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Grecia', m_prov(2), v_estado_activo);
+  m_cant(203) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Mateo', m_prov(2), v_estado_activo);
+  m_cant(204) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Atenas', m_prov(2), v_estado_activo);
+  m_cant(205) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Naranjo', m_prov(2), v_estado_activo);
+  m_cant(206) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Palmares', m_prov(2), v_estado_activo);
+  m_cant(207) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Poás', m_prov(2), v_estado_activo);
+  m_cant(208) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Orotina', m_prov(2), v_estado_activo);
+  m_cant(209) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Carlos', m_prov(2), v_estado_activo);
+  m_cant(210) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Zarcero', m_prov(2), v_estado_activo);
+  m_cant(211) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Sarchí', m_prov(2), v_estado_activo);
+  m_cant(212) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Upala', m_prov(2), v_estado_activo);
+  m_cant(213) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Los Chiles', m_prov(2), v_estado_activo);
+  m_cant(214) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Guatuso', m_prov(2), v_estado_activo);
+  m_cant(215) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Río Cuarto', m_prov(2), v_estado_activo);
+  m_cant(216) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Cartago', m_prov(3), v_estado_activo);
+  m_cant(301) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Paraíso', m_prov(3), v_estado_activo);
+  m_cant(302) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('La Unión', m_prov(3), v_estado_activo);
+  m_cant(303) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Jiménez', m_prov(3), v_estado_activo);
+  m_cant(304) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Turrialba', m_prov(3), v_estado_activo);
+  m_cant(305) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Alvarado', m_prov(3), v_estado_activo);
+  m_cant(306) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Oreamuno', m_prov(3), v_estado_activo);
+  m_cant(307) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('El Guarco', m_prov(3), v_estado_activo);
+  m_cant(308) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Heredia', m_prov(4), v_estado_activo);
+  m_cant(401) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Barva', m_prov(4), v_estado_activo);
+  m_cant(402) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Santo Domingo', m_prov(4), v_estado_activo);
+  m_cant(403) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Santa Bárbara', m_prov(4), v_estado_activo);
+  m_cant(404) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Rafael', m_prov(4), v_estado_activo);
+  m_cant(405) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Isidro', m_prov(4), v_estado_activo);
+  m_cant(406) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Belén', m_prov(4), v_estado_activo);
+  m_cant(407) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Flores', m_prov(4), v_estado_activo);
+  m_cant(408) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('San Pablo', m_prov(4), v_estado_activo);
+  m_cant(409) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Sarapiquí', m_prov(4), v_estado_activo);
+  m_cant(410) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Liberia', m_prov(5), v_estado_activo);
+  m_cant(501) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Nicoya', m_prov(5), v_estado_activo);
+  m_cant(502) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Santa Cruz', m_prov(5), v_estado_activo);
+  m_cant(503) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Bagaces', m_prov(5), v_estado_activo);
+  m_cant(504) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Carrillo', m_prov(5), v_estado_activo);
+  m_cant(505) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Cañas', m_prov(5), v_estado_activo);
+  m_cant(506) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Abangares', m_prov(5), v_estado_activo);
+  m_cant(507) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Tilarán', m_prov(5), v_estado_activo);
+  m_cant(508) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Nandayure', m_prov(5), v_estado_activo);
+  m_cant(509) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('La Cruz', m_prov(5), v_estado_activo);
+  m_cant(510) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Hojancha', m_prov(5), v_estado_activo);
+  m_cant(511) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Puntarenas', m_prov(6), v_estado_activo);
+  m_cant(601) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Esparza', m_prov(6), v_estado_activo);
+  m_cant(602) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Buenos Aires', m_prov(6), v_estado_activo);
+  m_cant(603) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Montes de Oro', m_prov(6), v_estado_activo);
+  m_cant(604) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Osa', m_prov(6), v_estado_activo);
+  m_cant(605) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Quepos', m_prov(6), v_estado_activo);
+  m_cant(606) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Golfito', m_prov(6), v_estado_activo);
+  m_cant(607) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Coto Brus', m_prov(6), v_estado_activo);
+  m_cant(608) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Parrita', m_prov(6), v_estado_activo);
+  m_cant(609) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Corredores', m_prov(6), v_estado_activo);
+  m_cant(610) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Garabito', m_prov(6), v_estado_activo);
+  m_cant(611) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Monteverde', m_prov(6), v_estado_activo);
+  m_cant(612) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Puerto Jiménez', m_prov(6), v_estado_activo);
+  m_cant(613) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Limón', m_prov(7), v_estado_activo);
+  m_cant(701) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Pococí', m_prov(7), v_estado_activo);
+  m_cant(702) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Siquirres', m_prov(7), v_estado_activo);
+  m_cant(703) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Talamanca', m_prov(7), v_estado_activo);
+  m_cant(704) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Matina', m_prov(7), v_estado_activo);
+  m_cant(705) := CANTON_SEQ.CURRVAL;
+  PORTAL_ESCOLAR_PKG.CANTON_INSERTAR('Guácimo', m_prov(7), v_estado_activo);
+  m_cant(706) := CANTON_SEQ.CURRVAL;
+
+  -- =====================
+  -- DISTRITOS (492)
+  -- =====================
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carmen', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Merced', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Hospital', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Catedral', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zapote', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Francisco de Dos Ríos', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Uruca', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mata Redonda', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pavas', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Hatillo', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Sebastián', m_cant(101), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Escazú', m_cant(102), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(102), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(102), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Desamparados', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Miguel', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan de Dios', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael Arriba', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Frailes', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Patarrá', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Cristobal', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rosario', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Damas', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael Abajo', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Gravilias', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Los Guido', m_cant(103), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mercedes Sur', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Barbacoas', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Grifo Alto', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Candelarita', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Desamparaditos', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chires', m_cant(104), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Marcos', m_cant(105), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Lorenzo', m_cant(105), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Carlos', m_cant(105), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Aserrí', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tarbaca', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Vuelta de Jorco', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Gabriel', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Legua', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Monterrey', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Salitrillos', m_cant(106), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Colón', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guayabo', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tabarcia', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedras Negras', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Picagres', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jaris', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quitirrisí', m_cant(107), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guadalupe', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Francisco', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Calle Blancos', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mata de Plátano', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Ipís', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rancho Redondo', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Purral', m_cant(108), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Ana', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Salitral', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pozos', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Uruca', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedades', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Brasil', m_cant(109), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Alajuelita', m_cant(110), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Josecito', m_cant(110), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(110), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(110), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Felipe', m_cant(110), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(111), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(111), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Dulce Nombre de Jesús', m_cant(111), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Patalillo', m_cant(111), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cascajal', m_cant(111), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Ignacio', m_cant(112), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guaitil', m_cant(112), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmichal', m_cant(112), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cangrejal', m_cant(112), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sabanillas', m_cant(112), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(113), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cinco Esquinas', m_cant(113), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Anselmo Llorente', m_cant(113), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('León XIII', m_cant(113), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Colima', m_cant(113), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Vicente', m_cant(114), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Jerónimo', m_cant(114), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Trinidad', m_cant(114), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(115), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sabanilla', m_cant(115), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mercedes', m_cant(115), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(115), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pablo', m_cant(116), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(116), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan de Mata', m_cant(116), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Luis', m_cant(116), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carara', m_cant(116), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa María', m_cant(117), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jardín', m_cant(117), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Copey', m_cant(117), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Curridabat', m_cant(118), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Granadilla', m_cant(118), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sánchez', m_cant(118), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tirrases', m_cant(118), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro de El General', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El General', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Daniel Flores', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rivas', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Platanares', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pejibaye', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cajón', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Barú', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Nuevo', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Páramo', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La  Amistad', m_cant(119), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pablo', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Andrés', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Llano Bonito', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Cruz', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(120), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Alajuela', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carrizal', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guácima', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sabanilla', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Segundo', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Desamparados', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Turrúcares', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tambor', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Garita', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sarapiquí', m_cant(201), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Ramón', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedades Norte', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedades Sur', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Ángeles', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Alfaro', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Volio', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zapotal', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Peñas Blancas', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Lorenzo', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Grecia', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Roque', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tacares', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puente de Piedra', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bolivar', m_cant(203), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Mateo', m_cant(204), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Desmonte', m_cant(204), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jesús María', m_cant(204), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Labrador', m_cant(204), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Atenas', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jesús', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mercedes', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Eulalia', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Escobal', m_cant(205), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Naranjo', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Miguel', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cirrí Sur', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Jerónimo', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Rosario', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmitos', m_cant(206), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmares', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zaragoza', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Buenos Aires', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Candelaria', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Esquipulas', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Granja', m_cant(207), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(208), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(208), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(208), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carrillos', m_cant(208), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sabana Redonda', m_cant(208), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Orotina', m_cant(209), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Mastate', m_cant(209), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Hacienda Vieja', m_cant(209), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Coyolar', m_cant(209), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Ceiba', m_cant(209), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quesada', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Florencia', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Buenavista', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Aguas Zarcas', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Venecia', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pital', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Fortuna', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Tigra', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Palmera', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Venado', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cutris', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Monterrey', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pocosol', m_cant(210), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zarcero', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Laguna', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tapesco', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guadalupe', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmira', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zapote', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Brisas', m_cant(211), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sarchí Norte', m_cant(212), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sarchí Sur', m_cant(212), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Toro Amarillo', m_cant(212), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(212), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rodríguez', m_cant(212), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Upala', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Aguas Claras', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José O Pizote', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bijagua', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Delicias', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Dos Ríos', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Yolillal', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Canalete', m_cant(213), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Los Chiles', m_cant(214), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Caño Negro', m_cant(214), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Amparo', m_cant(214), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Jorge', m_cant(214), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(215), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Buenavista', m_cant(215), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cote', m_cant(215), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Katira', m_cant(215), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Cuarto', m_cant(216), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rita', m_cant(216), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Isabel', m_cant(216), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Oriental', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Occidental', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carmen', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Nicolás', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Aguacaliente o San Francisco', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guadalupe o Arenilla', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Corralillo', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tierra Blanca', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Dulce Nombre', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Llano Grande', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quebradilla', m_cant(301), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Paraíso', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Orosi', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cachí', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Llanos de Santa Lucía', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Birrisito', m_cant(302), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tres Ríos', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Diego', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Dulce Nombre', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Ramón', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Azul', m_cant(303), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Juan Viñas', m_cant(304), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tucurrique', m_cant(304), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pejibaye', m_cant(304), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Victoria', m_cant(304), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Turrialba', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Suiza', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Peralta', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Cruz', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Teresita', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pavones', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tuis', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tayutic', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rosa', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tres Equis', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Isabel', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chirripó', m_cant(305), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pacayas', m_cant(306), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cervantes', m_cant(306), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Capellades', m_cant(306), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(307), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cot', m_cant(307), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Potrero Cerrado', m_cant(307), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cipreses', m_cant(307), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rosa', m_cant(307), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Tejar', m_cant(308), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(308), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tobosi', m_cant(308), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Patio de Agua', m_cant(308), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Heredia', m_cant(401), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mercedes', m_cant(401), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Francisco', m_cant(401), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Ulloa', m_cant(401), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Varablanca', m_cant(401), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Barva', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pablo', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Roque', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Lucía', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José de la Montaña', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puente Salas', m_cant(402), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santo Domingo', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Vicente', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Miguel', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Paracito', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santo Tomás', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rosa', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tures', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pará', m_cant(403), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Bárbara', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pedro', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jesús', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santo Domingo', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Purabá', m_cant(404), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Josecito', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Ángeles', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(406), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San José', m_cant(406), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepción', m_cant(406), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Francisco', m_cant(406), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(407), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Ribera', m_cant(407), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Asunción', m_cant(407), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Joaquín', m_cant(408), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Barrantes', m_cant(408), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Llorente', m_cant(408), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pablo', m_cant(409), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rincón de Sabanilla', m_cant(409), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puerto Viejo', m_cant(410), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Virgen', m_cant(410), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Las Horquetas', m_cant(410), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Llanuras del Gaspar', m_cant(410), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cureña', m_cant(410), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Liberia', m_cant(501), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cañas Dulces', m_cant(501), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mayorga', m_cant(501), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Nacascolo', m_cant(501), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Curubandé', m_cant(501), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Nicoya', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mansión', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Antonio', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quebrada Honda', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sámara', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Nosara', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Belén de Nosarita', m_cant(502), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Cruz', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bolsón', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Veintisiete de Abril', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tempate', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cartagena', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cuajiniquil', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Diriá', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cabo Velas', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tamarindo', m_cant(503), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bagaces', m_cant(504), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Fortuna', m_cant(504), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mogote', m_cant(504), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Naranjo', m_cant(504), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Filadelfia', m_cant(505), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmira', m_cant(505), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sardinal', m_cant(505), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Belén', m_cant(505), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cañas', m_cant(506), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmira', m_cant(506), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Miguel', m_cant(506), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bebedero', m_cant(506), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Porozal', m_cant(506), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Las Juntas', m_cant(507), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sierra', m_cant(507), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan', m_cant(507), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Colorado', m_cant(507), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tilarán', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quebrada Grande', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tronadora', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rosa', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Líbano', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tierras Morenas', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Arenal', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cabeceras', m_cant(508), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carmona', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Rita', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Zapotal', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Pablo', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Porvenir', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bejuco', m_cant(509), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Cruz', m_cant(510), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Cecilia', m_cant(510), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Garita', m_cant(510), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santa Elena', m_cant(510), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Hojancha', m_cant(511), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Monte Romo', m_cant(511), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puerto Carrillo', m_cant(511), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Huacas', m_cant(511), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Matambú', m_cant(511), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puntarenas', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pitahaya', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chomes', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Lepanto', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Paquera', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Manzanillo', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guacimal', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Barranca', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Isla del Coco', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cóbano', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chacarita', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chira', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Acapulco', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Roble', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Arancibia', m_cant(601), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Espíritu Santo', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Juan Grande', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Macacona', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Jerónimo', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Caldera', m_cant(602), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Buenos Aires', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Volcán', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Potrero Grande', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Boruca', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pilas', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Colinas', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Chánguena', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Biolley', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Brunka', m_cant(603), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Miramar', m_cant(604), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Unión', m_cant(604), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(604), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puerto Cortés', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Palmar', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sierpe', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bahía Ballena', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedras Blancas', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bahía Drake', m_cant(605), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Quepos', m_cant(606), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Savegre', m_cant(606), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Naranjito', m_cant(606), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Golfito', m_cant(607), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guaycará', m_cant(607), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pavón', m_cant(607), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Vito', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sabalito', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Aguabuena', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Limoncito', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pittier', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Gutiérrez Braun', m_cant(608), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Parrita', m_cant(609), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Corredor', m_cant(610), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Cuesta', m_cant(610), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Canoas', m_cant(610), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Laurel', m_cant(610), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jacó', m_cant(611), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Tárcoles', m_cant(611), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Lagunillas', m_cant(611), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Monteverde', m_cant(612), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Puerto Jiménez', m_cant(613), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Limón', m_cant(701), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Valle La Estrella', m_cant(701), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Blanco', m_cant(701), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Matama', m_cant(701), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guápiles', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Jiménez', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Rita', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Roxana', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cariari', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Colorado', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('La Colonia', m_cant(702), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Siquirres', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pacuarito', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Florida', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Germania', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('El Cairo', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Alegría', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Reventazón', m_cant(703), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Bratsi', m_cant(704), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Sixaola', m_cant(704), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Cahuita', m_cant(704), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Telire', m_cant(704), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Matina', m_cant(705), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Batán', m_cant(705), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Carrandí', m_cant(705), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Guácimo', m_cant(706), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Mercedes', m_cant(706), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Pocora', m_cant(706), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Río Jiménez', m_cant(706), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Duacarí', m_cant(706), v_estado_activo);
+
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Carga CR (Provincias/Cantones/Distritos) completada.');
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;
+    DBMS_OUTPUT.PUT_LINE('ERROR en carga CR: ' || SQLERRM);
+    RAISE;
+END;
+/
+
+
+
+BEGIN
+  
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Administrador',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Profesor',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Estudiante',1);
+  PORTAL_ESCOLAR_PKG.TIPOUSUARIO_INSERTAR('Encargado',1);
+
+END;
+
+
+
+
+
+
+-- =========================================================
+-- SCRIPT DE CREACIÓN DE USUARIO ADMINISTRADOR
+-- =========================================================
+
+DECLARE
+    v_id_usuario NUMBER;
+    v_id_correo NUMBER;
+    v_id_credencial NUMBER;
+    v_password_hash VARCHAR2(255);
+BEGIN
+    -- =======================
+    -- 1. INSERTAR USUARIO
+    -- =======================
+    INSERT INTO USUARIOS_TB (
+        ID_USUARIO,
+        NOMBRE,
+        PRIMER_APELLIDO,
+        SEGUNDO_APELLIDO,
+        ID_TIPOUSUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1, -- ID_USUARIO
+        'Admin',
+        'Sistema',
+        'Portal',
+        1, -- Administrador (según tu TIPOUSUARIO_INSERTAR)
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_USUARIO INTO v_id_usuario;
+
+    -- =======================
+    -- 2. INSERTAR TELÉFONO
+    -- =======================
+    INSERT INTO TELEFONO_TB (
+        ID_TELEFONO,
+        NUMERO,
+        ID_USUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        '8888-8888',
+        v_id_usuario,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    );
+
+    -- =======================
+    -- 3. INSERTAR CORREO (ES_LOGIN = 'S')
+    -- =======================
+    INSERT INTO CORREO_TB (
+        ID_CORREO,
+        CORREO,
+        ES_LOGIN,
+        ID_USUARIO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        'admin@escuela.com', -- ← CAMBIAR POR TU EMAIL
+        'S', -- ES_LOGIN = 'S' (este correo se usa para login)
+        v_id_usuario,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_CORREO INTO v_id_correo;
+
+    -- =======================
+    -- 4. GENERAR PASSWORD HASH
+    -- =======================
+    -- Password: Admin123! (CAMBIAR DESPUÉS DEL PRIMER LOGIN)
+    -- Hash BCrypt generado con fuerza 10
+    v_password_hash := '$2a$10$N9qo8uLOickgx2ZMRZoMye1JRvWmZQVpEQ8YQHG0J.HQZIqKWXjXC';
+    
+    -- =======================
+    -- 5. INSERTAR CREDENCIALES
+    -- =======================
+    INSERT INTO CREDENCIALES_TB (
+        ID_CREDENCIAL,
+        PASSWORD_HASH,
+        ULTIMO_LOGIN,
+        INTENTOS_FALLIDOS,
+        BLOQUEADO_HASTA,
+        ID_USUARIO_FK,
+        ID_CORREO_FK,
+        ID_ESTADO_FK,
+        FECHA_CREACION,
+        CREADO_POR,
+        ACCION
+    ) VALUES (
+        1,
+        v_password_hash,
+        NULL, -- Aún no ha hecho login
+        0,
+        NULL,
+        v_id_usuario,
+        v_id_correo,
+        1, -- ACTIVO
+        SYSTIMESTAMP,
+        'SYSTEM',
+        'INSERT'
+    ) RETURNING ID_CREDENCIAL INTO v_id_credencial;
+
+    COMMIT;
+    
+    DBMS_OUTPUT.PUT_LINE('✓ Usuario administrador creado exitosamente');
+    DBMS_OUTPUT.PUT_LINE('  Email: admin@escuela.com');
+    DBMS_OUTPUT.PUT_LINE('  Password: Admin123!');
+    DBMS_OUTPUT.PUT_LINE('  ID_USUARIO: ' || v_id_usuario);
+    DBMS_OUTPUT.PUT_LINE('  ID_CREDENCIAL: ' || v_id_credencial);
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('✗ Error al crear usuario: ' || SQLERRM);
+        RAISE;
+END;
+/
+
+
+
