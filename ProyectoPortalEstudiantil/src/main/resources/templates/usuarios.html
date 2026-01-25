@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Gestión de Usuarios - Portal Estudiantil</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <!-- CSS propio -->
+    <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+</head>
+
+<body>
+
+<div class="d-flex">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img th:src="@{/img/Escuela_Neftali.png}" alt="Logo"/>
+            <h6>Portal Estudiantil<br/>y Administrativo</h6>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="active"><i class="fa-solid fa-users"></i> Usuarios</li>
+            <li><i class="fa-solid fa-graduation-cap"></i> Gestión Académica</li>
+            <li><i class="fa-solid fa-user-check"></i> Asistencia estudiantil</li>
+            <li><i class="fa-solid fa-clipboard-list"></i> Calificaciones</li>
+            <li><i class="fa-solid fa-calendar-days"></i> Calendario Académico</li>
+            <li><i class="fa-solid fa-chart-column"></i> Reportes</li>
+            <li><i class="fa-solid fa-chart-line"></i> Estadísticas</li>
+            <li><i class="fa-solid fa-calendar-plus"></i> Gestión de Eventos</li>
+            <li><i class="fa-solid fa-comment-dots"></i> Feedback 360</li>
+            <li><i class="fa-solid fa-gear"></i> Gestión administrativa</li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </div>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="content">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+            <h2>Usuarios</h2>
+
+            <div class="topbar-actions">
+                <button class="btn btn-warning btn-sm">Noticias y Anuncios</button>
+                <div class="user-info">
+                    <i class="fa-solid fa-user-circle"></i>
+                    <span>UsuarioAdmin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filters row g-3 align-items-center">
+            <div class="col-md-4">
+                <input type="text" class="form-control" placeholder="Buscar usuario...">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select">
+                    <option>Todos</option>
+                    <option>Administrador</option>
+                    <option>Docente</option>
+                    <option>Estudiante</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> Nuevo Usuario
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="table-container mt-4">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo Electrónico</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Raúl Robles Segura</td>
+                        <td>raul@ejemplo.com</td>
+                        <td><strong>Administrador</strong></td>
+                        <td><span class="badge bg-success">Activo</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>Sabrina Romero Silva</td>
+                        <td>sabrina@ejemplo.com</td>
+                        <td><strong>Estudiante</strong></td>
+                        <td><span class="badge bg-success">Activo</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer">
+                <span>Mostrando 6 de 100 usuarios</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item"><a class="page-link">1</a></li>
+                        <li class="page-item active"><a class="page-link">2</a></li>
+                        <li class="page-item"><a class="page-link">3</a></li>
+                        <li class="page-item"><a class="page-link">4</a></li>
+                        <li class="page-item"><a class="page-link">Siguiente</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
