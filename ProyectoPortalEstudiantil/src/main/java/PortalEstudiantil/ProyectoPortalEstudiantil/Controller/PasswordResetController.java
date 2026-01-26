@@ -18,21 +18,16 @@ public class PasswordResetController {
     @Autowired
     private PasswordResetService passwordService;
 
-    @GetMapping("/index")
-    public String indexView() {
-        return "resetContrasenna/index";
-    }
-
     @GetMapping("/recuperar-password")
-    public String recuperarView(Model model) {
-        model.addAttribute("modo", "request");
-        return "resetContrasenna/index";
+    public String recuperarView() {
+        return "resetContrasenna/recuperar-password";
     }
 
     @PostMapping("/recuperar-password")
     public String procesarRecuperar(@RequestParam("email") String email,
             RedirectAttributes redirectAttributes) {
         System.out.println("🔍 DEBUG: POST /resetContrasenna/recuperar-password - Email: " + email);
+        
         try {
             passwordService.requestPasswordReset(email);
             redirectAttributes.addFlashAttribute("successMessage",
@@ -47,42 +42,49 @@ public class PasswordResetController {
     }
 
     @GetMapping("/reset-password")
-    public String resetView(@RequestParam("token") String token, Model model) {
+    public String resetView(@RequestParam("token") String token, 
+            Model model, RedirectAttributes redirectAttributes) {
 
         System.out.println("🔍 DEBUG: GET /resetContrasenna/reset-password - Token: " + token);
         ResetPasswordRequest validation = passwordService.validateToken(token);
 
-        if (validation.getValid() == 0) {
-            model.addAttribute("modo", "reset");
-            model.addAttribute("errorMessage",
+        if (validation.getValid() == null || validation.getValid() == 0) {
+            redirectAttributes.addFlashAttribute("errorMessage",
                     "El enlace de recuperación es inválido o ha expirado.");
-            return "resetContrasenna/index";
+            return "resetContrasenna/reset-password";
         }
 
-        model.addAttribute("modo", "reset");
         model.addAttribute("token", token);
         model.addAttribute("email", validation.getEmail());
-        return "resetContrasenna/index";
+        model.addAttribute("successMessage", "Se ha restablecido su contraseña porfavor inicie sesión.");
+        return "resetContrasenna/reset-password";
     }
 
     @PostMapping("/reset-password")
-    public String procesarReset(@RequestParam("token") String token,
+    public String procesarReset(
+            @RequestParam("token") String token,
             @RequestParam("password") String password,
             @RequestParam("confirmPassword") String confirmPassword,
             RedirectAttributes redirectAttributes,
             Model model) {
-        model.addAttribute("modo", "reset");
-        model.addAttribute("token", token);
-
+        System.out.println("POST reset token recibido: [" + token + "]");
+        
+        if (token == null || token.isBlank()) {
+            model.addAttribute("errorMessage", "No hay token. Debes ingresar desde el enlace de recuperación.");
+            return "resetContrasenna/recuperar-password";
+        }
+        
         if (!password.equals(confirmPassword)) {
+            model.addAttribute("token", token);
             model.addAttribute("errorMessage", "Las contraseñas no coinciden.");
-            return "resetContrasenna/index";
+            return "resetContrasenna//reset-password";
         }
 
         if (!passwordService.isValidPassword(password)) {
+            model.addAttribute("token", token);
             model.addAttribute("errorMessage",
                     "La contraseña no cumple con los requisitos de seguridad.");
-            return "resetContrasenna/index";
+            return "resetContrasenna//reset-password";
         }
 
         boolean success = passwordService.resetPassword(token, password);
@@ -93,8 +95,9 @@ public class PasswordResetController {
             return "redirect:/login";
 
         }
+        model.addAttribute("token", token);
         model.addAttribute("errorMessage",
                 "No se pudo restablecer la contraseña. El enlace puede haber expirado.");
-        return "resetContrasenna/index";
+        return "resetContrasenna//reset-password";
     }
 }

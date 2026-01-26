@@ -29,15 +29,24 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void requestPasswordReset(String email) {
-        ResetPasswordRequest request = resetRepository.requestReset(email);
+    public boolean requestPasswordReset(String email) {
+        try {
+            ResetPasswordRequest request = resetRepository.requestReset(email);
 
-        if (request.getExists() == 0) {
-            return;
+            if (request.getExists() == null || request.getExists() == 0) {
+                return true;
+            }
+
+            // DEV: log temporal
+            System.out.println("DEV TOKEN: " + request.getToken());
+
+            sendResetEmail(email, request.getToken());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Error en requestPasswordReset: " + e.getMessage());
+            return false;
         }
-
-        sendResetEmail(email, request.getToken());
-
     }
 
     public ResetPasswordRequest validateToken(String token) {
@@ -50,33 +59,22 @@ public class PasswordResetService {
     }
 
     private void sendResetEmail(String toEmail, String token) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(toEmail);
-            message.setSubject("Recuperación de Contraseña - Portal Estudiantil");
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("Recuperación de Contraseña - Portal Estudiantil");
 
-            String resetUrl = baseUrl + "/resetContrasenna/reset-password?token=" + token;
-            
-            String emailBody = String.format(
-                    "Hola,\n\n"
-                    + "Hemos recibido una solicitud para restablecer tu contraseña en el Portal Estudiantil.\n\n"
-                    + "Para restablecer tu contraseña, haz clic en el siguiente enlace:\n"
-                    + "%s\n\n"
-                    + "Este enlace es válido por 30 minutos.\n\n"
-                    + "Si no solicitaste este cambio, puedes ignorar este correo de forma segura.\n\n"
-                    + "Saludos,\n"
-                    + "Escuela Neftalí Villalobos Gutiérrez",
-                    resetUrl
-            );
+        String resetUrl = baseUrl + "/resetContrasenna/reset-password?token=" + token;
 
-            message.setText(emailBody);
-            mailSender.send(message);
+        message.setText(
+                "Hola,\n\n"
+                + "Recibimos una solicitud para restablecer tu contraseña.\n\n"
+                + "Enlace:\n" + resetUrl + "\n\n"
+                + "Si no solicitaste esto, ignora el correo.\n\n"
+                + "Saludos."
+        );
 
-        } catch (Exception e) {
-            System.err.println("Error enviando email: " + e.getMessage());
-            throw new RuntimeException("No se pudo enviar el email de recuperación");
-        }
+        mailSender.send(message);
     }
 
     public boolean isValidPassword(String password) {
