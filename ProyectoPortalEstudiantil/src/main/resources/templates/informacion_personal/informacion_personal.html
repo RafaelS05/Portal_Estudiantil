@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/plantilla :: head}">
+    <link rel="stylesheet" th:href="@{/css/informacion_personal.css}">
+</head>
+
+<body>
+
+<div th:replace="~{layout/plantilla :: shell(~{informacion_personal/informacion_personal_content})}">
+</div>
+
+</body>
+</html>
