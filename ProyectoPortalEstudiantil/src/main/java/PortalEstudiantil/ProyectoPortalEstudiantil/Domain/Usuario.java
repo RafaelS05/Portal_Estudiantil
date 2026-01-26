@@ -19,8 +19,16 @@ public class Usuario {
     @Column(name = "SEGUNDO_APELLIDO")
     private String segundoApellido;
 
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    // RELACIONES
+    @OneToMany(mappedBy = "usuario")
+    private List<Correo> correos;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Telefono> telefonos;
+
+    @OneToMany(mappedBy = "usuario")
     private List<Direccion> direcciones;
+
 
     // GETTERS Y SETTERS
     public Long getIdUsuario() {

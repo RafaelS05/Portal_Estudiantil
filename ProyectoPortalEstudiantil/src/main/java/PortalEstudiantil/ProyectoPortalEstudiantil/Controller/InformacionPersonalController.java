@@ -29,7 +29,7 @@ public class InformacionPersonalController {
         model.addAttribute("usuario", service.obtenerUsuario(idUsuario));
         model.addAttribute("telefono", service.obtenerTelefono(idUsuario));
         model.addAttribute("correo", service.obtenerCorreoLogin(idUsuario));
-
+        model.addAttribute("direccion", service.obtenerDireccion(idUsuario));
         model.addAttribute("titulo", "Información Personal");
         model.addAttribute("contenido", "informacion_personal");
         model.addAttribute("pageTitle", "Información personal");
@@ -39,10 +39,14 @@ public class InformacionPersonalController {
 
     // GUARDAR CAMBIOS
     @PostMapping("/guardar")
-    public String guardarPerfil(Usuario usuario) {
+    public String guardarPerfil(
+            @ModelAttribute Usuario usuario,
+            @RequestParam String correo,
+            @RequestParam String numero,
+            @RequestParam String otrasSenas
+    ) {
 
-        service.guardarUsuario(usuario);
-
+        service.actualizarInformacion(usuario, correo, numero, otrasSenas);
         return "redirect:/informacion-personal";
     }
 

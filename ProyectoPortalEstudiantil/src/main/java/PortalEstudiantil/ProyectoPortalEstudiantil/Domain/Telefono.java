@@ -16,15 +16,33 @@ public class Telefono {
 
     private String numero;
 
-    @Column(name = "ID_USUARIO_FK")
-    private Long idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "ID_USUARIO_FK")
+    private Usuario usuario;
 
-    public Long getIdTelefono() { return idTelefono; }
-    public void setIdTelefono(Long idTelefono) { this.idTelefono = idTelefono; }
+    public Long getIdTelefono() {
+        return idTelefono;
+    }
 
-    public String getNumero() { return numero; }
-    public void setNumero(String numero) { this.numero = numero; }
+    public void setIdTelefono(Long idTelefono) {
+        this.idTelefono = idTelefono;
+    }
 
-    public Long getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+
 }

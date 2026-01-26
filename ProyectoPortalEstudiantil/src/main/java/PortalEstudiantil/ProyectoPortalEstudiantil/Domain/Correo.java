@@ -21,18 +21,43 @@ public class Correo {
     @Column(name = "ES_LOGIN")
     private String esLogin;
 
-    @Column(name = "ID_USUARIO_FK")
-    private Long idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "ID_USUARIO_FK")
+    private Usuario usuario;
 
-    public Long getIdCorreo() { return idCorreo; }
-    public void setIdCorreo(Long idCorreo) { this.idCorreo = idCorreo; }
+    public Long getIdCorreo() {
+        return idCorreo;
+    }
 
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public void setIdCorreo(Long idCorreo) {
+        this.idCorreo = idCorreo;
+    }
 
-    public String getEsLogin() { return esLogin; }
-    public void setEsLogin(String esLogin) { this.esLogin = esLogin; }
+    public String getCorreo() {
+        return correo;
+    }
 
-    public Long getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getEsLogin() {
+        return esLogin;
+    }
+
+    public void setEsLogin(String esLogin) {
+        this.esLogin = esLogin;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+
+
+
 }

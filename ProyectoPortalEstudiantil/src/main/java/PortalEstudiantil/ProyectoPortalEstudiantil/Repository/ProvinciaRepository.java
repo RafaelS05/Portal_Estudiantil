@@ -4,11 +4,9 @@
  */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
 
-
-import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Telefono;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Provincia;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TelefonoRepository extends JpaRepository<Telefono, Long> {
 
-    Telefono findByUsuario_IdUsuario(Long idUsuario);
+public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
 }
