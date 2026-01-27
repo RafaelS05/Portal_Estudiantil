@@ -28,5 +28,37 @@ public class Distrito {
     @Column(name = "ID_ESTADO_FK")
     private Long idEstado;
 
-    // getters y setters
+    public Long getIdDistrito() {
+        return idDistrito;
+    }
+
+    public void setIdDistrito(Long idDistrito) {
+        this.idDistrito = idDistrito;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public Canton getCanton() {
+        return canton;
+    }
+
+    public void setCanton(Canton canton) {
+        this.canton = canton;
+    }
+
+    public Long getIdEstado() {
+        return idEstado;
+    }
+
+    public void setIdEstado(Long idEstado) {
+        this.idEstado = idEstado;
+    }
+
+    
 }

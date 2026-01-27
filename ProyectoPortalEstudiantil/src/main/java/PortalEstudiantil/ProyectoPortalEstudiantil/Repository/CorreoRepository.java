@@ -4,7 +4,6 @@
  */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
 
-
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Correo;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface CorreoRepository extends JpaRepository<Correo, Long> {
 
-     // =====================
+    // =====================
     // LECTURA
     // =====================
     Correo findByUsuario_IdUsuarioAndEsLogin(Long idUsuario, String esLogin);
@@ -25,13 +24,18 @@ public interface CorreoRepository extends JpaRepository<Correo, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.CORREO_MODIFICAR(
-            :idCorreo,
-            :correo
-        )
-    """, nativeQuery = true)
+    CALL PORTAL_ESCOLAR_PKG.CORREO_MODIFICAR(
+        :idCorreo,
+        :correo,
+        :esLogin,
+        :idUsuario
+    )
+""", nativeQuery = true)
     void modificarCorreo(
-        @Param("idCorreo") Long idCorreo,
-        @Param("correo") String correo
+            @Param("idCorreo") Long idCorreo,
+            @Param("correo") String correo,
+            @Param("esLogin") String esLogin,
+            @Param("idUsuario") Long idUsuario
     );
+
 }

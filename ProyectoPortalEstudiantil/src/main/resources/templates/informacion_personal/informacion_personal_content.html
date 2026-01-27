@@ -1,5 +1,4 @@
-<section class="perfil-container"
-         xmlns:th="http://www.thymeleaf.org">
+<section class="perfil-container" xmlns:th="http://www.thymeleaf.org">
 
     <form th:action="@{/informacion-personal/guardar}"
           th:object="${usuario}"
@@ -21,24 +20,23 @@
         <div class="datos-card mt-4">
             <div class="row g-3">
 
+                <!-- Nombre y apellidos -->
                 <div class="col-md-4">
                     <label class="form-label">Nombre</label>
-                    <input class="form-control"
-                           th:field="*{nombre}">
+                    <input class="form-control" th:field="*{nombre}">
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Primer apellido</label>
-                    <input class="form-control"
-                           th:field="*{primerApellido}">
+                    <input class="form-control" th:field="*{primerApellido}">
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label">Segundo apellido</label>
-                    <input class="form-control"
-                           th:field="*{segundoApellido}">
+                    <input class="form-control" th:field="*{segundoApellido}">
                 </div>
 
+                <!-- Correo y teléfono -->
                 <div class="col-md-6">
                     <label class="form-label">Correo</label>
                     <input class="form-control"
@@ -55,15 +53,50 @@
                            th:value="${telefono.numero}">
                 </div>
 
-                <div class="col-12">
-                    <label class="form-label">Dirección</label>
-                    <textarea class="form-control"
-                              name="otrasSenas"
-                              rows="3"
-                              th:text="${direccion != null} ? ${direccion.otrasSenas} : ''">
-                    </textarea>
+                <!-- DIRECCIÓN -->
+                <div class="col-md-4">
+                    <label class="form-label">Provincia</label>
+                    <select class="form-control" name="idProvincia" id="provinciaSelect">
+                        <option value="" disabled>Seleccione una provincia</option>
+                        <option th:each="prov : ${provincias}"
+                                th:value="${prov.idProvincia}"
+                                th:text="${prov.nombre}"
+                                th:selected="${prov.idProvincia} == ${direccion.provincia != null ? direccion.provincia.idProvincia : 0}">
+                        </option>
+                    </select>
                 </div>
 
+                <div class="col-md-4">
+                    <label class="form-label">Cantón</label>
+                    <select class="form-control" name="idCanton" id="cantonSelect">
+                        <option value="" disabled>Seleccione un cantón</option>
+                        <option th:each="canton : ${cantones}"
+                                th:value="${canton.idCanton}"
+                                th:text="${canton.nombre}"
+                                th:selected="${canton.idCanton} == ${direccion.canton != null ? direccion.canton.idCanton : 0}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Distrito</label>
+                    <select class="form-control" name="idDistrito" id="distritoSelect">
+                        <option value="" disabled>Seleccione un distrito</option>
+                        <option th:each="distrito : ${distritos}"
+                                th:value="${distrito.idDistrito}"
+                                th:text="${distrito.nombre}"
+                                th:selected="${distrito.idDistrito} == ${direccion.distrito != null ? direccion.distrito.idDistrito : 0}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <label class="form-label">Otras señas</label>
+                    <input type="text"
+                           class="form-control"
+                           name="otrasSenas"
+                           th:value="${direccion != null ? direccion.otrasSenas : ''}">
+                </div>
 
             </div>
         </div>
@@ -77,5 +110,51 @@
         </div>
 
     </form>
+
+    <!-- SCRIPT PARA DROPDOWNS DINÁMICOS -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const provinciaSelect = document.getElementById('provinciaSelect');
+            const cantonSelect = document.getElementById('cantonSelect');
+            const distritoSelect = document.getElementById('distritoSelect');
+
+            provinciaSelect.addEventListener('change', function () {
+                const idProvincia = this.value;
+                cantonSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
+                distritoSelect.innerHTML = '<option value="" disabled selected>Seleccione un distrito</option>';
+
+                fetch('/informacion-personal/cantones?idProvincia=' + idProvincia)
+                        .then(response => response.json())
+                        .then(data => {
+                            cantonSelect.innerHTML = '<option value="" disabled selected>Seleccione un cantón</option>';
+                            data.forEach(c => {
+                                const option = document.createElement('option');
+                                option.value = c.idCanton;
+                                option.textContent = c.nombre;
+                                cantonSelect.appendChild(option);
+                            });
+                        });
+            });
+
+            cantonSelect.addEventListener('change', function () {
+                const idCanton = this.value;
+                distritoSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
+
+                fetch('/informacion-personal/distritos?idCanton=' + idCanton)
+                        .then(response => response.json())
+                        .then(data => {
+                            distritoSelect.innerHTML = '<option value="" disabled selected>Seleccione un distrito</option>';
+                            data.forEach(d => {
+                                const option = document.createElement('option');
+                                option.value = d.idDistrito;
+                                option.textContent = d.nombre;
+                                distritoSelect.appendChild(option);
+                            });
+                        });
+            });
+
+        });
+    </script>
 
 </section>

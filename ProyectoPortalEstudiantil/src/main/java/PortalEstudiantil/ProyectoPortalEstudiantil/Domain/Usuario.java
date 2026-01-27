@@ -1,6 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,7 +29,6 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario")
     private List<Direccion> direcciones;
-
 
     // GETTERS Y SETTERS
     public Long getIdUsuario() {
@@ -69,6 +69,30 @@ public class Usuario {
 
     public void setDirecciones(List<Direccion> direcciones) {
         this.direcciones = direcciones;
+    }
+
+    
+
+    @Transient // Para que JPA no lo considere como columna
+    public Direccion getDireccion() {
+        if (direcciones != null && !direcciones.isEmpty()) {
+            return direcciones.get(0); // Retorna la primera dirección
+        } else {
+            return null;
+        }
+    }
+
+    @Transient
+    public void setDireccion(Direccion direccion) {
+        if (direcciones == null) {
+            direcciones = new ArrayList<>();
+        }
+
+        if (direcciones.isEmpty()) {
+            direcciones.add(direccion);
+        } else {
+            direcciones.set(0, direccion); // Reemplaza la primera
+        }
     }
 
 }

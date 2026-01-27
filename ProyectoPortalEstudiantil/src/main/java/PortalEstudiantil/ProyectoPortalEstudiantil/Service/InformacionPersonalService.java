@@ -1,13 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.*;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class InformacionPersonalService {
@@ -16,19 +14,31 @@ public class InformacionPersonalService {
     private final TelefonoRepository telefonoRepo;
     private final CorreoRepository correoRepo;
     private final DireccionRepository direccionRepo;
+    private final ProvinciaRepository provinciaRepo;
+    private final CantonRepository cantonRepo;
+    private final DistritoRepository distritoRepo;
 
     public InformacionPersonalService(
             UsuarioRepository usuarioRepo,
             TelefonoRepository telefonoRepo,
             CorreoRepository correoRepo,
-            DireccionRepository direccionRepo) {
-
+            DireccionRepository direccionRepo,
+            ProvinciaRepository provinciaRepo,
+            CantonRepository cantonRepo,
+            DistritoRepository distritoRepo
+    ) {
         this.usuarioRepo = usuarioRepo;
         this.telefonoRepo = telefonoRepo;
         this.correoRepo = correoRepo;
         this.direccionRepo = direccionRepo;
+        this.provinciaRepo = provinciaRepo;
+        this.cantonRepo = cantonRepo;
+        this.distritoRepo = distritoRepo;
     }
 
+    // ==========================
+    // OBTENER DATOS
+    // ==========================
     public Usuario obtenerUsuario(Long idUsuario) {
         return usuarioRepo.findById(idUsuario).orElse(null);
     }
@@ -45,16 +55,22 @@ public class InformacionPersonalService {
         return direccionRepo.findByUsuario_IdUsuario(idUsuario);
     }
 
+    // ==========================
     // ACTUALIZAR INFORMACIÓN
+    // ==========================
     @Transactional
     public void actualizarInformacion(
             Usuario usuarioForm,
             String correoTxt,
             String numeroTxt,
+            Long idProvincia,
+            Long idCanton,
+            Long idDistrito,
             String otrasSenas
     ) {
-
+        // ==========================
         // USUARIO
+        // ==========================
         Usuario usuario = usuarioRepo
                 .findById(usuarioForm.getIdUsuario())
                 .orElseThrow();
@@ -63,83 +79,71 @@ public class InformacionPersonalService {
         usuario.setPrimerApellido(usuarioForm.getPrimerApellido());
         usuario.setSegundoApellido(usuarioForm.getSegundoApellido());
 
-        // CORREO (login)
-        Correo correo = correoRepo
-                .findByUsuario_IdUsuarioAndEsLogin(usuario.getIdUsuario(), "S");
-
+        // ==========================
+        // CORREO
+        // ==========================
+        Correo correo = correoRepo.findByUsuario_IdUsuarioAndEsLogin(usuario.getIdUsuario(), "S");
         if (correo != null) {
-            correo.setCorreo(correoTxt);
+            correoRepo.modificarCorreo(
+                    correo.getIdCorreo(), // id_correo
+                    correoTxt, // correo nuevo
+                    "S", // es_login
+                    usuario.getIdUsuario() // id_usuario_fk
+            );
         }
 
+        // ==========================
         // TELÉFONO
-        Telefono telefono = telefonoRepo
-                .findByUsuario_IdUsuario(usuario.getIdUsuario());
-
-        if (telefono != null) {
-            telefono.setNumero(numeroTxt);
+        // ==========================
+        Telefono telefono = telefonoRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
+        if (telefono == null) {
+            // Insertar nuevo teléfono usando SP
+            telefonoRepo.insertarTelefono(numeroTxt, usuario.getIdUsuario(), 1L); // estado activo
+        } else {
+            // Modificar teléfono usando SP
+            telefonoRepo.modificarTelefono(telefono.getIdTelefono(), numeroTxt, usuario.getIdUsuario());
         }
 
+        // ==========================
         // DIRECCIÓN
-        Direccion direccion = direccionRepo
-                .findByUsuario_IdUsuario(usuario.getIdUsuario());
+        // ==========================
+        Direccion direccion = direccionRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
 
-        if (direccion != null) {
-            direccion.setOtrasSenas(otrasSenas);
+        if (direccion == null) {
+            // Insertar nueva dirección usando SP
+            direccionRepo.insertarDireccion(
+                    otrasSenas,
+                    usuario.getIdUsuario(),
+                    idProvincia,
+                    idCanton,
+                    idDistrito,
+                    1L // activo
+            );
+        } else {
+            // Modificar existente usando SP
+            direccionRepo.modificarDireccion(
+                    direccion.getIdDireccion(),
+                    otrasSenas,
+                    usuario.getIdUsuario(),
+                    idProvincia,
+                    idCanton,
+                    idDistrito
+            );
         }
     }
 
-//    @Transactional
-//    public void guardarDireccion(
-//            Long idUsuario,
-//            String otrasSenas,
-//            Long idProvincia,
-//            Long idCanton,
-//            Long idDistrito
-//    ) {
-//
-//        Direccion direccionBD
-//                = direccionRepo.findByUsuario_IdUsuario(idUsuario);
-//
-//        if (direccionBD == null) {
-//            // 👉 INSERT
-//            direccionRepo.insertarDireccion(
-//                    otrasSenas,
-//                    idUsuario,
-//                    idProvincia,
-//                    idCanton,
-//                    idDistrito,
-//                    1L // estado ACTIVO
-//            );
-//
-//        } else {
-//            // 👉 UPDATE
-//            direccionRepo.modificarDireccion(
-//                    direccionBD.getIdDireccion(),
-//                    otrasSenas,
-//                    idUsuario,
-//                    idProvincia,
-//                    idCanton,
-//                    idDistrito
-//            );
-//        }
-//    }
+    // ==========================
+    // LISTAR UBICACIONES
+    // ==========================
+    public List<Provincia> listarProvincias() {
+        return provinciaRepo.findAll();
+    }
 
-//    @Transactional
-//    public void actualizarCorreoLogin(Long idUsuario, String correoTxt) {
-//
-//        Correo correoBD
-//                = correoRepo.findByUsuario_IdUsuarioAndEsLogin(idUsuario, "S");
-//
-//        if (correoBD == null) {
-//            throw new IllegalStateException(
-//                    "El usuario no tiene correo login registrado"
-//            );
-//        }
-//
-//        correoRepo.modificarCorreo(
-//                correoBD.getIdCorreo(),
-//                correoTxt
-//        );
-//    }
+    public List<Canton> listarCantonesPorProvincia(Long idProvincia) {
+        return cantonRepo.findByProvincia_IdProvincia(idProvincia);
+    }
 
+    public List<Distrito> listarDistritosPorCanton(Long idCanton) {
+        return distritoRepo.findByCanton_IdCanton(idCanton);
+    }
 }
