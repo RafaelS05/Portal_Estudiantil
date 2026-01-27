@@ -8,7 +8,7 @@
    ========================================================= */
 
 -- =========================================================
--- 1) CAT√ÅLOGOS BASE
+-- 1) CAT√?LOGOS BASE
 -- =========================================================
 
 CREATE TABLE ESTADOS_TB (
@@ -42,6 +42,7 @@ CREATE TABLE TIPOUSUARIO_TB (
     CONSTRAINT TIPOUSUARIO_TB_ID_ESTADO_FK FOREIGN KEY (ID_ESTADO_FK)
         REFERENCES ESTADOS_TB (ID_ESTADO)
 );
+
 
 CREATE TABLE TIPOVISIBILIDAD_TB (
     ID_TIPOVISIBILIDAD NUMBER NOT NULL,
@@ -669,7 +670,7 @@ CREATE TABLE EVENTO_TB (
 );
 
 -- =========================================================
--- 6) MENSAJER√çA
+-- 6) MENSAJER√?A
 -- =========================================================
 
 CREATE TABLE CONVERSACION_TB (

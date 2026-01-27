@@ -13,7 +13,7 @@ DROP TABLE ADJUNTOTICKET_TB;
 DROP TABLE TICKET_TB;
 DROP TABLE CATEGORIATICKET_TB;
 
--- MENSAJER√çA
+-- MENSAJER√?A
 DROP TABLE MENSAJESARCHIVOS_TB;
 DROP TABLE MENSAJES_TB;
 DROP TABLE CONVERSACION_TB;
@@ -50,7 +50,7 @@ DROP TABLE DISTRITO_TB;
 DROP TABLE CANTON_TB;
 DROP TABLE PROVINCIA_TB;
 
--- CAT√ÅLOGOS BASE
+-- CAT√?LOGOS BASE
 DROP TABLE TIPOCONVERSACION_TB;
 DROP TABLE TIPOREPORTE_TB;
 DROP TABLE TIPOVISIBILIDAD_TB;
@@ -434,7 +434,7 @@ BEGIN
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Piedades Sur', m_cant(202), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(202), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(202), v_estado_activo);
-  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('√Ångeles', m_cant(202), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('√?ngeles', m_cant(202), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Alfaro', m_cant(202), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Volio', m_cant(202), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepci√≥n', m_cant(202), v_estado_activo);
@@ -611,7 +611,7 @@ BEGIN
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Rafael', m_cant(405), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Josecito', m_cant(405), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Santiago', m_cant(405), v_estado_activo);
-  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('√Ångeles', m_cant(405), v_estado_activo);
+  PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('√?ngeles', m_cant(405), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('Concepci√≥n', m_cant(405), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Isidro', m_cant(406), v_estado_activo);
   PORTAL_ESCOLAR_PKG.DISTRITO_INSERTAR('San Jos√©', m_cant(406), v_estado_activo);
@@ -879,7 +879,7 @@ BEGIN
         ACCION
     ) VALUES (
         1,
-        'admin@escuela.com', -- ‚Üê CAMBIAR POR TU EMAIL
+        'admin@escuela.com', -- ‚Ü? CAMBIAR POR TU EMAIL
         'S', -- ES_LOGIN = 'S' (este correo se usa para login)
         v_id_usuario,
         1, -- ACTIVO
