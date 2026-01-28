@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="layout/plantilla :: head">
+        <title>Gestión de Usuarios</title>
+        <!-- Solo incluir CSS específico de usuarios -->
+        <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+    </head>
+    
+    <body>
+        <!-- La plantilla ya incluye: sidebar, topbar, botón noticias, dropdown usuario -->
+        <div th:replace="layout/plantilla :: shell(~{::#usuarios-content})">
+            
+            <!-- Contenido ESPECÍFICO de usuarios -->
+            <div id="usuarios-content">
+                
+                <!-- Hero/Header de la página (personalizado para usuarios) -->
+                <section class="mb-4">
+                    <h2 class="fw-bold mb-2">Usuarios</h2>
+                    <p class="text-muted mb-0">Administra los usuarios del sistema</p>
+                </section>
+
+                <!-- Mensajes Flash -->
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4" 
+                     th:classappend="'alert-' + ${tipoMensaje}" role="alert">
+                    [[${mensaje}]]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <!-- Barra de herramientas ESPECÍFICA para usuarios -->
+                <div class="card mb-4">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-muted">Filtrar por rol:</span>
+                                    <select class="form-select form-select-sm" style="width: auto;">
+                                        <option selected>Todos</option>
+                                        <option>Administrador</option>
+                                        <option>Estudiante</option>
+                                        <option>Docente</option>
+                                    </select>
+                                    
+                                    <!-- Total de usuarios -->
+                                    <span class="ms-3 text-muted">
+                                        <i class="fa-solid fa-users me-1"></i>
+                                        <span th:text="${totalUsuarios}">0</span> usuarios
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <!-- Botón Nuevo Usuario -->
+                                <a th:href="@{/usuarios/nuevo}" class="btn btn-primary">
+                                    <i class="fa-solid fa-plus me-2"></i>Nuevo Usuario
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de usuarios -->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 30%">Nombre</th>
+                                        <th style="width: 25%">Correo Electrónico</th>
+                                        <th style="width: 15%">Rol</th>
+                                        <th style="width: 10%">Estado</th>
+                                        <th style="width: 20%">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Datos reales desde la base de datos -->
+                                    <tr th:each="usuario, stat : ${usuarios}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <!-- Avatar con color dinámico -->
+                                                <div class="avatar-circle me-3" 
+                                                     th:classappend="'color-' + ${stat.index % 6 + 1}">
+                                                    <span class="avatar-initials" 
+                                                          th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1))}+${#strings.toUpperCase(#strings.substring(usuario.primerApellido,0,1))}">
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">
+                                                        [[${usuario.nombre}]] [[${usuario.primerApellido}]] 
+                                                        <span th:if="${usuario.segundoApellido != null}">[[${usuario.segundoApellido}]]</span>
+                                                    </div>
+                                                    <small class="text-muted">ID: [[${usuario.idUsuario}]]</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:text="${usuario.correos != null && !usuario.correos.isEmpty() ? usuario.correos[0].correoElectronico : 'Sin correo'}">
+                                                Sin correo
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span th:switch="${usuario.idTipoUsuarioFk}" 
+                                                  class="badge" 
+                                                  th:classappend="${usuario.idTipoUsuarioFk == 1} ? 'badge-estudiante' : 
+                                                                 ${usuario.idTipoUsuarioFk == 2} ? 'badge-docente' : 
+                                                                 ${usuario.idTipoUsuarioFk == 3} ? 'badge-administrador' : 'bg-secondary'">
+                                                <span th:case="1">Estudiante</span>
+                                                <span th:case="2">Docente</span>
+                                                <span th:case="3">Administrador</span>
+                                                <span th:case="*">Otro</span>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${usuario.idEstadoFk == 1}" class="badge badge-activo">Activo</span>
+                                            <span th:if="${usuario.idEstadoFk == 2}" class="badge badge-inactivo">Inactivo</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group toolbar-actions" role="group">
+                                                <a th:href="@{/usuarios/ver/{id}(id=${usuario.idUsuario})}" 
+                                                   class="btn btn-sm btn-outline-primary" title="Ver">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/usuarios/editar/{id}(id=${usuario.idUsuario})}" 
+                                                   class="btn btn-sm btn-outline-warning" title="Editar">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </a>
+                                                
+                                                <form th:action="@{/usuarios/activar/{id}(id=${usuario.idUsuario})}" 
+                                                      method="post" class="d-inline" 
+                                                      th:if="${usuario.idEstadoFk != 1}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Activar">
+                                                        <i class="fa-solid fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                
+                                                <form th:action="@{/usuarios/desactivar/{id}(id=${usuario.idUsuario})}" 
+                                                      method="post" class="d-inline" 
+                                                      th:if="${usuario.idEstadoFk != 2}">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Desactivar">
+                                                        <i class="fa-solid fa-ban"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Si no hay usuarios -->
+                                    <tr th:if="${#lists.isEmpty(usuarios)}">
+                                        <td colspan="5" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fa-solid fa-users-slash fa-3x mb-3"></i>
+                                                <h5>No hay usuarios registrados</h5>
+                                                <p class="mb-0">Crea el primer usuario haciendo clic en "Nuevo Usuario"</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Pie de tabla con paginación -->
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                                Mostrando <span class="fw-semibold">[[${usuarios != null ? #lists.size(usuarios) : 0}]]</span> de 
+                                <span class="fw-semibold">[[${totalUsuarios != null ? totalUsuarios : 0}]]</span> usuarios
+                            </div>
+                            
+                            <!-- Paginación -->
+                            <nav aria-label="Paginación" th:if="${totalUsuarios > 10}">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div> 
+    </body>
+</html>

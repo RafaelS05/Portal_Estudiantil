@@ -1,74 +1,77 @@
-body {
-    background-color: #f5f6fa;
-    font-family: 'Segoe UI', sans-serif;
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
-.sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #2d9cdb, #56ccf2);
+.avatar-initials {
+    font-size: 14px;
+}
+
+.badge-estudiante {
+    background-color: #ffc107 !important;
+    color: #212529;
+}
+
+.badge-docente {
+    background-color: #0dcaf0 !important;
     color: #fff;
-    min-height: 100vh;
+}
+
+.badge-administrador {
+    background-color: #198754 !important;
+    color: #fff;
+}
+
+.badge-activo {
+    background-color: #198754 !important;
+}
+
+.badge-inactivo {
+    background-color: #6c757d !important;
+}
+
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s;
+}
+
+.toolbar-actions {
     display: flex;
-    flex-direction: column;
-}
-
-.sidebar-header {
-    text-align: center;
-    padding: 20px;
-}
-
-.sidebar-header img {
-    width: 80px;
-    margin-bottom: 10px;
-}
-
-.sidebar-menu {
-    list-style: none;
-    padding: 0;
-    flex-grow: 1;
-}
-
-.sidebar-menu li {
-    padding: 12px 20px;
-    cursor: pointer;
-}
-
-.sidebar-menu li.active,
-.sidebar-menu li:hover {
-    background-color: rgba(255,255,255,0.2);
-}
-
-.sidebar-footer {
-    padding: 15px;
-    text-align: center;
-    background-color: rgba(0,0,0,0.1);
-}
-
-.content {
-    flex-grow: 1;
-    padding: 25px;
-}
-
-.topbar {
-    display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     align-items: center;
 }
 
-.topbar-actions {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
+.avatar-circle.color-1 { background-color: #007bff; }
+.avatar-circle.color-2 { background-color: #6f42c1; }
+.avatar-circle.color-3 { background-color: #e83e8c; }
+.avatar-circle.color-4 { background-color: #fd7e14; }
+.avatar-circle.color-5 { background-color: #20c997; }
+.avatar-circle.color-6 { background-color: #17a2b8; }
 
-.table-container {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-}
-
-.table-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+@media (max-width: 768px) {
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .avatar-initials {
+        font-size: 12px;
+    }
+    
+    .btn-group .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+    }
 }
