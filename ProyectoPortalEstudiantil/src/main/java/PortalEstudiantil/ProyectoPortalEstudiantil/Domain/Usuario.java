@@ -1,0 +1,98 @@
+package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "USUARIOS_TB")
+public class Usuario {
+
+    @Id
+    @Column(name = "ID_USUARIO")
+    private Long idUsuario;
+
+    private String nombre;
+
+    @Column(name = "PRIMER_APELLIDO")
+    private String primerApellido;
+
+    @Column(name = "SEGUNDO_APELLIDO")
+    private String segundoApellido;
+
+    // RELACIONES
+    @OneToMany(mappedBy = "usuario")
+    private List<Correo> correos;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Telefono> telefonos;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Direccion> direcciones;
+
+    // GETTERS Y SETTERS
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getPrimerApellido() {
+        return primerApellido;
+    }
+
+    public void setPrimerApellido(String primerApellido) {
+        this.primerApellido = primerApellido;
+    }
+
+    public String getSegundoApellido() {
+        return segundoApellido;
+    }
+
+    public void setSegundoApellido(String segundoApellido) {
+        this.segundoApellido = segundoApellido;
+    }
+
+    public List<Direccion> getDirecciones() {
+        return direcciones;
+    }
+
+    public void setDirecciones(List<Direccion> direcciones) {
+        this.direcciones = direcciones;
+    }
+
+    
+
+    @Transient // Para que JPA no lo considere como columna
+    public Direccion getDireccion() {
+        if (direcciones != null && !direcciones.isEmpty()) {
+            return direcciones.get(0); // Retorna la primera dirección
+        } else {
+            return null;
+        }
+    }
+
+    @Transient
+    public void setDireccion(Direccion direccion) {
+        if (direcciones == null) {
+            direcciones = new ArrayList<>();
+        }
+
+        if (direcciones.isEmpty()) {
+            direcciones.add(direccion);
+        } else {
+            direcciones.set(0, direccion); // Reemplaza la primera
+        }
+    }
+
+}
