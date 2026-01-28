@@ -281,6 +281,27 @@ PROCEDURE CREDENCIALES_MODIFICAR (
       p_id_estado IN NUMBER
   );
 
+ -- RESET_PASSWORD_PROCEDIMIENTOS_AUTH
+PROCEDURE AUTH_REQUEST_RESET (
+    p_email IN VARCHAR2,
+    p_token OUT VARCHAR2,
+    p_id_credencial OUT NUMBER,
+    p_exists OUT NUMBER
+);
+
+PROCEDURE AUTH_VALIDATE_TOKEN (
+    p_token IN VARCHAR2,
+    p_valid OUT NUMBER,
+    p_id_credencial OUT NUMBER,
+    p_email OUT VARCHAR2
+);
+
+PROCEDURE AUTH_RESET_PASSWORD (
+    p_token IN VARCHAR2,
+    p_new_password_hash IN VARCHAR2,
+    p_success OUT NUMBER
+);
+
   -- PERIODOS_TB
   PROCEDURE PERIODOS_INSERTAR (
       p_nombre IN VARCHAR2,
