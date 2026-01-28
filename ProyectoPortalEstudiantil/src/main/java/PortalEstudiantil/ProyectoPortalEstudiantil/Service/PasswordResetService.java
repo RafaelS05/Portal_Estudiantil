@@ -37,7 +37,7 @@ public class PasswordResetService {
                 return true;
             }
 
-            // DEV: log temporal
+            //log temporal
             System.out.println("DEV TOKEN: " + request.getToken());
 
             sendResetEmail(email, request.getToken());
