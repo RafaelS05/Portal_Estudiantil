@@ -232,26 +232,25 @@ create or replace PACKAGE PORTAL_ESCOLAR_PKG AS
 
   -- CREDENCIALES_TB
   PROCEDURE CREDENCIALES_INSERTAR (
-      p_password_hash IN VARCHAR2,
-      p_password_salt IN VARCHAR2,
-      p_ultimo_login IN TIMESTAMP,
-      p_intentos_fallidos IN NUMBER,
-      p_bloqueado_hasta IN TIMESTAMP,
-      p_id_usuario_fk IN NUMBER,
-      p_id_correo_fk IN NUMBER,
-      p_id_estado_fk IN NUMBER
-  );
+    p_password_hash     IN VARCHAR2,
+    p_ultimo_login      IN TIMESTAMP,
+    p_intentos_fallidos IN NUMBER,
+    p_bloqueado_hasta   IN TIMESTAMP,
+    p_id_usuario_fk     IN NUMBER,
+    p_id_correo_fk      IN NUMBER,
+    p_id_estado_fk      IN NUMBER
+);
 
-  PROCEDURE CREDENCIALES_MODIFICAR (
-      p_id_credencial IN NUMBER,
-      p_password_hash IN VARCHAR2,
-      p_password_salt IN VARCHAR2,
-      p_ultimo_login IN TIMESTAMP,
-      p_intentos_fallidos IN NUMBER,
-      p_bloqueado_hasta IN TIMESTAMP,
-      p_id_usuario_fk IN NUMBER,
-      p_id_correo_fk IN NUMBER
-  );
+PROCEDURE CREDENCIALES_MODIFICAR (
+    p_id_credencial     IN NUMBER,
+    p_password_hash     IN VARCHAR2,
+    p_ultimo_login      IN TIMESTAMP,
+    p_intentos_fallidos IN NUMBER,
+    p_bloqueado_hasta   IN TIMESTAMP,
+    p_id_usuario_fk     IN NUMBER,
+    p_id_correo_fk      IN NUMBER
+);
+
 
   PROCEDURE CREDENCIALES_CAMBIAR_ESTADO (
       p_id_credencial IN NUMBER,

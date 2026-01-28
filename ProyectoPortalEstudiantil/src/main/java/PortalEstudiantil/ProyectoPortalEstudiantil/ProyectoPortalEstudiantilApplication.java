@@ -26,5 +26,8 @@ public class ProyectoPortalEstudiantilApplication {
             System.out.println("❌ ERROR DE CONEXIÓN A ORACLE");
             e.printStackTrace();
         }
+        
+       
+        
     }
 }

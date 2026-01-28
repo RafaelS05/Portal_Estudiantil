@@ -1,0 +1,25 @@
+.perfil-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.perfil-card {
+    text-align: center;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.perfil-avatar {
+    font-size: 60px;
+    color: #0d6efd;
+    margin-bottom: 10px;
+}
+
+.datos-card {
+    padding: 25px;
+}
+
+.acciones {
+    margin-top: 25px;
+    text-align: center;
+}

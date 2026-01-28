@@ -1,102 +1,98 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "USUARIOS_TB")
 public class Usuario {
-    
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_USUARIO")
     private Long idUsuario;
-    
-    @Column(name = "NOMBRE", nullable = false, length = 80)
+
     private String nombre;
-    
-    @Column(name = "PRIMER_APELLIDO", nullable = false, length = 80)
+
+    @Column(name = "PRIMER_APELLIDO")
     private String primerApellido;
-    
-    @Column(name = "SEGUNDO_APELLIDO", length = 80)
+
+    @Column(name = "SEGUNDO_APELLIDO")
     private String segundoApellido;
-    
-    @ManyToOne
-    @JoinColumn(name = "ID_TIPOUSUARIO_FK", nullable = false)
-    private TipoUsuario tipoUsuario;
-    
-    @ManyToOne
-    @JoinColumn(name = "ID_ESTADO_FK", nullable = false)
-    private Estado estado;
-    
-    // Constructores
-    public Usuario() {
-    }
-    
-    public Usuario(String nombre, String primerApellido, String segundoApellido, 
-                   TipoUsuario tipoUsuario, Estado estado) {
-        this.nombre = nombre;
-        this.primerApellido = primerApellido;
-        this.segundoApellido = segundoApellido;
-        this.tipoUsuario = tipoUsuario;
-        this.estado = estado;
-    }
-    
-    // Getters y Setters
+
+    // RELACIONES
+    @OneToMany(mappedBy = "usuario")
+    private List<Correo> correos;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Telefono> telefonos;
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Direccion> direcciones;
+
+    // GETTERS Y SETTERS
     public Long getIdUsuario() {
         return idUsuario;
     }
-    
+
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
     }
-    
+
     public String getNombre() {
         return nombre;
     }
-    
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    
+
     public String getPrimerApellido() {
         return primerApellido;
     }
-    
+
     public void setPrimerApellido(String primerApellido) {
         this.primerApellido = primerApellido;
     }
-    
+
     public String getSegundoApellido() {
         return segundoApellido;
     }
-    
+
     public void setSegundoApellido(String segundoApellido) {
         this.segundoApellido = segundoApellido;
     }
-    
-    public TipoUsuario getTipoUsuario() {
-        return tipoUsuario;
+
+    public List<Direccion> getDirecciones() {
+        return direcciones;
     }
-    
-    public void setTipoUsuario(TipoUsuario tipoUsuario) {
-        this.tipoUsuario = tipoUsuario;
+
+    public void setDirecciones(List<Direccion> direcciones) {
+        this.direcciones = direcciones;
     }
+
     
-    public Estado getEstado() {
-        return estado;
+
+    @Transient // Para que JPA no lo considere como columna
+    public Direccion getDireccion() {
+        if (direcciones != null && !direcciones.isEmpty()) {
+            return direcciones.get(0); // Retorna la primera dirección
+        } else {
+            return null;
+        }
     }
-    
-    public void setEstado(Estado estado) {
-        this.estado = estado;
+
+    @Transient
+    public void setDireccion(Direccion direccion) {
+        if (direcciones == null) {
+            direcciones = new ArrayList<>();
+        }
+
+        if (direcciones.isEmpty()) {
+            direcciones.add(direccion);
+        } else {
+            direcciones.set(0, direccion); // Reemplaza la primera
+        }
     }
-    
-    // Método de conveniencia
-    public String getNombreCompleto() {
-        return nombre + " " + primerApellido + 
-               (segundoApellido != null ? " " + segundoApellido : "");
-    }
+
 }

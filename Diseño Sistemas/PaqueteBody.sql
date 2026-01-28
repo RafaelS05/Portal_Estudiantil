@@ -611,7 +611,6 @@ create or replace PACKAGE BODY PORTAL_ESCOLAR_PKG AS
   -- CREDENCIALES_TB
   PROCEDURE CREDENCIALES_INSERTAR (
       p_password_hash IN VARCHAR2,
-      p_password_salt IN VARCHAR2,
       p_ultimo_login IN TIMESTAMP,
       p_intentos_fallidos IN NUMBER,
       p_bloqueado_hasta IN TIMESTAMP,
@@ -620,8 +619,8 @@ create or replace PACKAGE BODY PORTAL_ESCOLAR_PKG AS
       p_id_estado_fk IN NUMBER
   ) AS
   BEGIN
-      INSERT INTO CREDENCIALES_TB (ID_CREDENCIAL, PASSWORD_HASH, PASSWORD_SALT, ULTIMO_LOGIN, INTENTOS_FALLIDOS, BLOQUEADO_HASTA, ID_USUARIO_FK, ID_CORREO_FK, ID_ESTADO_FK, FECHA_CREACION, CREADO_POR, ACCION)
-      VALUES (CREDENCIALES_SEQ.NEXTVAL, p_password_hash, p_password_salt, p_ultimo_login, p_intentos_fallidos, p_bloqueado_hasta, p_id_usuario_fk, p_id_correo_fk, p_id_estado_fk, SYSTIMESTAMP, SYS_CONTEXT('USERENV','SESSION_USER'), 'INSERT');
+      INSERT INTO CREDENCIALES_TB (ID_CREDENCIAL, PASSWORD_HASH, ULTIMO_LOGIN, INTENTOS_FALLIDOS, BLOQUEADO_HASTA, ID_USUARIO_FK, ID_CORREO_FK, ID_ESTADO_FK, FECHA_CREACION, CREADO_POR, ACCION)
+      VALUES (CREDENCIALES_SEQ.NEXTVAL, p_password_hash, p_ultimo_login, p_intentos_fallidos, p_bloqueado_hasta, p_id_usuario_fk, p_id_correo_fk, p_id_estado_fk, SYSTIMESTAMP, SYS_CONTEXT('USERENV','SESSION_USER'), 'INSERT');
       DBMS_OUTPUT.PUT_LINE('CREDENCIALES INSERTADO CORRECTAMENTE');
   EXCEPTION
       WHEN OTHERS THEN
@@ -631,7 +630,6 @@ create or replace PACKAGE BODY PORTAL_ESCOLAR_PKG AS
   PROCEDURE CREDENCIALES_MODIFICAR (
       p_id_credencial IN NUMBER,
       p_password_hash IN VARCHAR2,
-      p_password_salt IN VARCHAR2,
       p_ultimo_login IN TIMESTAMP,
       p_intentos_fallidos IN NUMBER,
       p_bloqueado_hasta IN TIMESTAMP,
@@ -640,7 +638,7 @@ create or replace PACKAGE BODY PORTAL_ESCOLAR_PKG AS
   ) AS
   BEGIN
       UPDATE CREDENCIALES_TB
-      SET PASSWORD_HASH = p_password_hash, PASSWORD_SALT = p_password_salt, ULTIMO_LOGIN = p_ultimo_login, INTENTOS_FALLIDOS = p_intentos_fallidos, BLOQUEADO_HASTA = p_bloqueado_hasta, ID_USUARIO_FK = p_id_usuario_fk, ID_CORREO_FK = p_id_correo_fk, FECHA_MODIFICACION = SYSTIMESTAMP, MODIFICADO_POR = SYS_CONTEXT('USERENV','SESSION_USER'), ACCION = 'UPDATE'
+      SET PASSWORD_HASH = p_password_hash, ULTIMO_LOGIN = p_ultimo_login, INTENTOS_FALLIDOS = p_intentos_fallidos, BLOQUEADO_HASTA = p_bloqueado_hasta, ID_USUARIO_FK = p_id_usuario_fk, ID_CORREO_FK = p_id_correo_fk, FECHA_MODIFICACION = SYSTIMESTAMP, MODIFICADO_POR = SYS_CONTEXT('USERENV','SESSION_USER'), ACCION = 'UPDATE'
       WHERE ID_CREDENCIAL = p_id_credencial;
       DBMS_OUTPUT.PUT_LINE('CREDENCIALES MODIFICADO CORRECTAMENTE');
   EXCEPTION
