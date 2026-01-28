@@ -717,6 +717,181 @@ create or replace PACKAGE BODY PORTAL_ESCOLAR_PKG AS
           DBMS_OUTPUT.PUT_LINE('ERROR AL CAMBIAR ESTADO DE RESET_PASSWORD: ' || SQLERRM);
   END RESET_PASSWORD_CAMBIAR_ESTADO;
 
+  -- RESET_PASSWORD_PROCEDIMIENTOS_AUTH
+    -- Solicitar reset de contraseña
+PROCEDURE AUTH_REQUEST_RESET (
+    p_email IN VARCHAR2,
+    p_token OUT VARCHAR2,
+    p_id_credencial OUT NUMBER,
+    p_exists OUT NUMBER
+) AS
+    v_id_credencial NUMBER;
+    v_token VARCHAR2(255);
+    v_id_estado_activo NUMBER;
+BEGIN
+    -- Verificar si el correo existe y está activo
+    BEGIN
+        SELECT c.ID_CREDENCIAL 
+        INTO v_id_credencial
+        FROM CREDENCIALES_TB c
+        INNER JOIN CORREO_TB co ON c.ID_CORREO_FK = co.ID_CORREO
+        WHERE co.CORREO = p_email 
+          AND co.ES_LOGIN = 'S'
+          AND c.ID_ESTADO_FK = (SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' AND ROWNUM = 1);
+        
+        p_exists := 1;
+        p_id_credencial := v_id_credencial;
+        
+        -- Generar token único (UUID simulado con hash)
+        v_token := RAWTOHEX(SYS_GUID());
+        p_token := v_token;
+        
+        -- Obtener ID estado activo
+        SELECT ID_ESTADO INTO v_id_estado_activo 
+        FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' AND ROWNUM = 1;
+        
+        -- Invalidar tokens previos del usuario
+        UPDATE RESET_PASSWORD_TB
+        SET ID_ESTADO_FK = (SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'EXPIRADO' AND ROWNUM = 1)
+        WHERE ID_CREDENCIAL_FK = v_id_credencial
+          AND FECHA_EXPIRACION > SYSTIMESTAMP
+          AND FECHA_USO IS NULL;
+        
+        -- Insertar nuevo token (válido por 30 minutos)
+        INSERT INTO RESET_PASSWORD_TB (
+            ID_RESET, 
+            TOKEN, 
+            FECHA_CREACION_TOKEN, 
+            FECHA_EXPIRACION, 
+            ID_CREDENCIAL_FK, 
+            ID_ESTADO_FK,
+            FECHA_CREACION,
+            CREADO_POR,
+            ACCION
+        ) VALUES (
+            RESET_PASSWORD_SEQ.NEXTVAL,
+            v_token,
+            SYSTIMESTAMP,
+            SYSTIMESTAMP + INTERVAL '30' MINUTE,
+            v_id_credencial,
+            v_id_estado_activo,
+            SYSTIMESTAMP,
+            'SYSTEM',
+            'INSERT'
+        );
+        
+        COMMIT;
+        
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            p_exists := 0;
+            p_token := NULL;
+            p_id_credencial := NULL;
+    END;
+END AUTH_REQUEST_RESET;
+
+-- Validar token de recuperación
+PROCEDURE AUTH_VALIDATE_TOKEN (
+    p_token IN VARCHAR2,
+    p_valid OUT NUMBER,
+    p_id_credencial OUT NUMBER,
+    p_email OUT VARCHAR2
+) AS
+    v_id_credencial NUMBER;
+    v_correo VARCHAR2(120);
+    v_fecha_exp TIMESTAMP;
+    v_fecha_uso TIMESTAMP;
+BEGIN
+    BEGIN
+        SELECT 
+            rp.ID_CREDENCIAL_FK,
+            co.CORREO,
+            rp.FECHA_EXPIRACION,
+            rp.FECHA_USO
+        INTO 
+            v_id_credencial,
+            v_correo,
+            v_fecha_exp,
+            v_fecha_uso
+        FROM RESET_PASSWORD_TB rp
+        INNER JOIN CREDENCIALES_TB cr ON rp.ID_CREDENCIAL_FK = cr.ID_CREDENCIAL
+        INNER JOIN CORREO_TB co ON cr.ID_CORREO_FK = co.ID_CORREO
+        WHERE rp.TOKEN = p_token
+          AND rp.ID_ESTADO_FK = (SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' AND ROWNUM = 1);
+        
+        -- Validar que no haya sido usado y no esté expirado
+        IF v_fecha_uso IS NOT NULL THEN
+            p_valid := 0; -- Token ya usado
+        ELSIF v_fecha_exp < SYSTIMESTAMP THEN
+            p_valid := 0; -- Token expirado
+            -- Marcar como expirado
+            UPDATE RESET_PASSWORD_TB
+            SET ID_ESTADO_FK = (SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'EXPIRADO' AND ROWNUM = 1)
+            WHERE TOKEN = p_token;
+            COMMIT;
+        ELSE
+            p_valid := 1; -- Token válido
+            p_id_credencial := v_id_credencial;
+            p_email := v_correo;
+        END IF;
+        
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            p_valid := 0;
+            p_id_credencial := NULL;
+            p_email := NULL;
+    END;
+END AUTH_VALIDATE_TOKEN;
+
+-- Restablecer contraseña
+PROCEDURE AUTH_RESET_PASSWORD (
+    p_token IN VARCHAR2,
+    p_new_password_hash IN VARCHAR2,
+    p_success OUT NUMBER
+) AS
+    v_id_credencial NUMBER;
+    v_valid NUMBER;
+BEGIN
+    -- Validar token primero
+    DECLARE
+        v_email VARCHAR2(120);
+    BEGIN
+        AUTH_VALIDATE_TOKEN(p_token, v_valid, v_id_credencial, v_email);
+    END;
+    
+    IF v_valid = 1 THEN
+        -- Actualizar contraseña
+        UPDATE CREDENCIALES_TB
+        SET PASSWORD_HASH = p_new_password_hash,
+            INTENTOS_FALLIDOS = 0,
+            BLOQUEADO_HASTA = NULL,
+            FECHA_MODIFICACION = SYSTIMESTAMP,
+            MODIFICADO_POR = 'RESET_PASSWORD',
+            ACCION = 'PASSWORD_RESET'
+        WHERE ID_CREDENCIAL = v_id_credencial;
+        
+        -- Marcar token como usado
+        UPDATE RESET_PASSWORD_TB
+        SET FECHA_USO = SYSTIMESTAMP,
+            FECHA_MODIFICACION = SYSTIMESTAMP,
+            MODIFICADO_POR = 'SYSTEM',
+            ACCION = 'TOKEN_USED'
+        WHERE TOKEN = p_token;
+        
+        COMMIT;
+        p_success := 1;
+    ELSE
+        p_success := 0;
+    END IF;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        p_success := 0;
+        DBMS_OUTPUT.PUT_LINE('ERROR AL RESETEAR PASSWORD: ' || SQLERRM);
+END AUTH_RESET_PASSWORD;
+
+
 
   -- PERIODOS_TB
   PROCEDURE PERIODOS_INSERTAR (
