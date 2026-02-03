@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:fragment="head">
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Recuperar o Restablecer Contraseña - Portal Estudiantil</title>
+
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+        <link rel="stylesheet" th:href="@{/css/login.css}">
+
+        <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/js/script.js}"></script>
+    </head>
+
+    <body>
+        <div class="login-container">
+
+            <!-- Panel Izquierdo - Branding -->
+            <div class="login-left" th:fragment="container-1">
+                <div class="logo-container">
+                    <img th:src="@{/img/Escuela_Neftali.png}" 
+                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect fill='%23ffffff' width='150' height='150' rx='10'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='%23FF9966'%3EEN%3C/text%3E%3C/svg%3E" 
+                         alt="Escuela Neftalí"/>
+                </div>
+                <h1>Portal Estudiantil<br/>y Administrativo</h1>
+                <p>Escuela Neftalí Villalobos Gutiérrez</p>
+            </div>
+
+            <!-- Panel Derecho - Formulario -->
+            <div class="login-right" th:fragment="form-recuperarPassword">
+                <div class="login-card">
+                    <h2 class="login-title">Recuperar</h2>
+                    <p class="subtitle">Te enviaremos un enlace al correo</p>
+
+                    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+                    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+
+                    <form th:action="@{/resetContrasenna/recuperar-password}" method="post">
+                        <div class="form-group">
+                            <label>Correo electrónico</label>
+                            <input type="email" class="form-control" name="email" required autofocus/>
+                        </div>
+
+                        <button type="submit" class="btn-login mt-4">Enviar enlace</button>
+                    </form>
+
+                    <div class="mt-3">
+                        <a th:href="@{/login}">Volver al login</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="login-right" th:fragment="form-resetPassword">
+                <div class="login-card">
+                    <h2 class="login-title">Restablecer</h2>
+                    <p class="subtitle">Ingrese su nueva contraseña</p>
+
+                    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+                    <form th:action="@{/resetContrasenna/reset-password}" method="post">
+                        <input type="hidden" name="token" th:value="${token}"/>
+
+                        <div class="form-group" th:if="${email != null}">
+                            <label>Cuenta</label>
+                            <input type="text" class="form-control" th:value="${email}" disabled/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nueva contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="Ingrese su contraseña"
+                                       required/>
+                                <button type="button" class="password-toggle" onclick="togglePassword()">
+                                    <i class="fa-regular fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Confirmar contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="confirmPassword" 
+                                       placeholder="Ingrese su contraseña"
+                                       required/>
+                            </div>
+                        </div>
+
+                        <div class="password-rules mt-3">
+                            <small>
+                                • Entre 8 y 20 caracteres<br/>
+                                • Al menos 1 mayúscula (A–Z)<br/>
+                                • Al menos 3 números (0–9)<br/>
+                                • Solo letras y números
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn-login mt-4">Guardar nueva contraseña</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

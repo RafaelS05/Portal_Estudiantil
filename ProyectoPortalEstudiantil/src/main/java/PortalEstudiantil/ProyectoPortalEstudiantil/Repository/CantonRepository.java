@@ -26,7 +26,7 @@ public interface CantonRepository extends JpaRepository<Canton, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.CANTON_INSERTAR(
+        CALL CANTON_INSERTAR(
             :nombre,
             :idProvincia,
             :idEstado
@@ -44,7 +44,7 @@ public interface CantonRepository extends JpaRepository<Canton, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.CANTON_MODIFICAR(
+        CALL CANTON_MODIFICAR(
             :idCanton,
             :nombre,
             :idProvincia
