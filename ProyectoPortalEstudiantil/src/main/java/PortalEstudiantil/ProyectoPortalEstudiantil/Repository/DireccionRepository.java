@@ -25,7 +25,7 @@ public interface DireccionRepository extends JpaRepository<Direccion, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.DIRECCION_INSERTAR(
+        CALL DIRECCION_INSERTAR(
             :otrasSenas,
             :idUsuario,
             :idProvincia,
@@ -49,7 +49,7 @@ public interface DireccionRepository extends JpaRepository<Direccion, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.DIRECCION_MODIFICAR(
+        CALL DIRECCION_MODIFICAR(
             :idDireccion,
             :otrasSenas,
             :idUsuario,

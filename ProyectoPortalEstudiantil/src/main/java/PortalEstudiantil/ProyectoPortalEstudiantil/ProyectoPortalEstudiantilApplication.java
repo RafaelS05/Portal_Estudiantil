@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+
 @SpringBootApplication
 public class ProyectoPortalEstudiantilApplication {
 
@@ -19,15 +20,18 @@ public class ProyectoPortalEstudiantilApplication {
             DataSource ds = context.getBean(DataSource.class);
             try (Connection conn = ds.getConnection()) {
                 System.out.println("=================================");
-                System.out.println("✅ CONEXION A ORACLE OK");
+                System.out.println("✅ CONEXIÓN A MARIADB OK");
                 System.out.println("=================================");
             }
         } catch (Exception e) {
-            System.out.println("❌ ERROR DE CONEXIÓN A ORACLE");
+            System.out.println("❌ ERROR DE CONEXIÓN A MARIADB");
             e.printStackTrace();
+            
+           
         }
-        
-       
-        
+         //BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        //String raw = "Admin123!";
+        //String hash = encoder.encode(raw);
+        //System.out.println(hash);
     }
 }
