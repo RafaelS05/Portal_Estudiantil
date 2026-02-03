@@ -24,7 +24,7 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        PROVINCIA_INSERTAR(
+        CALL PROVINCIA_INSERTAR(
             :nombre,
             :idEstado
         )
@@ -40,7 +40,7 @@ public interface ProvinciaRepository extends JpaRepository<Provincia, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        PROVINCIA_MODIFICAR(
+        CALL PROVINCIA_MODIFICAR(
             :idProvincia,
             :nombre
         )

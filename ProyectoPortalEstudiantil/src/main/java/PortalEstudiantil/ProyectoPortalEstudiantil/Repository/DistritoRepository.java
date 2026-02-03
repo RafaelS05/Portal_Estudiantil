@@ -26,7 +26,7 @@ public interface DistritoRepository extends JpaRepository<Distrito, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PDISTRITO_INSERTAR(
+        CALL DISTRITO_INSERTAR(
             :nombre,
             :idCanton,
             :idEstado
@@ -44,7 +44,7 @@ public interface DistritoRepository extends JpaRepository<Distrito, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-       DISTRITO_MODIFICAR(
+      CALL DISTRITO_MODIFICAR(
             :idDistrito,
             :nombre,
             :idCanton
