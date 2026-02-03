@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="layout/plantilla :: head">
+        <title>Detalle de Usuario - Portal Estudiantil</title>
+        <link rel="stylesheet" th:href="@{/css/usuarios.css}">
+    </head>
+
+    <body>
+        <div th:replace="layout/plantilla :: shell(~{::#detalle-content})">
+            <div id="detalle-content">
+                <!-- Encabezado con acciones -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0">Detalle de Usuario</h1>
+                        <p class="text-muted mb-0">Información completa del usuario</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/usuarios/}" class="btn btn-outline-secondary me-2">
+                            <i class="fa-solid fa-arrow-left me-2"></i> Volver
+                        </a>
+                        <a th:href="@{'/usuarios/editar/' + ${usuario.idUsuario}}" 
+                           class="btn btn-outline-primary me-2">
+                            <i class="fa-solid fa-pen me-2"></i> Editar
+                        </a>
+                        <form th:action="@{'/usuarios/eliminar/' + ${usuario.idUsuario}}" 
+                              method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger" 
+                                    onclick="return confirm('¿Estás seguro de eliminar este usuario?')">
+                                <i class="fa-solid fa-trash me-2"></i> Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <div class="avatar-circle mx-auto mb-3" 
+                                     style="width: 120px; height: 120px;"
+                                     th:classappend="'color-' + ${(usuario.idUsuario % 6) + 1}">
+                                    <span class="avatar-initials" style="font-size: 3rem;"
+                                          th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1))}+${#strings.toUpperCase(#strings.substring(usuario.primerApellido,0,1))}">
+                                    </span>
+                                </div>
+                                
+                                <h4>[[${usuario.nombre}]] [[${usuario.primerApellido}]]</h4>
+                                <p class="text-muted mb-3" th:if="${usuario.segundoApellido != null}">
+                                    [[${usuario.segundoApellido}]]
+                                </p>
+                                
+                                <div class="mb-3">
+                                    <span th:switch="${usuario.idTipoUsuarioFk}">
+                                        <span th:case="1" class="badge badge-estudiante p-2">Estudiante</span>
+                                        <span th:case="2" class="badge badge-docente p-2">Docente</span>
+                                        <span th:case="3" class="badge badge-administrador p-2">Administrador</span>
+                                    </span>
+                                </div>
+                                
+                                <div>
+                                    <span th:if="${usuario.idEstadoFk == 1}" 
+                                          class="estado activo p-2">Activo</span>
+                                    <span th:if="${usuario.idEstadoFk == 2}" 
+                                          class="estado p-2">Inactivo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Cambiar Estado</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <form th:action="@{'/usuarios/activar/' + ${usuario.idUsuario}}" 
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-success w-100"
+                                                th:disabled="${usuario.idEstadoFk == 1}">
+                                            <i class="fa-solid fa-check-circle me-2"></i> Activar
+                                        </button>
+                                    </form>
+                                    
+                                    <form th:action="@{'/usuarios/desactivar/' + ${usuario.idUsuario}}" 
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-warning w-100"
+                                                th:disabled="${usuario.idEstadoFk == 2}">
+                                            <i class="fa-solid fa-ban me-2"></i> Desactivar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Información del Usuario</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted">ID de Usuario</h6>
+                                        <p class="fw-semibold">[[${usuario.idUsuario}]]</p>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted">Nombre Completo</h6>
+                                        <p class="fw-semibold">
+                                            [[${usuario.nombre}]] [[${usuario.primerApellido}]] 
+                                            <span th:if="${usuario.segundoApellido != null}">[[${usuario.segundoApellido}]]</span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted">Tipo de Usuario</h6>
+                                        <p>
+                                            <span th:switch="${usuario.idTipoUsuarioFk}">
+                                                <span th:case="1" class="badge badge-estudiante">Estudiante</span>
+                                                <span th:case="2" class="badge badge-docente">Docente</span>
+                                                <span th:case="3" class="badge badge-administrador">Administrador</span>
+                                                <span th:case="*" class="badge bg-secondary">Otro</span>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="text-muted">Estado Actual</h6>
+                                        <p>
+                                            <span th:if="${usuario.idEstadoFk == 1}" class="estado activo">Activo</span>
+                                            <span th:if="${usuario.idEstadoFk == 2}" class="estado">Inactivo</span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-3" th:if="${usuario.correos != null && !usuario.correos.isEmpty()}">
+                                        <h6 class="text-muted">Correo Electrónico</h6>
+                                        <p class="fw-semibold">
+                                            <i class="fa-solid fa-envelope me-2 text-muted"></i>
+                                            [[${usuario.correos[0].correo}]]
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <h6 class="text-muted">Información Adicional</h6>
+                                        <div class="alert alert-info">
+                                            <small>
+                                                <i class="fa-solid fa-circle-info me-2"></i>
+                                                Usuario registrado en el sistema. 
+                                                <span th:if="${usuario.idEstadoFk == 1}">
+                                                    Actualmente activo y disponible para uso.
+                                                </span>
+                                                <span th:if="${usuario.idEstadoFk == 2}">
+                                                    Actualmente inactivo. Puede ser reactivado cuando sea necesario.
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer text-end">
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-clock me-1"></i>
+                                    Última actualización: Información actual
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

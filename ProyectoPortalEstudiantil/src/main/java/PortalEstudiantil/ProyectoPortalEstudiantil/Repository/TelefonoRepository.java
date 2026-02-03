@@ -26,7 +26,7 @@ public interface TelefonoRepository extends JpaRepository<Telefono, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.TELEFONO_INSERTAR(
+        TELEFONO_INSERTAR(
             :numero,
             :idUsuario,
             :idEstado
@@ -44,7 +44,7 @@ public interface TelefonoRepository extends JpaRepository<Telefono, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PORTAL_ESCOLAR_PKG.TELEFONO_MODIFICAR(
+        TELEFONO_MODIFICAR(
             :idTelefono,
             :numero,
             :idUsuario

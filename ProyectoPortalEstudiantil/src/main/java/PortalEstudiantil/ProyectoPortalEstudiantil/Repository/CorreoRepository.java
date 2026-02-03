@@ -24,7 +24,7 @@ public interface CorreoRepository extends JpaRepository<Correo, Long> {
     @Modifying
     @Transactional
     @Query(value = """
-    CALL PORTAL_ESCOLAR_PKG.CORREO_MODIFICAR(
+    CALL CORREO_MODIFICAR(
         :idCorreo,
         :correo,
         :esLogin,

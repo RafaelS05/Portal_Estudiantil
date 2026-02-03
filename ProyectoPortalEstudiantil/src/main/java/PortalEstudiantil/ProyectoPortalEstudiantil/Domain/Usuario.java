@@ -20,7 +20,12 @@ public class Usuario {
     @Column(name = "SEGUNDO_APELLIDO")
     private String segundoApellido;
 
-    // RELACIONES
+    @Column(name = "ID_TIPOUSUARIO_FK")
+    private Long idTipoUsuarioFk;
+
+    @Column(name = "ID_ESTADO_FK")
+    private Long idEstadoFk;
+
     @OneToMany(mappedBy = "usuario")
     private List<Correo> correos;
 
@@ -30,7 +35,6 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private List<Direccion> direcciones;
 
-    // GETTERS Y SETTERS
     public Long getIdUsuario() {
         return idUsuario;
     }
@@ -63,6 +67,22 @@ public class Usuario {
         this.segundoApellido = segundoApellido;
     }
 
+    public Long getIdTipoUsuarioFk() {
+        return idTipoUsuarioFk;
+    }
+
+    public void setIdTipoUsuarioFk(Long idTipoUsuarioFk) {
+        this.idTipoUsuarioFk = idTipoUsuarioFk;
+    }
+
+    public Long getIdEstadoFk() {
+        return idEstadoFk;
+    }
+
+    public void setIdEstadoFk(Long idEstadoFk) {
+        this.idEstadoFk = idEstadoFk;
+    }
+
     public List<Direccion> getDirecciones() {
         return direcciones;
     }
@@ -71,12 +91,10 @@ public class Usuario {
         this.direcciones = direcciones;
     }
 
-    
-
-    @Transient // Para que JPA no lo considere como columna
+    @Transient
     public Direccion getDireccion() {
         if (direcciones != null && !direcciones.isEmpty()) {
-            return direcciones.get(0); // Retorna la primera dirección
+            return direcciones.get(0);
         } else {
             return null;
         }
@@ -91,8 +109,23 @@ public class Usuario {
         if (direcciones.isEmpty()) {
             direcciones.add(direccion);
         } else {
-            direcciones.set(0, direccion); // Reemplaza la primera
+            direcciones.set(0, direccion);
         }
     }
 
+    public List<Correo> getCorreos() {
+        return correos;
+    }
+
+    public void setCorreos(List<Correo> correos) {
+        this.correos = correos;
+    }
+
+    public List<Telefono> getTelefonos() {
+        return telefonos;
+    }
+
+    public void setTelefonos(List<Telefono> telefonos) {
+        this.telefonos = telefonos;
+    }
 }
