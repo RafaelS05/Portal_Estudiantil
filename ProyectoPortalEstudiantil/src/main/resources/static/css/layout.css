@@ -14,7 +14,7 @@
   --radius: 0.875rem;
 }
 
-/*Tipografía*/
+/*tipográfia*/
 html{
   font-size: 100%;
 }
@@ -41,7 +41,6 @@ p{ margin: 0; }
 .app-shell{
   display: flex;
   min-height: 100vh;
-  position: relative;
 }
 
 /*Sidebar*/
@@ -53,9 +52,16 @@ p{ margin: 0; }
   top: 0;
   height: 100vh;
   box-shadow: 0.5rem 0 1.5rem rgba(0,0,0,.08);
-  overflow-y: auto;
-  z-index: 1000;
-  transition: transform 0.3s ease;
+}
+
+.app-sidebar{
+  width: var(--sidebar-w);
+  background: linear-gradient(180deg, var(--sidebar-blue) 0%, #7cc7ff 100%);
+  color: #fff;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-shadow: 0.5rem 0 1.5rem rgba(0,0,0,.08);
 }
 
 /*Brand*/
@@ -66,35 +72,15 @@ p{ margin: 0; }
   background: rgba(255,255,255,.12);
   font-weight: 700;
   letter-spacing: 0.0125rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 
-.sidebar-brand .brand-link{
+.sidebar-brand a{
   display: flex;
   align-items: center;
   gap: 0.75rem;
   height: 100%;
   color: #fff;
   text-decoration: none;
-  flex: 1;
-}
-
-/* Botón cerrar sidebar (oculto en desktop) */
-.sidebar-close{
-  display: none;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: opacity 0.2s;
-}
-
-.sidebar-close:hover{
-  opacity: 0.8;
 }
 
 /* Logo con imagen */
@@ -155,7 +141,8 @@ p{ margin: 0; }
   box-shadow: 0 0.5rem 1.125rem rgba(0,0,0,.10);
 }
 
-/*Dropdown menu*/
+/*Dropmenu */
+
 .dropdown-menu{
   list-style: none;
   padding-left: 0;
@@ -178,6 +165,9 @@ p{ margin: 0; }
   background: rgba(220,53,69,.08);
 }
 
+
+
+
 /*Contenedor principal*/
 .app-main{
   flex: 1;
@@ -198,32 +188,7 @@ p{ margin: 0; }
   box-shadow: 0 0.25rem 1rem rgba(0,0,0,.06);
   position: sticky;
   top: 0;
-  z-index: 999;
-}
-
-.topbar-left{
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 0;
-}
-
-/* Botón hamburguesa (oculto en desktop) */
-.sidebar-toggle{
-  display: none;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text);
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: opacity 0.2s;
-  flex-shrink: 0;
-}
-
-.sidebar-toggle:hover{
-  opacity: 0.7;
+  z-index: 5;
 }
 
 .page-title{
@@ -233,24 +198,6 @@ p{ margin: 0; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/*Overlay (oculto en desktop)*/
-.sidebar-overlay{
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 999;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active{
-  opacity: 1;
 }
 
 /*Chips y botones*/
@@ -276,19 +223,16 @@ p{ margin: 0; }
   cursor: pointer;
   box-shadow: 0 0.5rem 1.125rem rgba(255,138,31,.22);
   font-size: 0.875rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: inline-block;
 }
 
 .btn-news:hover{
   filter: brightness(.98);
 }
 
-/*Contenido*/
+/*Contenido */
 .app-content{
   padding: 1.125rem;
-  flex: 1;
 }
 
 .content-card{
@@ -299,103 +243,30 @@ p{ margin: 0; }
   min-height: calc(100vh - var(--sidebar-top-h) - 2.25rem);
 }
 
-/*Utilidades*/
+/*Utilidades */
 .text-truncate{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ==================== RESPONSIVE ==================== */
-
-/* Tablets y móviles */
-@media (max-width: 991px){
-  /* Mostrar botón hamburguesa */
-  .sidebar-toggle{
-    display: block;
+/*Responsive*/
+@media (max-width: 48rem){
+  .app-shell{
+    flex-direction: column;
   }
 
-  /* Sidebar como overlay */
   .app-sidebar{
-    position: fixed;
-    left: 0;
-    top: 0;
-    transform: translateX(-100%);
-    z-index: 1000;
-    box-shadow: none;
+    width: 100%;
+    height: auto;
+    position: relative;
   }
 
-  .app-sidebar.active{
-    transform: translateX(0);
-    box-shadow: 0.5rem 0 2rem rgba(0,0,0,.15);
-  }
-
-  /* Mostrar overlay cuando sidebar está activo */
-  body.sidebar-open .sidebar-overlay{
-    display: block;
-  }
-
-  /* Mostrar botón cerrar en sidebar */
-  .sidebar-close{
-    display: block;
-  }
-
-  /* Ajustar topbar */
   .app-topbar{
-    padding: 0 0.75rem;
-  }
-
-  /* Reducir padding del contenido */
-  .app-content{
-    padding: 0.875rem;
+    position: relative;
   }
 
   .content-card{
-    padding: 0.875rem;
     min-height: auto;
-  }
-
-  /* Título más pequeño */
-  .page-title{
-    font-size: 0.95rem;
-  }
-
-  /* Ajustar tamaños de fuente */
-  body{
-    font-size: 1rem;
-  }
-
-  h1{ font-size: 1.75rem; }
-  h2{ font-size: 1.5rem; }
-  h3{ font-size: 1.25rem; }
-}
-
-/* Móviles pequeños */
-@media (max-width: 576px){
-  .topbar-right{
-    gap: 0.5rem !important;
-  }
-
-  .btn-news{
-    padding: 0.5rem;
-    min-width: 2.5rem;
-    justify-content: center;
-  }
-
-  .chip{
-    padding: 0.4375rem 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .page-title{
-    font-size: 0.875rem;
-  }
-
-  .app-content{
-    padding: 0.625rem;
-  }
-
-  .content-card{
-    padding: 0.75rem;
   }
 }
