@@ -22,7 +22,7 @@ public class AuthRepository {
     public AuthRepository(DataSource dataSource) {
         this.getUserByEmailCall = new SimpleJdbcCall(dataSource)
                 .withProcedureName("AUTH_GET_USER_BY_EMAIL")
-                .withoutProcedureColumnMetaDataAccess() // 🔥 CLAVE
+                .withoutProcedureColumnMetaDataAccess() 
                 .declareParameters(
                         new SqlParameter("p_email", Types.VARCHAR),
                         new SqlOutParameter("p_username", Types.VARCHAR),
