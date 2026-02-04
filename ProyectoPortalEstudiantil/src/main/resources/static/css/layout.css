@@ -41,6 +41,12 @@ p{ margin: 0; }
 .app-shell{
   display: flex;
   min-height: 100vh;
+<<<<<<< Updated upstream
+=======
+  position: relative;
+  overflow-y: auto;
+
+>>>>>>> Stashed changes
 }
 
 /*Sidebar*/
