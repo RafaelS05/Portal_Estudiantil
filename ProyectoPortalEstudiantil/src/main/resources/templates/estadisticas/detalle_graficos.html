@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+    <div th:fragment="content">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/estadisticas/}">
+                        <i class="fa-solid fa-chart-pie me-1"></i>Estadísticas
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">Detalle</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="detail-header mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h2 class="fw-bold mb-2">
+                        <i class="fa-solid fa-chart-bar text-primary me-2"></i>
+                        Estadística #<span th:text="${estadistica.idEstadistica}">1</span>
+                    </h2>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="badge" 
+                              th:classappend="${estadistica.idEstadoFk == 1} ? 'bg-success' : 'bg-danger'"
+                              th:text="${estadistica.idEstadoFk == 1} ? 'Activa' : 'Inactiva'">
+                            Activa
+                        </span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a th:href="@{/estadisticas/editar/{id}(id=${estadistica.idEstadistica})}" 
+                       class="btn btn-primary">
+                        <i class="fa-solid fa-edit me-2"></i>Editar
+                    </a>
+                    <a th:href="@{/estadisticas/}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información General -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-icon bg-primary">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Materia</div>
+                        <div class="info-value" th:text="'ID: ' + ${estadistica.idMateriaFk}">ID: 1</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-icon bg-info">
+                        <i class="fa-solid fa-users-between-lines"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Sección</div>
+                        <div class="info-value" th:text="'ID: ' + ${estadistica.idSeccionFk}">ID: 1</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-icon bg-warning">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Docente</div>
+                        <div class="info-value" th:text="'ID: ' + ${estadistica.idDocenteFk}">ID: 1</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="info-card">
+                    <div class="info-icon bg-success">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="info-content">
+                        <div class="info-label">Total Estudiantes</div>
+                        <div class="info-value" th:text="${estadistica.totalEstudiantes}">30</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráficos y Estadísticas -->
+        <div class="row g-4">
+            <!-- Gráfico de Distribución -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-chart-pie me-2"></i>
+                            Distribución de Resultados
+                        </h5>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartDistribucion"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico de Notas -->
+            <div class="col-12 col-lg-6">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h5 class="mb-0">
+                            <i class="fa-solid fa-chart-bar me-2"></i>
+                            Rango de Calificaciones
+                        </h5>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chartNotas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Métricas Detalladas -->
+            <div class="col-12">
+                <div class="metrics-grid">
+                    <div class="metric-item metric-primary">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">Promedio</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(estadistica.promedio, 1, 2)}">85.50</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item metric-success">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-arrow-up"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">Nota Máxima</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(estadistica.notaMaxima, 1, 2)}">98.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item metric-danger">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-arrow-down"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">Nota Mínima</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(estadistica.notaMinima, 1, 2)}">45.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item metric-info">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-check-circle"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">Aprobados</div>
+                            <div class="metric-value" th:text="${estadistica.aprobados}">25</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item metric-warning">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-times-circle"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">Reprobados</div>
+                            <div class="metric-value" th:text="${estadistica.reprobados}">5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item metric-purple">
+                        <div class="metric-icon">
+                            <i class="fa-solid fa-percentage"></i>
+                        </div>
+                        <div class="metric-info">
+                            <div class="metric-label">% Aprobación</div>
+                            <div class="metric-value" th:text="${#numbers.formatDecimal(estadistica.porcentajeAprobacion, 1, 2) + '%'}">83.33%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datos para JavaScript -->
+        <script th:inline="javascript">
+            const estadisticaData = {
+                aprobados: /*[[${estadistica.aprobados}]]*/ 25,
+                reprobados: /*[[${estadistica.reprobados}]]*/ 5,
+                promedio: /*[[${estadistica.promedio}]]*/ 85.5,
+                notaMaxima: /*[[${estadistica.notaMaxima}]]*/ 98,
+                notaMinima: /*[[${estadistica.notaMinima}]]*/ 45,
+                porcentajeAprobacion: /*[[${estadistica.porcentajeAprobacion}]]*/ 83.33
+            };
+        </script>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:src="@{/js/estadisticas-detalle.js}"></script>
+</body>
+</html>

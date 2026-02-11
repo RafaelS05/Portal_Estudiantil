@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+    <div th:fragment="content">
+        
+        <!-- Mensajes Flash -->
+        <div th:if="${mensaje}" 
+             th:class="'alert alert-' + ${tipoMensaje ?: 'info'} + ' alert-dismissible fade show'" 
+             role="alert">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            <span th:text="${mensaje}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Header con acciones -->
+        <div class="stats-header mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fa-solid fa-chart-pie text-primary me-2"></i>
+                        Estadísticas de Calificaciones
+                    </h2>
+                    <p class="text-muted mb-0" th:if="${criterioBusqueda}">
+                        <i class="fa-solid fa-filter me-1"></i>
+                        <span th:text="${criterioBusqueda}"></span>
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalBusqueda">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>
+                        Buscar
+                    </button>
+                    <a th:href="@{/estadisticas/nuevo}" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-2"></i>
+                        Nueva Estadística
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de resumen -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card card-blue">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-chart-bar"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Estadísticas</div>
+                        <div class="stat-value" th:text="${totalEstadisticas ?: totalResultados ?: 0}">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3" th:if="${promedioGeneral != null}">
+                <div class="stat-card card-green">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Promedio General</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(promedioGeneral, 1, 2)}">0.00</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3" th:if="${porcentajeAprobacionGeneral != null}">
+                <div class="stat-card card-purple">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-percentage"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">% Aprobación</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(porcentajeAprobacionGeneral, 1, 2) + '%'}">0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="stat-card card-orange">
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Resultados</div>
+                        <div class="stat-value" th:text="${totalResultados ?: estadisticas.size() ?: 0}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros rápidos -->
+        <div class="quick-filters mb-4">
+            <div class="d-flex flex-wrap gap-2">
+                <a th:href="@{/estadisticas/}" class="filter-chip" 
+                   th:classappend="${criterioBusqueda == null} ? 'active' : ''">
+                    <i class="fa-solid fa-list me-1"></i> Todas
+                </a>
+                <a th:href="@{/estadisticas/activas}" class="filter-chip"
+                   th:classappend="${criterioBusqueda == 'Estadísticas Activas'} ? 'active' : ''">
+                    <i class="fa-solid fa-check-circle me-1"></i> Activas
+                </a>
+                <a th:href="@{/estadisticas/inactivas}" class="filter-chip"
+                   th:classappend="${criterioBusqueda == 'Estadísticas Inactivas'} ? 'active' : ''">
+                    <i class="fa-solid fa-times-circle me-1"></i> Inactivas
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabla de estadísticas -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Materia</th>
+                        <th>Sección</th>
+                        <th>Docente</th>
+                        <th class="text-center">Promedio</th>
+                        <th class="text-center">Estudiantes</th>
+                        <th class="text-center">Aprobación</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${estadisticas == null || estadisticas.isEmpty()}">
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-inbox fa-3x mb-3 d-block"></i>
+                            <p class="mb-0">No hay estadísticas disponibles</p>
+                        </td>
+                    </tr>
+                    <tr th:each="est : ${estadisticas}">
+                        <td>
+                            <span class="badge bg-secondary" th:text="${est.idEstadistica}">1</span>
+                        </td>
+                        <td>
+                            <strong th:text="'Materia ' + ${est.idMateriaFk}">Materia 1</strong>
+                        </td>
+                        <td th:text="'Sección ' + ${est.idSeccionFk}">Sección 1</td>
+                        <td th:text="'Docente ' + ${est.idDocenteFk}">Docente 1</td>
+                        <td class="text-center">
+                            <div class="grade-badge" 
+                                 th:classappend="${est.promedio >= 70} ? 'grade-excellent' : (${est.promedio >= 60} ? 'grade-good' : 'grade-poor')">
+                                <i class="fa-solid fa-chart-line me-1"></i>
+                                <span th:text="${#numbers.formatDecimal(est.promedio, 1, 2)}">85.5</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="student-count">
+                                <i class="fa-solid fa-users me-1 text-muted"></i>
+                                <span th:text="${est.totalEstudiantes}">30</span>
+                                <small class="text-muted ms-2">
+                                    (<span class="text-success" th:text="${est.aprobados}">25</span>/<span class="text-danger" th:text="${est.reprobados}">5</span>)
+                                </small>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="progress-ring">
+                                <svg width="60" height="60">
+                                    <circle cx="30" cy="30" r="25" class="progress-ring-bg"/>
+                                    <circle cx="30" cy="30" r="25" class="progress-ring-fill"
+                                            th:attr="data-percent=${est.porcentajeAprobacion}"/>
+                                </svg>
+                                <div class="progress-text">
+                                    <span th:text="${#numbers.formatDecimal(est.porcentajeAprobacion, 1, 0) + '%'}">85%</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge" 
+                                  th:classappend="${est.idEstadoFk == 1} ? 'bg-success' : 'bg-danger'"
+                                  th:text="${est.idEstadoFk == 1} ? 'Activa' : 'Inactiva'">
+                                Activa
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{/estadisticas/ver/{id}(id=${est.idEstadistica})}" 
+                                   class="btn btn-outline-info" title="Ver detalles">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a th:href="@{/estadisticas/editar/{id}(id=${est.idEstadistica})}" 
+                                   class="btn btn-outline-primary" title="Editar">
+                                    <i class="fa-solid fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" 
+                                        onclick="confirmarEliminacion(this)" 
+                                        th:data-id="${est.idEstadistica}"
+                                        title="Eliminar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal de búsqueda -->
+        <div class="modal fade" id="modalBusqueda" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i>
+                            Buscar Estadísticas
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/estadisticas/buscar}" method="get">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Materia</label>
+                                <input type="number" name="materia" class="form-control" placeholder="ID de la materia">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Sección</label>
+                                <input type="number" name="seccion" class="form-control" placeholder="ID de la sección">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Docente</label>
+                                <input type="number" name="docente" class="form-control" placeholder="ID del docente">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-search me-2"></i>Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario oculto para eliminación -->
+        <form id="formEliminar" method="post" style="display: none;">
+            <input type="hidden" name="_method" value="delete">
+        </form>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:src="@{/js/estadisticas.js}"></script>
+</body>
+</html>

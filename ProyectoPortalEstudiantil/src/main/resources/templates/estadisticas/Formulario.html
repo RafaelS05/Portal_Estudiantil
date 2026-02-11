@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+    <div th:fragment="content">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{/estadisticas/}">
+                        <i class="fa-solid fa-chart-pie me-1"></i>Estadísticas
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" th:text="${titulo}">Nueva Estadística</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="mb-4">
+            <h2 class="fw-bold">
+                <i class="fa-solid fa-edit text-primary me-2"></i>
+                <span th:text="${titulo}">Nueva Estadística</span>
+            </h2>
+        </div>
+
+        <!-- Formulario -->
+        <div class="form-container">
+            <form th:action="${accion}" method="post" th:object="${estadistica}">
+                
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-circle-info me-2"></i>
+                        Información Básica
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Materia</label>
+                            <input type="number" class="form-control" th:field="*{idMateriaFk}" 
+                                   placeholder="ID de la materia" required min="1">
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Sección</label>
+                            <input type="number" class="form-control" th:field="*{idSeccionFk}" 
+                                   placeholder="ID de la sección" required min="1">
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Docente</label>
+                            <input type="number" class="form-control" th:field="*{idDocenteFk}" 
+                                   placeholder="ID del docente" required min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calificaciones -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-chart-line me-2"></i>
+                        Calificaciones
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Promedio</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" th:field="*{promedio}" 
+                                       placeholder="0.00" required min="0" max="100" step="0.01">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-calculator"></i>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Nota Máxima</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" th:field="*{notaMaxima}" 
+                                       placeholder="0.00" required min="0" max="100" step="0.01">
+                                <span class="input-group-text text-success">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Nota Mínima</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" th:field="*{notaMinima}" 
+                                       placeholder="0.00" required min="0" max="100" step="0.01">
+                                <span class="input-group-text text-danger">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estudiantes -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-users me-2"></i>
+                        Estudiantes
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Total de Estudiantes</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-users"></i>
+                                </span>
+                                <input type="number" class="form-control" th:field="*{totalEstudiantes}" 
+                                       placeholder="0" required min="0" id="totalEstudiantes">
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Aprobados</label>
+                            <div class="input-group">
+                                <span class="input-group-text text-success">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                </span>
+                                <input type="number" class="form-control" th:field="*{aprobados}" 
+                                       placeholder="0" required min="0" id="aprobados">
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 col-md-4">
+                            <label class="form-label required">Reprobados</label>
+                            <div class="input-group">
+                                <span class="input-group-text text-danger">
+                                    <i class="fa-solid fa-times-circle"></i>
+                                </span>
+                                <input type="number" class="form-control" th:field="*{reprobados}" 
+                                       placeholder="0" required min="0" id="reprobados">
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label required">Porcentaje de Aprobación</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" th:field="*{porcentajeAprobacion}" 
+                                       placeholder="0.00" required min="0" max="100" step="0.01" id="porcentajeAprobacion">
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-percentage"></i>
+                                </span>
+                                <button type="button" class="btn btn-outline-secondary" id="calcularPorcentaje">
+                                    <i class="fa-solid fa-calculator me-2"></i>Calcular
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                El porcentaje se puede calcular automáticamente basándose en aprobados/total
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-toggle-on me-2"></i>
+                        Estado
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label required">Estado</label>
+                            <select class="form-select" th:field="*{idEstadoFk}" required>
+                                <option value="">Seleccione un estado</option>
+                                <option value="1">Activo</option>
+                                <option value="2">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fa-solid fa-save me-2"></i>Guardar
+                    </button>
+                    <a th:href="@{/estadisticas/}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fa-solid fa-times me-2"></i>Cancelar
+                    </a>
+                </div>
+                
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/js/estadisticas-form.js}"></script>
+</body>
+</html>
