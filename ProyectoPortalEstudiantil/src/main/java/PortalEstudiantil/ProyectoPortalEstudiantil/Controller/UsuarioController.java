@@ -1,77 +1,206 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TipoUsuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.TipoUsuarioRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.EstudianteService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/usuarios")
 public class UsuarioController {
 
+    private static final Long TIPO_ESTUDIANTE = 3L;
+    private static final Long TIPO_ENCARGADO = 4L;
+
     @Autowired
     private UsuarioService usuarioService;
 
-    @GetMapping("/")
-    public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioService.obtenerTodosUsuarios();
+    @Autowired
+    private EstudianteService estudianteService;
+
+    @Autowired
+    private TipoUsuarioRepository tipoUsuarioRepository;
+
+    private Long obtenerTipoId(String nombreTipo) {
+        return tipoUsuarioRepository.findByNombreIgnoreCase(nombreTipo)
+                .map(TipoUsuario::getIdTipoUsuario)
+                .orElse(null);
+    }
+
+    // ==================== LISTADO ====================
+    @GetMapping({"", "/"})
+    public String listarUsuarios(
+            @RequestParam(value = "busqueda", required = false) String busqueda,
+            @RequestParam(value = "tipoUsuario", required = false) String tipoUsuario,
+            @RequestParam(value = "estado", required = false) Long estado,
+            Model model) {
+
+        List<Usuario> usuarios;
+        Long idTipoUsuario = null;
+
+        if (tipoUsuario != null && !tipoUsuario.trim().isEmpty()) {
+            idTipoUsuario = obtenerTipoId(tipoUsuario);
+        }
+
+        if (idTipoUsuario != null && estado != null) {
+            usuarios = usuarioService.buscarPorTipoUsuario(idTipoUsuario).stream()
+                    .filter(u -> u.getIdEstadoFk() != null && u.getIdEstadoFk().equals(estado))
+                    .collect(Collectors.toList());
+        } else if (idTipoUsuario != null) {
+            usuarios = usuarioService.buscarPorTipoUsuario(idTipoUsuario);
+        } else if (estado != null) {
+            usuarios = usuarioService.buscarPorEstado(estado);
+        } else {
+            usuarios = usuarioService.obtenerTodosUsuarios();
+        }
+
+        if (busqueda != null && !busqueda.trim().isEmpty()) {
+            String b = busqueda.trim().toLowerCase();
+            usuarios = usuarios.stream()
+                    .filter(u -> {
+                        String nombreCompleto = (n(u.getNombre()) + " " + n(u.getPrimerApellido()) + " " + n(u.getSegundoApellido()))
+                                .trim().toLowerCase();
+
+                        boolean matchNombre = nombreCompleto.contains(b);
+
+                        boolean matchCorreo = false;
+                        if (u.getCorreos() != null && !u.getCorreos().isEmpty()) {
+                            matchCorreo = u.getCorreos().stream()
+                                    .anyMatch(c -> c.getCorreo() != null && c.getCorreo().toLowerCase().contains(b));
+                        }
+
+                        return matchNombre || matchCorreo;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        List<TipoUsuario> tiposUsuario = tipoUsuarioRepository.findAll();
+
         model.addAttribute("usuarios", usuarios);
+        model.addAttribute("total", usuarios.size());
         model.addAttribute("totalUsuarios", usuarioService.contarTotalUsuarios());
-        model.addAttribute("pageTitle", "Gestión de Usuarios"); // IMPORTANTE
+        model.addAttribute("busqueda", busqueda);
+        model.addAttribute("tipoUsuario", tipoUsuario);
+        model.addAttribute("tiposUsuario", tiposUsuario);
+        model.addAttribute("estado", estado);
+
         return "usuarios/listado";
     }
 
+    // ==================== FORMULARIOS ====================
     @GetMapping("/nuevo")
     public String mostrarFormularioNuevo(Model model) {
         model.addAttribute("usuario", new Usuario());
+        model.addAttribute("tiposUsuario", tipoUsuarioRepository.findAll());
         model.addAttribute("titulo", "Nuevo Usuario");
         model.addAttribute("accion", "/usuarios/guardar");
-        model.addAttribute("pageTitle", "Nuevo Usuario");
+        model.addAttribute("telefonoNumero", "");
+        model.addAttribute("correoLogin", "");
+        model.addAttribute("esEstudiante", false);
+        model.addAttribute("encargadosVista", List.of());
         return "usuarios/formulario";
     }
 
     @GetMapping("/editar/{id}")
-    public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
+    public String mostrarFormularioEditar(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             Usuario usuario = usuarioService.obtenerUsuario(id);
+
             model.addAttribute("usuario", usuario);
+            model.addAttribute("tiposUsuario", tipoUsuarioRepository.findAll());
+
+            model.addAttribute("telefonoNumero",
+                    usuarioService.obtenerTelefono(id) != null
+                    ? usuarioService.obtenerTelefono(id).getNumero()
+                    : "");
+
+            model.addAttribute("correoLogin",
+                    usuarioService.obtenerCorreoLogin(id) != null
+                    ? usuarioService.obtenerCorreoLogin(id).getCorreo()
+                    : "");
+
             model.addAttribute("titulo", "Editar Usuario");
             model.addAttribute("accion", "/usuarios/actualizar/" + id);
+
+            boolean esEstudiante = usuario.getIdTipoUsuarioFk() != null
+                    && usuario.getIdTipoUsuarioFk().equals(TIPO_ESTUDIANTE);
+
+            model.addAttribute("esEstudiante", esEstudiante);
+            model.addAttribute("encargadosVista",
+                    esEstudiante ? estudianteService.listarEncargadosVista(id) : List.of());
+
             return "usuarios/formulario";
         } catch (Exception e) {
-            return "redirect:/usuarios/?error=Usuario no encontrado";
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario no encontrado");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+            return "redirect:/usuarios";
         }
     }
 
+    // ==================== VER DETALLE ====================
     @GetMapping("/ver/{id}")
-    public String verUsuario(@PathVariable Long id, Model model) {
+    public String verUsuario(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
         try {
             Usuario usuario = usuarioService.obtenerUsuario(id);
+
+            boolean esEstudiante = usuario.getIdTipoUsuarioFk() != null
+                    && usuario.getIdTipoUsuarioFk().equals(TIPO_ESTUDIANTE);
+
+            boolean esEncargado = usuario.getIdTipoUsuarioFk() != null
+                    && usuario.getIdTipoUsuarioFk().equals(TIPO_ENCARGADO);
+
             model.addAttribute("usuario", usuario);
+            model.addAttribute("telefono", usuarioService.obtenerTelefono(id));
+            model.addAttribute("correo", usuarioService.obtenerCorreoLogin(id));
+            model.addAttribute("esEstudiante", esEstudiante);
+            model.addAttribute("esEncargado", esEncargado);
+
+            if (esEstudiante) {
+                model.addAttribute("encargadosVista", estudianteService.listarEncargadosVista(id));
+            } else {
+                model.addAttribute("encargadosVista", List.of());
+            }
+
+            if (esEncargado) {
+                model.addAttribute("estudiantesVista", estudianteService.listarEstudiantesVistaPorEncargado(id));
+            } else {
+                model.addAttribute("estudiantesVista", List.of());
+            }
+
             return "usuarios/detalle";
         } catch (Exception e) {
-            return "redirect:/usuarios/?error=Usuario no encontrado";
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario no encontrado");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+            return "redirect:/usuarios";
         }
     }
 
+    // ==================== GUARDAR / ACTUALIZAR ====================
     @PostMapping("/guardar")
     public String guardarUsuario(
             @ModelAttribute Usuario usuario,
+            @RequestParam(value = "telefonoNumero", required = false) String telefonoNumero,
+            @RequestParam(value = "correoLogin", required = false) String correoLogin,
             RedirectAttributes redirectAttributes) {
 
         try {
             Long idNuevo = usuarioService.crearUsuario(usuario);
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Usuario creado exitosamente con ID: " + idNuevo);
+            usuarioService.actualizarContacto(idNuevo, telefonoNumero, correoLogin);
+
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario creado exitosamente");
             redirectAttributes.addFlashAttribute("tipoMensaje", "success");
-            return "redirect:/usuarios/";
+            return "redirect:/usuarios";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Error al crear usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "Error al crear usuario: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
             return "redirect:/usuarios/nuevo";
         }
@@ -81,108 +210,143 @@ public class UsuarioController {
     public String actualizarUsuario(
             @PathVariable Long id,
             @ModelAttribute Usuario usuario,
+            @RequestParam(value = "telefonoNumero", required = false) String telefonoNumero,
+            @RequestParam(value = "correoLogin", required = false) String correoLogin,
             RedirectAttributes redirectAttributes) {
 
         try {
             usuario.setIdUsuario(id);
             usuarioService.actualizarUsuario(usuario);
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Usuario actualizado exitosamente");
+            usuarioService.actualizarContacto(id, telefonoNumero, correoLogin);
+
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario actualizado exitosamente");
             redirectAttributes.addFlashAttribute("tipoMensaje", "success");
-            return "redirect:/usuarios/";
+            return "redirect:/usuarios/ver/" + id;
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Error al actualizar usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "Error al actualizar usuario: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
             return "redirect:/usuarios/editar/" + id;
         }
     }
 
-    @PostMapping("/cambiar-estado/{id}")
-    public String cambiarEstadoUsuario(
+    // ==================== ENCARGADOS ====================
+    @GetMapping("/{id}/encargados/nuevo")
+    public String nuevoEncargadoForm(
             @PathVariable Long id,
-            @RequestParam Long idEstado,
+            @RequestParam(value = "correo", required = false) String correo,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        Usuario usuario = usuarioService.obtenerUsuario(id);
+
+        boolean esEstudiante = usuario.getIdTipoUsuarioFk() != null
+                && usuario.getIdTipoUsuarioFk().equals(TIPO_ESTUDIANTE);
+
+        if (!esEstudiante) {
+            redirectAttributes.addFlashAttribute("mensaje", "Solo los usuarios tipo Estudiante pueden vincular encargados");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+            return "redirect:/usuarios/editar/" + id;
+        }
+
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("correo", correo);
+        model.addAttribute("encargados",
+                (correo != null && !correo.isBlank())
+                ? estudianteService.buscarEncargadosPorCorreo(correo)
+                : estudianteService.listarEncargados());
+        model.addAttribute("accion", "/usuarios/" + id + "/encargados/nuevo");
+
+        return "usuarios/nuevo-encargado";
+    }
+
+    @PostMapping("/{id}/encargados/nuevo")
+    public String vincularEncargado(
+            @PathVariable Long id,
+            @RequestParam Long idEncargado,
+            @RequestParam String parentesco,
             RedirectAttributes redirectAttributes) {
 
         try {
-            usuarioService.cambiarEstadoUsuario(id, idEstado);
-            String estado = idEstado == 1L ? "activado" : "desactivado";
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Usuario " + estado + " exitosamente");
-            redirectAttributes.addFlashAttribute("tipoMensaje", "info");
-            return "redirect:/usuarios/";
+            Usuario usuario = usuarioService.obtenerUsuario(id);
+            boolean esEstudiante = usuario.getIdTipoUsuarioFk() != null
+                    && usuario.getIdTipoUsuarioFk().equals(TIPO_ESTUDIANTE);
+
+            if (!esEstudiante) {
+                redirectAttributes.addFlashAttribute("mensaje", "Solo los usuarios tipo Estudiante pueden vincular encargados");
+                redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+                return "redirect:/usuarios/editar/" + id;
+            }
+
+            estudianteService.vincularEncargado(id, idEncargado, parentesco);
+            redirectAttributes.addFlashAttribute("mensaje", "Encargado vinculado exitosamente");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Error al cambiar estado: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
-            return "redirect:/usuarios/";
         }
+
+        return "redirect:/usuarios/editar/" + id;
     }
 
+    @PostMapping("/encargados/desactivar/{idRelacion}")
+    public String desactivarEncargado(
+            @PathVariable Long idRelacion,
+            @RequestParam Long idUsuario,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            estudianteService.desactivarRelacionEncargado(idRelacion);
+            redirectAttributes.addFlashAttribute("mensaje", "Encargado desvinculado");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje", "Error: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+        }
+
+        return "redirect:/usuarios/editar/" + idUsuario;
+    }
+
+    // ==================== ACTIVAR / DESACTIVAR / ELIMINAR ====================
     @PostMapping("/activar/{id}")
     public String activarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return cambiarEstadoUsuario(id, 1L, redirectAttributes);
+        try {
+            usuarioService.activarUsuario(id);
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario activado exitosamente");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje", "Error al activar: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+        }
+        return "redirect:/usuarios/ver/" + id;
     }
 
     @PostMapping("/desactivar/{id}")
     public String desactivarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        return cambiarEstadoUsuario(id, 2L, redirectAttributes);
+        try {
+            usuarioService.desactivarUsuario(id);
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario desactivado exitosamente");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje", "Error al desactivar: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+        }
+        return "redirect:/usuarios/ver/" + id;
     }
 
     @PostMapping("/eliminar/{id}")
     public String eliminarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
             usuarioService.eliminarUsuario(id);
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Usuario eliminado exitosamente");
-            redirectAttributes.addFlashAttribute("tipoMensaje", "warning");
-            return "redirect:/usuarios/";
+            redirectAttributes.addFlashAttribute("mensaje", "Usuario eliminado exitosamente");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje",
-                    "Error al eliminar usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", "Error al eliminar: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
-            return "redirect:/usuarios/";
         }
+        return "redirect:/usuarios";
     }
 
-    @GetMapping("/buscar")
-    public String buscarUsuarios(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Long tipoUsuario,
-            Model model) {
-
-        List<Usuario> usuarios;
-
-        if (nombre != null && !nombre.trim().isEmpty()) {
-            usuarios = usuarioService.buscarPorNombre(nombre);
-            model.addAttribute("criterioBusqueda", "Nombre: " + nombre);
-        } else if (tipoUsuario != null) {
-            usuarios = usuarioService.buscarPorTipoUsuario(tipoUsuario);
-            model.addAttribute("criterioBusqueda", "Tipo de usuario: " + tipoUsuario);
-        } else {
-            usuarios = usuarioService.obtenerTodosUsuarios();
-        }
-
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("totalResultados", usuarios.size());
-        return "usuarios/listado";
-    }
-
-    @GetMapping("/activos")
-    public String listarActivos(Model model) {
-        List<Usuario> usuarios = usuarioService.obtenerUsuariosActivos();
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("criterioBusqueda", "Usuarios Activos");
-        model.addAttribute("totalResultados", usuarios.size());
-        return "usuarios/listado";
-    }
-
-    @GetMapping("/inactivos")
-    public String listarInactivos(Model model) {
-        List<Usuario> usuarios = usuarioService.obtenerUsuariosInactivos();
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("criterioBusqueda", "Usuarios Inactivos");
-        model.addAttribute("totalResultados", usuarios.size());
-        return "usuarios/listado";
+    private String n(String s) {
+        return s == null ? "" : s;
     }
 }
