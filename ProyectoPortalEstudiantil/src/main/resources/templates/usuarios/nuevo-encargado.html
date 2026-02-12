@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="fw-bold mb-0">Vincular Encargado</h2>
+                        <p class="text-muted mb-0">
+                            Estudiante:
+                            <span th:text="${usuario.nombre + ' ' + usuario.primerApellido}"></span>
+                            (ID: <span th:text="${usuario.idUsuario}"></span>)
+                        </p>
+                    </div>
+
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{'/usuarios/editar/' + ${usuario.idUsuario}}">
+                        Volver
+                    </a>
+                </div>
+
+                <div th:if="${mensaje}" class="alert"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}">
+                    [[${mensaje}]]
+                </div>
+
+                <form class="row g-2 mb-3"
+                      th:action="@{'/usuarios/' + ${usuario.idUsuario} + '/encargados/nuevo'}"
+                      method="get">
+
+                    <div class="col-md-6">
+                        <input class="form-control"
+                               name="correo"
+                               placeholder="Buscar encargado por correo"
+                               th:value="${correo}">
+                    </div>
+
+                    <div class="col-md-3">
+                        <button class="btn btn-outline-primary w-100" type="submit">
+                            Buscar
+                        </button>
+                    </div>
+
+                    <div class="col-md-3">
+                        <a class="btn btn-outline-secondary w-100"
+                           th:href="@{'/usuarios/' + ${usuario.idUsuario} + '/encargados/nuevo'}">
+                            Ver todos
+                        </a>
+                    </div>
+
+                </form>
+
+                <form class="row g-3" th:action="@{${accion}}" method="post">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Encargado</label>
+                        <select class="form-select" name="idEncargado" required>
+                            <option value="" disabled selected>Seleccione encargado</option>
+
+                            <option th:each="e : ${encargados}"
+                                    th:value="${e.idUsuario}"
+                                    th:text="${e.nombre + ' ' + e.primerApellido}">
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Parentesco</label>
+                        <input class="form-control"
+                               name="parentesco"
+                               placeholder="Padre, Madre, Tutor"
+                               required>
+                    </div>
+
+                    <div class="col-12 d-flex gap-2 mt-3">
+
+                        <button class="btn btn-primary" type="submit">
+                            Vincular
+                        </button>
+
+                        <a class="btn btn-secondary"
+                           th:href="@{'/usuarios/editar/' + ${usuario.idUsuario}}">
+                            Cancelar
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>
