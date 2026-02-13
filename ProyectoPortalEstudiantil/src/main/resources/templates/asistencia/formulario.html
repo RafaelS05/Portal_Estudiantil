@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="fw-bold mb-0">Asistencia Estudiantil</h2>
+                        <p class="text-muted mb-0">Total: <span th:text="${totalRegistros}">0</span> registros</p>
+                    </div>
+
+                    <a class="btn btn-primary" th:href="@{/asistencia/nuevo}">
+                        <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
+                    </a>
+                </div>
+
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}"
+                     role="alert">
+                    [[${mensaje}]]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body py-3">
+                        <form th:action="@{/asistencia}" method="get" class="row g-2 align-items-end">
+                            
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted mb-1">Buscar estudiante</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" name="busqueda"
+                                           placeholder="Nombre, apellido..." th:value="${busqueda}" autocomplete="off">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted mb-1">Filtrar por grupo</label>
+                                <select class="form-select" name="grupo">
+                                    <option value="">Todos los grupos</option>
+                                    <option value="1-1" th:selected="${grupo == '1-1'}">1-1</option>
+                                    <option value="2-1" th:selected="${grupo == '2-1'}">2-1</option>
+                                    <option value="3-1" th:selected="${grupo == '3-1'}">3-1</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted mb-1">Estado</label>
+                                <select class="form-select" name="estado">
+                                    <option value="">Todos</option>
+                                    <option value="Presente" th:selected="${estado == 'Presente'}">Presentes</option>
+                                    <option value="Tarde" th:selected="${estado == 'Tarde'}">Tardías</option>
+                                    <option value="Ausente" th:selected="${estado == 'Ausente'}">Ausentes</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary flex-fill" type="submit">Buscar</button>
+                                    <a class="btn btn-outline-secondary" th:href="@{/asistencia}"
+                                       th:if="${busqueda != null || grupo != null || estado != null}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 25%;">Estudiante</th>
+                                        <th style="width: 20%;">Correo</th>
+                                        <th style="width: 10%;">Grupo</th>
+                                        <th style="width: 15%;">Fecha</th>
+                                        <th style="width: 15%;">Estado</th>
+                                        <th style="width: 15%;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="a, stat : ${asistencias}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                     th:with="colorIndex=${stat.index % 6}"
+                                                     th:style="${colorIndex == 0 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e3f2fd; color: #1976d2' : 
+                                                                colorIndex == 1 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #f3e5f5; color: #7b1fa2' : 
+                                                                colorIndex == 2 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e8f5e9; color: #388e3c' : 
+                                                                colorIndex == 3 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #fff3e0; color: #f57c00' : 
+                                                                colorIndex == 4 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #fce4ec; color: #c2185b' : 
+                                                                'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e0f2f1; color: #00796b'}">
+                                                    <span th:text="${#strings.toUpperCase(#strings.substring(a.nombreCompleto,0,2))}">AB</span>
+                                                </div>
+                                                <div class="fw-semibold" th:text="${a.nombreCompleto}">Nombre</div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span th:if="${a.correo != null}"><small th:text="${a.correo}">correo@example.com</small></span>
+                                            <span th:unless="${a.correo != null}" class="text-muted"><small>Sin correo</small></span>
+                                        </td>
+                                        <td><span class="fw-medium text-muted" th:text="${a.grupo}">1-1</span></td>
+                                        <td><span th:text="${a.fecha}">02/03/2026</span></td>
+                                        <td>
+                                            <span th:if="${a.estado == 'Presente'}" class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-check me-1"></i>Presente
+                                            </span>
+                                            <span th:if="${a.estado == 'Tarde'}" class="badge bg-warning-subtle text-warning">
+                                                <i class="fa-solid fa-clock me-1"></i>Tarde
+                                            </span>
+                                            <span th:if="${a.estado == 'Ausente'}" class="badge bg-danger-subtle text-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Ausente
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a th:href="@{/asistencia/ver/{id}(id=${a.idAsistencia})}" class="btn btn-sm btn-outline-secondary" title="Ver detalles">
+                                                    <i class="fa-regular fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/asistencia/editar/{id}(id=${a.idAsistencia})}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                </a>
+                                                <form th:action="@{/asistencia/eliminar/{id}(id=${a.idAsistencia})}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                                            onclick="return confirm('¿Seguro que deseas eliminar este registro?')">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${asistencias == null || asistencias.isEmpty()}">
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-clipboard-list fa-3x mb-3 d-block"></i>
+                                            <h5>No hay registros de asistencia</h5>
+                                            <p class="mb-0">Crea el primer registro haciendo clic en "Nuevo Registro"</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>
