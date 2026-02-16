@@ -1,5 +1,6 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.*;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.*;
 import org.springframework.stereotype.Service;
