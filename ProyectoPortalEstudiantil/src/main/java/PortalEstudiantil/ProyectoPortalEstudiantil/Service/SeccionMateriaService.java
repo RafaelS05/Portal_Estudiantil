@@ -26,9 +26,9 @@ public class SeccionMateriaService {
     private final UsuarioRepository usuarioRepository;
 
     public SeccionMateriaService(SeccionMateriaRepository seccionMateriaRepository,
-                                 SeccionRepository seccionRepository,
-                                 MateriaRepository materiaRepository,
-                                 UsuarioRepository usuarioRepository) {
+            SeccionRepository seccionRepository,
+            MateriaRepository materiaRepository,
+            UsuarioRepository usuarioRepository) {
         this.seccionMateriaRepository = seccionMateriaRepository;
         this.seccionRepository = seccionRepository;
         this.materiaRepository = materiaRepository;
@@ -36,10 +36,13 @@ public class SeccionMateriaService {
     }
 
     // Validaciones
-
     private void validarFk(Long id, String nombreCampo) {
-        if (id == null) throw new IllegalArgumentException("El " + nombreCampo + " es obligatorio.");
-        if (id <= 0) throw new IllegalArgumentException("El " + nombreCampo + " debe ser válido.");
+        if (id == null) {
+            throw new IllegalArgumentException("El " + nombreCampo + " es obligatorio.");
+        }
+        if (id <= 0) {
+            throw new IllegalArgumentException("El " + nombreCampo + " debe ser válido.");
+        }
     }
 
     private void validarExisteSeccion(Long idSeccion) {
@@ -67,17 +70,18 @@ public class SeccionMateriaService {
         long dup = seccionMateriaRepository.contarDuplicado(idSeccion, idMateria, idDocente, idSeccionMateria);
         if (dup > 0) {
             throw new IllegalArgumentException(
-                "Ya existe la asignación Sección/Materia/Docente para esos valores."
+                    "Ya existe la asignación Sección/Materia/Docente para esos valores."
             );
         }
     }
 
     // CRUD
-
     @Transactional
     public Long crearSeccionMateria(Long idSeccionFk, Long idMateriaFk, Long idUsuarioDocenteFk, Long idEstadoFk) {
 
-        if (idEstadoFk == null) throw new IllegalArgumentException("El estado es obligatorio.");
+        if (idEstadoFk == null) {
+            throw new IllegalArgumentException("El estado es obligatorio.");
+        }
 
         validarExisteSeccion(idSeccionFk);
         validarExisteMateria(idMateriaFk);
@@ -99,17 +103,21 @@ public class SeccionMateriaService {
 
     @Transactional
     public Long crearSeccionMateria(SeccionMateria sm) {
-        if (sm == null) throw new IllegalArgumentException("La asignación sección-materia es obligatoria.");
+        if (sm == null) {
+            throw new IllegalArgumentException("La asignación sección-materia es obligatoria.");
+        }
         return crearSeccionMateria(sm.getIdSeccionFk(), sm.getIdMateriaFk(), sm.getIdUsuarioDocenteFk(), sm.getIdEstadoFk());
     }
 
     @Transactional
     public void actualizarSeccionMateria(Long idSeccionMateria,
-                                         Long idSeccionFk,
-                                         Long idMateriaFk,
-                                         Long idUsuarioDocenteFk) {
+            Long idSeccionFk,
+            Long idMateriaFk,
+            Long idUsuarioDocenteFk) {
 
-        if (idSeccionMateria == null) throw new IllegalArgumentException("El ID de sección-materia es obligatorio.");
+        if (idSeccionMateria == null) {
+            throw new IllegalArgumentException("El ID de sección-materia es obligatorio.");
+        }
         obtenerSeccionMateria(idSeccionMateria);
 
         validarExisteSeccion(idSeccionFk);
@@ -125,7 +133,9 @@ public class SeccionMateriaService {
 
     @Transactional
     public void actualizarSeccionMateria(SeccionMateria sm) {
-        if (sm == null) throw new IllegalArgumentException("La asignación sección-materia es obligatoria.");
+        if (sm == null) {
+            throw new IllegalArgumentException("La asignación sección-materia es obligatoria.");
+        }
         if (sm.getIdSeccionMateria() == null) {
             throw new IllegalArgumentException("El ID de sección-materia es obligatorio para actualizar.");
         }
@@ -133,11 +143,14 @@ public class SeccionMateriaService {
     }
 
     // Estado
-
     @Transactional
     public void cambiarEstadoSeccionMateria(Long idSeccionMateria, Long idEstado) {
-        if (idSeccionMateria == null) throw new IllegalArgumentException("El ID de sección-materia es obligatorio.");
-        if (idEstado == null) throw new IllegalArgumentException("El estado es obligatorio.");
+        if (idSeccionMateria == null) {
+            throw new IllegalArgumentException("El ID de sección-materia es obligatorio.");
+        }
+        if (idEstado == null) {
+            throw new IllegalArgumentException("El estado es obligatorio.");
+        }
 
         obtenerSeccionMateria(idSeccionMateria);
 
@@ -158,7 +171,6 @@ public class SeccionMateriaService {
     }
 
     // Consultas
-
     public SeccionMateria obtenerSeccionMateria(Long idSeccionMateria) {
         return seccionMateriaRepository.findById(idSeccionMateria)
                 .orElseThrow(() -> new RuntimeException("SeccionMateria no encontrada con ID: " + idSeccionMateria));
@@ -183,7 +195,9 @@ public class SeccionMateriaService {
     }
 
     public long contarPorEstado(Long idEstadoFk) {
-        if (idEstadoFk == null) throw new IllegalArgumentException("El estado es obligatorio.");
+        if (idEstadoFk == null) {
+            throw new IllegalArgumentException("El estado es obligatorio.");
+        }
         return seccionMateriaRepository.countByIdEstadoFk(idEstadoFk);
     }
 }
