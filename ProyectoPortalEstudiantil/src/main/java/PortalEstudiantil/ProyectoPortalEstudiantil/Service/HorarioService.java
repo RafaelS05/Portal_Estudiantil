@@ -1,73 +1,96 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Horario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Materia;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.HorarioRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MateriaRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-public class HorarioService {
+    @Service
+    public class HorarioService {
 
-    @Autowired
-    private MateriaRepository materiaRepository;
+        @Autowired
+        private HorarioRepository horarioRepository;
 
-    public List<Materia> listarTodas() {
-        return materiaRepository.findAll();
-    }
+        @Autowired
+        private SeccionMateriaRepository seccionMateriaRepository;
 
-    public List<Materia> listarActivas() {
-        return materiaRepository.listarActivas();
-    }
-
-    public Materia buscarPorId(Long id) {
-        return materiaRepository.findByIdMateria(id);
-    }
-
-    public List<Materia> buscar(String texto) {
-        if (texto == null || texto.isBlank()) {
-            return listarTodas();
+        public List<Horario> listarActivos() {
+            return horarioRepository.listarActivos();
         }
-        return materiaRepository.buscarPorNombreOCodigo(texto.trim());
-    }
 
-    @Transactional
-    public Long insertar(String nombre, String codigo) {
-        if (materiaRepository.contarNombreDuplicado(nombre, null) > 0) {
-            throw new IllegalArgumentException("Ya existe una materia con el nombre: " + nombre);
+        public List<Horario> listarPorSeccionMateria(Long idSeccionMateria) {
+            return horarioRepository.listarPorSeccionMateria(idSeccionMateria);
         }
-        if (codigo != null && !codigo.isBlank()
-                && materiaRepository.contarCodigoDuplicado(codigo, null) > 0) {
-            throw new IllegalArgumentException("Ya existe una materia con el código: " + codigo);
-        }
-        String codigoFinal = (codigo != null && !codigo.isBlank()) ? codigo.trim() : null;
-        return materiaRepository.insertarMateriaRetornaId(nombre.trim(), codigoFinal, 1L);
-    }
 
-    @Transactional
-    public void modificar(Long idMateria, String nombre, String codigo) {
-        Materia existente = materiaRepository.findByIdMateria(idMateria);
-        if (existente == null) {
-            throw new IllegalArgumentException("Materia no encontrada: " + idMateria);
+        public List<Horario> listarPorAula(Long idAula) {
+            return horarioRepository.listarPorAula(idAula);
         }
-        if (materiaRepository.contarNombreDuplicado(nombre, idMateria) > 0) {
-            throw new IllegalArgumentException("Ya existe una materia con el nombre: " + nombre);
-        }
-        if (codigo != null && !codigo.isBlank()
-                && materiaRepository.contarCodigoDuplicado(codigo, idMateria) > 0) {
-            throw new IllegalArgumentException("Ya existe una materia con el código: " + codigo);
-        }
-        String codigoFinal = (codigo != null && !codigo.isBlank()) ? codigo.trim() : null;
-        materiaRepository.modificarMateria(idMateria, nombre.trim(), codigoFinal);
-    }
 
-    @Transactional
-    public void cambiarEstado(Long idMateria, Long idEstado) {
-        materiaRepository.cambiarEstadoMateria(idMateria, idEstado);
-    }
+        public Horario buscarPorId(Long id) {
+            return horarioRepository.findByIdHorario(id);
+        }
 
-    public long contarActivas() {
-        return materiaRepository.countByIdEstadoFk(1L);
+        @Transactional
+        public Long insertar(Integer diaSemana, String horaInicio, String horaFin,
+                Long idAulaFk, Long idSeccionMateriaFk) {
+            // Validar duplicado de bloque
+            if (horarioRepository.contarDuplicadoBloque(diaSemana, horaInicio, horaFin,
+                    idSeccionMateriaFk, null) > 0) {
+                throw new IllegalArgumentException(
+                        "Ya existe un horario para ese bloque en esta sección-materia.");
+            }
+            return horarioRepository.insertarHorarioRetornaId(
+                    diaSemana, horaInicio, horaFin, idAulaFk, idSeccionMateriaFk, 1L);
+        }
+
+        @Transactional
+        public void modificar(Long idHorario, Integer diaSemana, String horaInicio, String horaFin,
+                Long idAulaFk, Long idSeccionMateriaFk) {
+            Horario existente = horarioRepository.findByIdHorario(idHorario);
+            if (existente == null) {
+                throw new IllegalArgumentException("Horario no encontrado: " + idHorario);
+            }
+            if (horarioRepository.contarDuplicadoBloque(diaSemana, horaInicio, horaFin,
+                    idSeccionMateriaFk, idHorario) > 0) {
+                throw new IllegalArgumentException(
+                        "Ya existe un horario para ese bloque en esta sección-materia.");
+            }
+            horarioRepository.modificarHorario(idHorario, diaSemana, horaInicio, horaFin,
+                    idAulaFk, idSeccionMateriaFk);
+        }
+
+        @Transactional
+        public void cambiarEstado(Long idHorario, Long idEstado) {
+            horarioRepository.cambiarEstadoHorario(idHorario, idEstado);
+        }
+
+        public long contarActivos() {
+            return horarioRepository.countByIdEstadoFk(1L);
+        }
+
+        public static String nombreDia(int dia) {
+            return switch (dia) {
+                case 1 ->
+                    "Lunes";
+                case 2 ->
+                    "Martes";
+                case 3 ->
+                    "Miércoles";
+                case 4 ->
+                    "Jueves";
+                case 5 ->
+                    "Viernes";
+                case 6 ->
+                    "Sábado";
+                case 7 ->
+                    "Domingo";
+                default ->
+                    "Día " + dia;
+            };
+        }
     }
-}

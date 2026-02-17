@@ -1,7 +1,10 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Seccion;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.SeccionMateria;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.PeriodoRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,59 +15,73 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeccionMateriaService {
 
     @Autowired
+    private SeccionMateriaRepository seccionMateriaRepository;
+
+    @Autowired
     private SeccionRepository seccionRepository;
 
     @Autowired
-    private PeriodoRepository periodoRepository;
+    private MateriaRepository materiaRepository;
 
-    public List<SeccionRepository.SeccionRow> listarResumen() {
-        return seccionRepository.listarResumen();
+    public List<SeccionMateria> listarTodas() {
+        return seccionMateriaRepository.findAll();
     }
 
-    public List<SeccionRepository.SeccionRow> listarPorPeriodo(Long idPeriodo) {
-        return seccionRepository.listarPorPeriodo(idPeriodo);
+    public List<SeccionMateria> listarActivas() {
+        return seccionMateriaRepository.listarActivas();
     }
 
-    public List<Seccion> listarActivas() {
-        return seccionRepository.listarActivas();
+    public List<SeccionMateria> listarPorSeccion(Long idSeccion) {
+        return seccionMateriaRepository.listarPorSeccion(idSeccion);
     }
 
-    public List<Seccion> listarActivasPorPeriodo(Long idPeriodo) {
-        return seccionRepository.listarActivasPorPeriodo(idPeriodo);
+    public List<SeccionMateria> listarPorDocente(Long idDocente) {
+        return seccionMateriaRepository.listarPorDocente(idDocente);
     }
 
-    public Seccion buscarPorId(Long id) {
-        return seccionRepository.findByIdSeccion(id);
+    public SeccionMateria buscarPorId(Long id) {
+        return seccionMateriaRepository.findByIdSeccionMateria(id);
     }
 
     @Transactional
-    public Long insertar(String numero, Long idPeriodoFk) {
-        if (seccionRepository.contarDuplicadoNumeroEnPeriodo(idPeriodoFk, numero, null) > 0) {
-            throw new IllegalArgumentException(
-                    "Ya existe la sección '" + numero + "' en ese período.");
+    public Long insertar(Long idSeccionFk, Long idMateriaFk, Long idUsuarioDocenteFk) {
+        if (seccionRepository.findByIdSeccion(idSeccionFk) == null) {
+            throw new IllegalArgumentException("La sección seleccionada no existe.");
         }
-        return seccionRepository.insertarSeccionRetornaId(numero.trim().toUpperCase(), idPeriodoFk, 1L);
+        if (materiaRepository.findByIdMateria(idMateriaFk) == null) {
+            throw new IllegalArgumentException("La materia seleccionada no existe.");
+        }
+        if (seccionMateriaRepository.contarDuplicado(
+                idSeccionFk, idMateriaFk, idUsuarioDocenteFk, null) > 0) {
+            throw new IllegalArgumentException(
+                    "Esa combinación de sección, materia y docente ya existe.");
+        }
+        return seccionMateriaRepository.insertarSeccionMateriaRetornaId(
+                idSeccionFk, idMateriaFk, idUsuarioDocenteFk, 1L);
     }
 
     @Transactional
-    public void modificar(Long idSeccion, String numero, Long idPeriodoFk) {
-        Seccion existente = seccionRepository.findByIdSeccion(idSeccion);
+    public void modificar(Long idSeccionMateria, Long idSeccionFk,
+            Long idMateriaFk, Long idUsuarioDocenteFk) {
+        SeccionMateria existente = seccionMateriaRepository.findByIdSeccionMateria(idSeccionMateria);
         if (existente == null) {
-            throw new IllegalArgumentException("Sección no encontrada: " + idSeccion);
+            throw new IllegalArgumentException("Asignación no encontrada: " + idSeccionMateria);
         }
-        if (seccionRepository.contarDuplicadoNumeroEnPeriodo(idPeriodoFk, numero, idSeccion) > 0) {
+        if (seccionMateriaRepository.contarDuplicado(
+                idSeccionFk, idMateriaFk, idUsuarioDocenteFk, idSeccionMateria) > 0) {
             throw new IllegalArgumentException(
-                    "Ya existe la sección '" + numero + "' en ese período.");
+                    "Esa combinación de sección, materia y docente ya existe.");
         }
-        seccionRepository.modificarSeccion(idSeccion, numero.trim().toUpperCase(), idPeriodoFk);
+        seccionMateriaRepository.modificarSeccionMateria(
+                idSeccionMateria, idSeccionFk, idMateriaFk, idUsuarioDocenteFk);
     }
 
     @Transactional
-    public void cambiarEstado(Long idSeccion, Long idEstado) {
-        seccionRepository.cambiarEstadoSeccion(idSeccion, idEstado);
+    public void cambiarEstado(Long idSeccionMateria, Long idEstado) {
+        seccionMateriaRepository.cambiarEstadoSeccionMateria(idSeccionMateria, idEstado);
     }
 
     public long contarActivas() {
-        return seccionRepository.countByIdEstadoFk(1L);
+        return seccionMateriaRepository.countByIdEstadoFk(1L);
     }
 }
