@@ -107,9 +107,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
             @Param("fechaFin") LocalDate fechaFin,
             @Param("idPeriodo") Long idPeriodo);
 
-    // -------------------------
-    // CRUD via PROCEDURES
-    // -------------------------
+    // CRUD
     @Modifying
     @Transactional
     @Query(value = """
@@ -156,5 +154,4 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
             @Param("idPeriodo") Long idPeriodo,
             @Param("idEstado") Long idEstado
     );
-
 }

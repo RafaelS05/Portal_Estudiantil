@@ -138,5 +138,4 @@ public interface HorarioRepository extends JpaRepository<Horario, Long>{
             @Param("idHorario") Long idHorario,
             @Param("idEstado") Long idEstado
     );
-
 }
