@@ -1,9 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
-import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Seccion;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.SeccionMateria;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MateriaRepository;
-import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.PeriodoRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionRepository;
 import java.util.List;

@@ -36,8 +36,6 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
 
         Integer getActivo();
     }
-    
-    
 
     @Query(value = """
         SELECT * FROM PERIODOS_TB
@@ -48,13 +46,14 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
 
     @Query(value = """
         SELECT
-            p.ID_PERIODO AS idPeriodo,
-            p.NOMBRE AS nombre,
-            p.FECHA_INICIO AS fechaInicio,
-            p.FECHA_FIN AS fechaFin,
-            p.ID_ESTADO_FK AS idEstadoFk,
-            CASE WHEN CURDATE() BETWEEN p.FECHA_INICIO AND p.FECHA_FIN THEN 1 ELSE 0 END AS enCurso,
-            CASE WHEN p.ID_ESTADO_FK = 1 THEN 1 ELSE 0 END AS activo
+            p.ID_PERIODO                                          AS idPeriodo,
+            p.NOMBRE                                              AS nombre,
+            p.FECHA_INICIO                                        AS fechaInicio,
+            p.FECHA_FIN                                           AS fechaFin,
+            p.ID_ESTADO_FK                                        AS idEstadoFk,
+            CASE WHEN CURDATE() BETWEEN p.FECHA_INICIO
+                                    AND p.FECHA_FIN THEN 1 ELSE 0 END AS enCurso,
+            CASE WHEN p.ID_ESTADO_FK = 1 THEN 1 ELSE 0 END       AS activo
         FROM PERIODOS_TB p
         ORDER BY p.FECHA_INICIO DESC
     """, nativeQuery = true)
@@ -80,14 +79,14 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
     @Query(value = """
         SELECT * FROM PERIODOS_TB
         WHERE FECHA_INICIO >= :desde
-          AND FECHA_FIN <= :hasta
+          AND FECHA_FIN    <= :hasta
         ORDER BY FECHA_INICIO DESC
     """, nativeQuery = true)
     List<Periodo> buscarPorRango(@Param("desde") LocalDate desde,
             @Param("hasta") LocalDate hasta);
 
     @Query(value = """
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM PERIODOS_TB
         WHERE LOWER(NOMBRE) = LOWER(:nombre)
           AND (:idPeriodo IS NULL OR ID_PERIODO <> :idPeriodo)
@@ -101,57 +100,43 @@ public interface PeriodoRepository extends JpaRepository<Periodo, Long> {
         WHERE (:idPeriodo IS NULL OR p.ID_PERIODO <> :idPeriodo)
           AND p.ID_ESTADO_FK = 1
           AND :fechaInicio <= p.FECHA_FIN
-          AND :fechaFin >= p.FECHA_INICIO
+          AND :fechaFin    >= p.FECHA_INICIO
     """, nativeQuery = true)
     long contarTraslapesActivos(@Param("fechaInicio") LocalDate fechaInicio,
             @Param("fechaFin") LocalDate fechaFin,
             @Param("idPeriodo") Long idPeriodo);
 
-    // CRUD
+    // INSERT
     @Modifying
     @Transactional
     @Query(value = """
-    CALL PERIODOS_INSERTAR(
-        :nombre,
-        :fechaInicio,
-        :fechaFin,
-        :idEstadoFk
-    )
-""", nativeQuery = true)
-    Long insertarPeriodoRetornaId(
-            @Param("nombre") String nombre,
+        CALL PERIODOS_INSERTAR(:nombre, :fechaInicio, :fechaFin, :idEstadoFk)
+    """, nativeQuery = true)
+    void insertarPeriodo(@Param("nombre") String nombre,
             @Param("fechaInicio") LocalDate fechaInicio,
             @Param("fechaFin") LocalDate fechaFin,
-            @Param("idEstadoFk") Long idEstadoFk
-    );
+            @Param("idEstadoFk") Long idEstadoFk);
 
+    @Query(value = "SELECT LAST_INSERT_ID()", nativeQuery = true)
+    Long obtenerUltimoIdInsertado();
+
+    // UPDATE
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PERIODOS_MODIFICAR(
-            :idPeriodo,
-            :nombre,
-            :fechaInicio,
-            :fechaFin
-        )
+        CALL PERIODOS_MODIFICAR(:idPeriodo, :nombre, :fechaInicio, :fechaFin)
     """, nativeQuery = true)
-    void modificarPeriodo(
-            @Param("idPeriodo") Long idPeriodo,
+    void modificarPeriodo(@Param("idPeriodo") Long idPeriodo,
             @Param("nombre") String nombre,
             @Param("fechaInicio") LocalDate fechaInicio,
-            @Param("fechaFin") LocalDate fechaFin
-    );
+            @Param("fechaFin") LocalDate fechaFin);
 
+    // CAMBIAR ESTADO
     @Modifying
     @Transactional
     @Query(value = """
-        CALL PERIODOS_CAMBIAR_ESTADO(
-            :idPeriodo,
-            :idEstado
-        )
+        CALL PERIODOS_CAMBIAR_ESTADO(:idPeriodo, :idEstado)
     """, nativeQuery = true)
-    void cambiarEstadoPeriodo(
-            @Param("idPeriodo") Long idPeriodo,
-            @Param("idEstado") Long idEstado
-    );
+    void cambiarEstadoPeriodo(@Param("idPeriodo") Long idPeriodo,
+            @Param("idEstado") Long idEstado);
 }

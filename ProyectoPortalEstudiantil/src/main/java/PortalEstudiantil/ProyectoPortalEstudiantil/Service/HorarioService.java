@@ -1,9 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Horario;
-import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Materia;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.HorarioRepository;
-import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
