@@ -1,5 +1,6 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.*;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.InformacionPersonalService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UbicacionService;
