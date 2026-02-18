@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/gestionAcademica/SeccionMateria")
+@RequestMapping("/gestionAcademica/seccionMateria")
 public class SeccionMateriaController {
 
     @Autowired
@@ -120,7 +120,7 @@ public class SeccionMateriaController {
         return "redirect:/gestion-academica/seccion-materias";
     }
 
-    @PostMapping("/cambiar-estado")
+    @PostMapping("/cambiarEstado")
     public String cambiarEstadoSeccionMateria(@RequestParam Long idSeccionMateria,
             @RequestParam Long idEstado,
             RedirectAttributes flash) {

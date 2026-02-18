@@ -81,7 +81,7 @@ public class MateriaController {
         return "redirect:/gestion-academica/materias";
     }
 
-    @PostMapping("/cambiar-estado")
+    @PostMapping("/cambiarEstado")
     public String cambiarEstadoMateria(@RequestParam Long idMateria,
             @RequestParam Long idEstado,
             RedirectAttributes flash) {
