@@ -3,6 +3,7 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.SeccionMateria;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository.SeccionMateriaRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,8 @@ public class SeccionMateriaService {
     @Autowired
     private MateriaRepository materiaRepository;
 
-    public List<SeccionMateria> listarTodas() {
-        return seccionMateriaRepository.findAll();
+    public List<SeccionMateriaRow> listarTodas() {
+        return seccionMateriaRepository.listarResumen();
     }
 
     public List<SeccionMateria> listarActivas() {

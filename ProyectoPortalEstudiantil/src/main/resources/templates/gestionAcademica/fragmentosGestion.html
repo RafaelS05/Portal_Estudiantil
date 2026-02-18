@@ -390,9 +390,9 @@
                             </tr></thead>
                         <tbody>
                             <tr th:each="sm : ${asignaciones}">
-                                <td><span class="chip-sec" th:text="${sm.seccion?.numero}"></span></td>
-                                <td th:text="${sm.materia?.nombre}"></td>
-                                <td th:text="${sm.docente?.nombre + ' ' + sm.docente?.primerApellido}"></td>
+                                <td><span class="chip-sec" th:text="${sm.numeroSeccion}"></span></td>
+                                <td th:text="${sm.nombreMateria}"></td>
+                                <td th:text="${sm.nombreDocente}"></td>
                                 <td>
                                     <span th:class="${sm.idEstadoFk==1}?'badge bg-success-subtle text-success':'badge bg-danger-subtle text-danger'"
                                           th:text="${sm.idEstadoFk==1}?'Activa':'Inactiva'"></span>
@@ -459,13 +459,13 @@
                             </tr></thead>
                         <tbody>
                             <tr th:each="h : ${horarios}">
-                                <td><span class="chip-sec" th:text="${h.seccionMateria?.seccion?.numero}"></span></td>
-                                <td th:text="${h.seccionMateria?.materia?.nombre}"></td>
-                                <td th:text="${h.seccionMateria?.docente?.nombre + ' ' + h.seccionMateria?.docente?.primerApellido}"></td>
+                                <td><span class="chip-sec" th:text="${h.numeroSeccion}"></span></td>
+                                <td th:text="${h.nombreMateria}"></td>
+                                <td th:text="${h.nombreDocente}"></td>
                                 <td th:text="${diasSemana[h.diaSemana]}"></td>
                                 <td th:text="${h.horaInicio}"></td>
                                 <td th:text="${h.horaFin}"></td>
-                                <td th:text="${h.aula?.numero ?: '—'}"></td>
+                                <td th:text="${h.numeroAula ?: '—'}"></td>
                                 <td>
                                     <span th:class="${h.idEstadoFk==1}?'badge bg-success-subtle text-success':'badge bg-danger-subtle text-danger'"
                                           th:text="${h.idEstadoFk==1}?'Activo':'Inactivo'"></span>
@@ -869,7 +869,7 @@
                                 <option value="">Seleccione…</option>
                                 <option th:each="sm : ${seccionMaterias}"
                                         th:value="${sm.idSeccionMateria}"
-                                        th:text="${sm.seccion?.numero + ' / ' + sm.materia?.nombre}"></option>
+                                        th:text="${sm.numeroSeccion + ' / ' + sm.nombreMateria}"></option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -927,7 +927,7 @@
                             <select name="idSeccionMateriaFk" id="eh-sm" class="form-select" required>
                                 <option th:each="sm : ${seccionMaterias}"
                                         th:value="${sm.idSeccionMateria}"
-                                        th:text="${sm.seccion?.numero + ' / ' + sm.materia?.nombre}"></option>
+                                        th:text="${sm.numeroSeccion + ' / ' + sm.nombreMateria}"></option>
                             </select>
                         </div>
                         <div class="mb-3">

@@ -25,7 +25,7 @@ public class SeccionController {
         } catch (IllegalArgumentException e) {
             flash.addFlashAttribute("mensajeError", e.getMessage());
         }
-        return "redirect:/gestion-academica/secciones/nuevo";
+        return "redirect:/gestionAcademica?tab=secciones";
 
     }
 

@@ -46,7 +46,7 @@ public class SeccionMateriaController {
 
     }
 
-    @PostMapping("/cambiarEstado")
+    @PostMapping("/cambiar-estado")
     public String cambiarEstado(@RequestParam Long idSeccionMateria,
             @RequestParam Long idEstado,
             RedirectAttributes flash) {

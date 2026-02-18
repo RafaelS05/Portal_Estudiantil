@@ -7,13 +7,85 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
-public interface HorarioRepository extends JpaRepository<Horario, Long>{
+public interface HorarioRepository extends JpaRepository<Horario, Long> {
 
     Horario findByIdHorario(Long idHorario);
 
     List<Horario> findByIdEstadoFk(Long idEstadoFk);
 
     long countByIdEstadoFk(Long idEstadoFk);
+
+    interface HorarioRow {
+
+        Long getIdHorario();
+
+        Long getIdSeccionMateriaFk();
+
+        String getNumeroSeccion();
+
+        String getNombreMateria();
+
+        String getNombreDocente();
+
+        Integer getDiaSemana();
+
+        String getHoraInicio();
+
+        String getHoraFin();
+
+        Long getIdAulaFk();
+
+        String getNumeroAula();
+
+        Long getIdEstadoFk();
+    }
+
+    @Query(value = """
+    SELECT
+        h.ID_HORARIO              AS idHorario,
+        h.ID_SECCIONMATERIA_FK    AS idSeccionMateriaFk,
+        s.NUMERO                  AS numeroSeccion,
+        m.NOMBRE                  AS nombreMateria,
+        CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO) AS nombreDocente,
+        h.DIA_SEMANA              AS diaSemana,
+        h.HORA_INICIO             AS horaInicio,
+        h.HORA_FIN                AS horaFin,
+        h.ID_AULA_FK              AS idAulaFk,
+        a.NUMERO                  AS numeroAula,
+        h.ID_ESTADO_FK            AS idEstadoFk
+    FROM HORARIO_TB h
+    JOIN SECCIONMATERIA_TB sm ON sm.ID_SECCIONMATERIA  = h.ID_SECCIONMATERIA_FK
+    JOIN SECCION_TB  s  ON s.ID_SECCION  = sm.ID_SECCION_FK
+    JOIN MATERIA_TB  m  ON m.ID_MATERIA  = sm.ID_MATERIA_FK
+    JOIN USUARIOS_TB u  ON u.ID_USUARIO  = sm.ID_USUARIO_DOCENTE_FK
+    LEFT JOIN AULA_TB a ON a.ID_AULA     = h.ID_AULA_FK
+    WHERE h.ID_ESTADO_FK = 1
+    ORDER BY s.NUMERO, h.DIA_SEMANA, h.HORA_INICIO
+""", nativeQuery = true)
+    List<HorarioRow> listarResumen();
+    
+        @Query(value = """
+    SELECT
+        h.ID_HORARIO              AS idHorario,
+        h.ID_SECCIONMATERIA_FK    AS idSeccionMateriaFk,
+        s.NUMERO                  AS numeroSeccion,
+        m.NOMBRE                  AS nombreMateria,
+        CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO) AS nombreDocente,
+        h.DIA_SEMANA              AS diaSemana,
+        h.HORA_INICIO             AS horaInicio,
+        h.HORA_FIN                AS horaFin,
+        h.ID_AULA_FK              AS idAulaFk,
+        a.NUMERO                  AS numeroAula,
+        h.ID_ESTADO_FK            AS idEstadoFk
+    FROM HORARIO_TB h
+    JOIN SECCIONMATERIA_TB sm ON sm.ID_SECCIONMATERIA  = h.ID_SECCIONMATERIA_FK
+    JOIN SECCION_TB  s  ON s.ID_SECCION  = sm.ID_SECCION_FK
+    JOIN MATERIA_TB  m  ON m.ID_MATERIA  = sm.ID_MATERIA_FK
+    JOIN USUARIOS_TB u  ON u.ID_USUARIO  = sm.ID_USUARIO_DOCENTE_FK
+    LEFT JOIN AULA_TB a ON a.ID_AULA     = h.ID_AULA_FK
+    ORDER BY s.NUMERO, h.DIA_SEMANA, h.HORA_INICIO
+""", nativeQuery = true)
+    List<HorarioRow> listarTodos();
 
     // Consultas útiles
     @Query(value = """
@@ -87,23 +159,18 @@ public interface HorarioRepository extends JpaRepository<Horario, Long>{
     @Modifying
     @Transactional
     @Query(value = """
-        CALL HORARIO_INSERTAR(
-            :diaSemana,
-            :horaInicio,
-            :horaFin,
-            :idAulaFk,
-            :idSeccionMateriaFk,
-            :idEstadoFk
-        )
-    """, nativeQuery = true)
-    Long insertarHorarioRetornaId(
-            @Param("diaSemana") Integer diaSemana,
+    CALL HORARIO_INSERTAR(:diaSemana, :horaInicio, :horaFin,
+                          :idAulaFk, :idSeccionMateriaFk, :idEstadoFk)
+""", nativeQuery = true)
+    void insertarHorario(@Param("diaSemana") Integer diaSemana,
             @Param("horaInicio") String horaInicio,
             @Param("horaFin") String horaFin,
             @Param("idAulaFk") Long idAulaFk,
             @Param("idSeccionMateriaFk") Long idSeccionMateriaFk,
-            @Param("idEstadoFk") Long idEstadoFk
-    );
+            @Param("idEstadoFk") Long idEstadoFk);
+
+    @Query(value = "SELECT LAST_INSERT_ID()", nativeQuery = true)
+    Long obtenerUltimoIdInsertado();
 
     @Modifying
     @Transactional

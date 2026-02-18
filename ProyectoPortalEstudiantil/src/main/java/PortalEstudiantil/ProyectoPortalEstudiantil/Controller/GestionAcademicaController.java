@@ -15,69 +15,83 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/gestionAcademica")
 public class GestionAcademicaController {
-    
-    @Autowired private PeriodoService periodoService;
-    @Autowired private MateriaService materiaService;
-    @Autowired private SeccionService seccionService;
-    @Autowired private AulaService aulaService;
-    @Autowired private SeccionMateriaService seccionMateriaService;
-    @Autowired private HorarioService horarioService;
 
-    @Autowired private PeriodoRepository periodoRepository;
-    @Autowired private MateriaRepository materiaRepository;
-    @Autowired private SeccionRepository seccionRepository;
-    @Autowired private AulaRepository aulaRepository;
-    @Autowired private SeccionMateriaRepository seccionMateriaRepository;
+    @Autowired
+    private PeriodoService periodoService;
+    @Autowired
+    private MateriaService materiaService;
+    @Autowired
+    private SeccionService seccionService;
+    @Autowired
+    private AulaService aulaService;
+    @Autowired
+    private SeccionMateriaService seccionMateriaService;
+    @Autowired
+    private HorarioService horarioService;
+
+    @Autowired
+    private PeriodoRepository periodoRepository;
+    @Autowired
+    private MateriaRepository materiaRepository;
+    @Autowired
+    private SeccionRepository seccionRepository;
+    @Autowired
+    private AulaRepository aulaRepository;
+    @Autowired
+    private SeccionMateriaRepository seccionMateriaRepository;
 
     @GetMapping
     public String index(@RequestParam(required = false, defaultValue = "periodos") String tab,
-                        Model model) {
-        
+            Model model) {
+
         //Periodo
-        model.addAttribute("periodos",      periodoService.listarResumen());
+        model.addAttribute("periodos", periodoService.listarResumen());
         model.addAttribute("periodoActual", periodoService.obtenerPeriodoActual());
         model.addAttribute("totalPeriodosActivos", periodoService.contarActivos());
-        
+
         //Materia
-        model.addAttribute("materias",     materiaService.listarTodas());
+        model.addAttribute("materias", materiaService.listarTodas());
         model.addAttribute("totalMateriasActivas", materiaService.contarActivas());
-        
+
         //Seccion
-        model.addAttribute("secciones",    seccionService.listarResumen());
+        model.addAttribute("secciones", seccionService.listarResumen());
         model.addAttribute("periodosActivos", periodoRepository.listarActivos());
         model.addAttribute("totalSeccionesActivas", seccionService.contarActivas());
-        
+
         //Aula
-        model.addAttribute("aulas",        aulaService.listarTodas());
+        model.addAttribute("aulas", aulaService.listarTodas());
         model.addAttribute("totalAulasActivas", aulaService.contarActivas());
-        
+
         //SeccionMateria
         model.addAttribute("asignaciones", seccionMateriaService.listarTodas());
-        model.addAttribute("seccionesActivas",  seccionRepository.listarActivas());
-        model.addAttribute("materiasActivas",   materiaRepository.listarActivas());
-        model.addAttribute("aulasActivas",      aulaRepository.listarActivas());
+        model.addAttribute("seccionesActivas", seccionRepository.listarActivas());
+        model.addAttribute("materiasActivas", materiaRepository.listarActivas());
+        model.addAttribute("aulasActivas", aulaRepository.listarActivas());
         model.addAttribute("totalAsignacionesActivas", seccionMateriaService.contarActivas());
-        
+
         //Horario
-        model.addAttribute("horarios",     horarioService.listarActivos());
-        model.addAttribute("seccionMaterias", seccionMateriaRepository.listarActivas());
-        model.addAttribute("diasSemana",   diasSemanaMap());
+        model.addAttribute("horarios", horarioService.listarTodos());
+        model.addAttribute("seccionMaterias", seccionMateriaService.listarTodas());
+        model.addAttribute("diasSemana", diasSemanaMap());
         model.addAttribute("horasDisponibles", horasDisponibles());
         model.addAttribute("totalHorariosActivos", horarioService.contarActivos());
-        
+
         //Comunes y js
-        model.addAttribute("tabActivo",    tab);
+        model.addAttribute("tabActivo", tab);
         model.addAttribute("paginaActual", "gestion-academica");
         model.addAttribute("tituloPagina", "Gestión Académica");
 
-        return "gestionAcademica/gestionAcademica"; 
+        return "gestionAcademica/gestionAcademica";
     }
 
     private Map<Integer, String> diasSemanaMap() {
         Map<Integer, String> dias = new LinkedHashMap<>();
-        dias.put(1, "Lunes");   dias.put(2, "Martes");
-        dias.put(3, "Miércoles"); dias.put(4, "Jueves");
-        dias.put(5, "Viernes"); dias.put(6, "Sábado");
+        dias.put(1, "Lunes");
+        dias.put(2, "Martes");
+        dias.put(3, "Miércoles");
+        dias.put(4, "Jueves");
+        dias.put(5, "Viernes");
+        dias.put(6, "Sábado");
         return dias;
     }
 
