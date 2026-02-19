@@ -1,9 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
-
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Telefono;
 import jakarta.transaction.Transactional;
@@ -14,16 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 public interface TelefonoRepository extends JpaRepository<Telefono, Long> {
 
-  
-    // =====================
     // LECTURA
-    // =====================
     Telefono findByUsuario_IdUsuario(Long idUsuario);
 
-    // =====================
     // INSERTAR
-    // =====================
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query(value = """
         CALL TELEFONO_INSERTAR(
@@ -38,13 +28,11 @@ public interface TelefonoRepository extends JpaRepository<Telefono, Long> {
         @Param("idEstado") Long idEstado
     );
 
-    // =====================
     // MODIFICAR
-    // =====================
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query(value = """
-       CALL TELEFONO_MODIFICAR(
+        CALL TELEFONO_MODIFICAR(
             :idTelefono,
             :numero,
             :idUsuario

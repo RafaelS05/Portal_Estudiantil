@@ -1,175 +1,233 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-    <head th:replace="layout/plantilla :: head">
-        <title>Usuarios</title>
-        <link rel="stylesheet" th:href="@{/css/usuarios.css}">
-    </head>
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
 
     <body>
-        <div th:replace="layout/plantilla :: shell(~{::#usuarios-content})">
-            <div id="usuarios-content">
-                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4" 
-                     th:classappend="'alert-' + ${tipoMensaje}" role="alert">
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- ENCABEZADO -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h2 class="fw-bold mb-0">Gestión de Usuarios</h2>
+                        <p class="text-muted mb-0">Total: <span th:text="${total}">0</span> usuarios</p>
+                    </div>
+
+                    <a class="btn btn-primary" th:href="@{/usuarios/nuevo}">
+                        <i class="fa-solid fa-plus me-1"></i> Nuevo Usuario
+                    </a>
+                </div>
+
+                <!-- MENSAJES -->
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}"
+                     role="alert">
                     [[${mensaje}]]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-
-
+                <!-- CARD DE BÚSQUEDA Y FILTROS -->
                 <div class="card mb-4">
                     <div class="card-body py-3">
-
-                        <div class="row align-items-center">
-
-                            <div class="col-md-4">
-                                <div class="search-box">
-                                    <i class="fa-solid fa-search"></i>
-                                    <input type="text" placeholder="Buscar usuario...">
+                        <form th:action="@{/usuarios}" method="get" class="row g-2 align-items-end">
+                            
+                            <!-- BÚSQUEDA POR NOMBRE -->
+                            <div class="col-md-5">
+                                <label class="form-label small text-muted mb-1">Buscar usuario</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control border-start-0"
+                                           name="busqueda"
+                                           placeholder="Nombre, apellido o correo..."
+                                           th:value="${busqueda}"
+                                           autocomplete="off">
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="filter-box dropdown">
-                                        <span>Filtrar por rol</span>
+                            <!-- FILTRO POR ROL -->
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted mb-1">Filtrar por rol</label>
+                                <select class="form-select" name="tipoUsuario">
+                                    <option value="">Todos los roles</option>
+                                    <option th:each="tipo : ${tiposUsuario}" 
+                                            th:value="${tipo.nombre}"
+                                            th:text="${tipo.nombre}"
+                                            th:selected="${tipoUsuario != null && tipoUsuario == tipo.nombre}">
+                                        Tipo
+                                    </option>
+                                </select>
+                            </div>
 
-                                        <button class="dropdown-toggle" data-bs-toggle="dropdown">
-                                            Todos
-                                        </button>
+                            <!-- FILTRO POR ESTADO -->
+                            <div class="col-md-2">
+                                <label class="form-label small text-muted mb-1">Estado</label>
+                                <select class="form-select" name="estado">
+                                    <option value="">Todos</option>
+                                    <option value="1" th:selected="${estado != null && estado == 1}">Activos</option>
+                                    <option value="2" th:selected="${estado != null && estado == 2}">Inactivos</option>
+                                </select>
+                            </div>
 
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">Todos</a></li>
-                                            <li><a class="dropdown-item" href="#">Administrador</a></li>
-                                            <li><a class="dropdown-item" href="#">Estudiante</a></li>
-                                            <li><a class="dropdown-item" href="#">Docente</a></li>
-                                        </ul>
-                                    </div>
+                            <!-- BOTONES -->
+                            <div class="col-md-2">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary flex-fill" type="submit">
+                                        Buscar
+                                    </button>
+                                    
+                                    <a class="btn btn-outline-secondary" 
+                                       th:href="@{/usuarios}"
+                                       th:if="${busqueda != null || tipoUsuario != null || estado != null}">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="col-md-4 text-end">
-                                <a th:href="@{/usuarios/nuevo}" class="nuevoUsu">
-                                    <i class="fa-solid fa-plus"></i> Nuevo Usuario
-                                </a>
-                            </div>
-
-                        </div>
-
+                        </form>
                     </div>
                 </div>
 
-
-
-
+                <!-- TABLA DE USUARIOS -->
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
+                            <table class="table align-middle table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width: 30%">Nombre</th>
-                                        <th style="width: 25%">Correo Electrónico</th>
-                                        <th style="width: 15%">Rol</th>
-                                        <th style="width: 10%">Estado</th>
-                                        <th style="width: 20%">Acción</th>
+                                        <th style="width: 25%;">Nombre</th>
+                                        <th style="width: 20%;">Apellidos</th>
+                                        <th style="width: 15%;">Correo</th>
+                                        <th style="width: 12%;">Rol</th>
+                                        <th style="width: 10%;">Estado</th>
+                                        <th style="width: 18%;">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="usuario, stat : ${usuarios}">
+                                        <!-- NOMBRE CON AVATAR -->
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <div class="avatar-circle me-3" 
-                                                     th:classappend="'color-' + ${stat.index % 6 + 1}">
-                                                    <span class="avatar-initials" 
-                                                          th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1))}+${#strings.toUpperCase(#strings.substring(usuario.primerApellido,0,1))}">
+                                                <!-- Avatar con iniciales -->
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                     th:with="colorIndex=${stat.index % 6}"
+                                                     th:style="${colorIndex == 0 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e3f2fd; color: #1976d2' : 
+                                                               colorIndex == 1 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #f3e5f5; color: #7b1fa2' : 
+                                                               colorIndex == 2 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e8f5e9; color: #388e3c' : 
+                                                               colorIndex == 3 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #fff3e0; color: #f57c00' : 
+                                                               colorIndex == 4 ? 'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #fce4ec; color: #c2185b' : 
+                                                               'width: 40px; height: 40px; font-size: 14px; font-weight: 600; background-color: #e0f2f1; color: #00796b'}">
+                                                    <span th:text="${#strings.toUpperCase(#strings.substring(usuario.nombre,0,1)) + #strings.toUpperCase(#strings.substring(usuario.primerApellido,0,1))}">
+                                                        AB
                                                     </span>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-semibold">
-                                                        [[${usuario.nombre}]] [[${usuario.primerApellido}]] 
-                                                        <span th:if="${usuario.segundoApellido != null}">[[${usuario.segundoApellido}]]</span>
-                                                    </div>
-                                                    <small class="text-muted">ID: [[${usuario.idUsuario}]]</small>
+                                                    <div class="fw-semibold" th:text="${usuario.nombre}">Nombre</div>
+                                                   
                                                 </div>
                                             </div>
                                         </td>
 
+                                        <!-- APELLIDOS -->
+                                        <td>
+                                            <span th:text="${usuario.primerApellido + (usuario.segundoApellido != null ? ' ' + usuario.segundoApellido : '')}">
+                                                Apellidos
+                                            </span>
+                                        </td>
+
+                                        <!-- CORREO -->
                                         <td>
                                             <span th:if="${usuario.correos != null && !usuario.correos.isEmpty()}">
-                                                [[${usuario.correos[0].correo}]]
+                                                <small th:text="${usuario.correos[0].correo}">correo@example.com</small>
                                             </span>
                                             <span th:unless="${usuario.correos != null && !usuario.correos.isEmpty()}" 
                                                   class="text-muted">
-                                                Sin correo
+                                                <small>Sin correo</small>
                                             </span>
                                         </td>
 
+                                        <!-- ROL CON BADGE -->
                                         <td>
-                                            <span th:switch="${usuario.idTipoUsuarioFk}">
-                                                <span th:case="1" class="badge badge-estudiante">Estudiante</span>
-                                                <span th:case="2" class="badge badge-docente">Docente</span>
-                                                <span th:case="3" class="badge badge-administrador">Administrador</span>
-                                                <span th:case="*" class="badge bg-secondary">Otro</span>
+                                            <span th:if="${usuario.idTipoUsuarioFk != null}">
+                                                <span th:switch="${usuario.idTipoUsuarioFk}">
+                                                    <!-- ID 1 = Administrador -->
+                                                    <span th:case="1" class="badge bg-danger-subtle text-danger">Administrador</span>
+                                                    <!-- ID 2 = Profesor -->
+                                                    <span th:case="2" class="badge bg-success-subtle text-success">Profesor</span>
+                                                    <!-- ID 3 = Estudiante -->
+                                                    <span th:case="3" class="badge bg-primary-subtle text-primary">Estudiante</span>
+                                                    <!-- ID 4 = Encargado -->
+                                                    <span th:case="4" class="badge bg-info-subtle text-info">Encargado</span>
+                                                    <span th:case="*" class="badge bg-secondary">Otro</span>
+                                                </span>
+                                            </span>
+                                            <span th:unless="${usuario.idTipoUsuarioFk != null}" class="badge bg-secondary">Sin tipo</span>
+                                        </td>
+
+                                        <!-- ESTADO -->
+                                        <td>
+                                            <span th:if="${usuario.idEstadoFk == 1}" 
+                                                  class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-circle-check me-1"></i>Activo
+                                            </span>
+                                            <span th:if="${usuario.idEstadoFk == 2}" 
+                                                  class="badge bg-secondary-subtle text-secondary">
+                                                <i class="fa-solid fa-circle-xmark me-1"></i>Inactivo
                                             </span>
                                         </td>
 
-                                       
+                                        <!-- ACCIONES -->
                                         <td>
-                                            <span th:if="${usuario.idEstadoFk == 1}" class="estado activo">Activo</span>
-                                            <span th:if="${usuario.idEstadoFk == 2}" class="estado">Inactivo</span>
-                                        </td>
-
-                                  
-                                        <td>
-                                            <div class="acciones-col">
-                                
+                                            <div class="d-flex gap-1">
+                                                <!-- Ver -->
                                                 <a th:href="@{/usuarios/ver/{id}(id=${usuario.idUsuario})}" 
-                                                   class="btn-accion ver" title="Ver detalles">
-                                                    <i class="fa-solid fa-eye"></i>
+                                                   class="btn btn-sm btn-outline-secondary"
+                                                   title="Ver detalles">
+                                                    <i class="fa-regular fa-eye"></i>
                                                 </a>
+
+                                                <!-- Editar -->
                                                 <a th:href="@{/usuarios/editar/{id}(id=${usuario.idUsuario})}" 
-                                                   class="btn-accion editar" title="Editar">
-                                                    <i class="fa-solid fa-pen"></i>
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   title="Editar">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
                                                 </a>
 
-                                                <form th:action="@{'/usuarios/desactivar/' + ${usuario.idUsuario}}" 
+                                                <!-- Activar/Desactivar -->
+                                                <form th:action="@{${usuario.idEstadoFk == 1 ? '/usuarios/desactivar/' + usuario.idUsuario : '/usuarios/activar/' + usuario.idUsuario}}" 
                                                       method="post" 
-                                                      th:if="${usuario.idEstadoFk == 1}"
                                                       class="d-inline">
-                                                    <button type="submit" class="btn-accion desactivar" title="Desactivar"
-                                                            onclick="return confirm('¿Desactivar este usuario?')">
-                                                        <i class="fa-solid fa-toggle-on"></i>
+                                                    <button type="submit" 
+                                                            th:class="${usuario.idEstadoFk == 1 ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'}"
+                                                            th:title="${usuario.idEstadoFk == 1 ? 'Desactivar' : 'Activar'}"
+                                                            onclick="return confirm('¿Está seguro de cambiar el estado de este usuario?')">
+                                                        <i th:class="${usuario.idEstadoFk == 1 ? 'fa-solid fa-toggle-on' : 'fa-solid fa-toggle-off'}"></i>
                                                     </button>
                                                 </form>
 
-                                                <!-- ACTIVAR -->
-                                                <form th:action="@{'/usuarios/activar/' + ${usuario.idUsuario}}" 
-                                                      method="post" 
-                                                      th:if="${usuario.idEstadoFk == 2}"
-                                                      class="d-inline">
-                                                    <button type="submit" class="btn-accion activar" title="Activar"
-                                                            onclick="return confirm('¿Activar este usuario?')">
-                                                        <i class="fa-solid fa-toggle-off"></i>
-                                                    </button>
-                                                </form>
-
-                                                <form th:action="@{/usuarios/eliminar/{id}(id=${usuario.idUsuario})}" 
-                                                      method="post" class="d-inline">
-                                                    <button type="submit" class="btn-accion eliminar" title="Eliminar"
-                                                            onclick="return confirm('¿Eliminar este usuario permanentemente?')">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
+                                               
                                             </div>
                                         </td>
+                                    </tr>
 
-                                    <tr th:if="${#lists.isEmpty(usuarios)}">
-                                        <td colspan="5" class="text-center py-5">
+                                    <!-- FILA VACÍA -->
+                                    <tr th:if="${usuarios == null || usuarios.isEmpty()}">
+                                        <td colspan="6" class="text-center py-5">
                                             <div class="text-muted">
-                                                <i class="fa-solid fa-users-slash fa-3x mb-3"></i>
+                                                <i class="fa-solid fa-users-slash fa-3x mb-3 d-block"></i>
                                                 <h5>No hay usuarios registrados</h5>
-                                                <p class="mb-0">Crea el primer usuario haciendo clic en "Nuevo Usuario"</p>
+                                                <p class="mb-0">
+                                                    <span th:if="${busqueda != null || tipoUsuario != null || estado != null}">
+                                                        No se encontraron resultados con los filtros aplicados.
+                                                    </span>
+                                                    <span th:unless="${busqueda != null || tipoUsuario != null || estado != null}">
+                                                        Crea el primer usuario haciendo clic en "Nuevo Usuario"
+                                                    </span>
+                                                </p>
                                             </div>
                                         </td>
                                     </tr>
@@ -178,35 +236,32 @@
                         </div>
                     </div>
 
+                    <!-- FOOTER CON CONTADORES -->
                     <div class="card-footer">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-muted">
-                                Mostrando <span class="fw-semibold">[[${usuarios != null ? #lists.size(usuarios) : 0}]]</span> de 
-                                <span class="fw-semibold">[[${totalUsuarios != null ? totalUsuarios : 0}]]</span> usuarios
+                            <div class="text-muted small">
+                                Mostrando <span class="fw-semibold">[[${usuarios != null ? #lists.size(usuarios) : 0}]]</span> 
+                                <span th:if="${busqueda != null || tipoUsuario != null || estado != null}">
+                                    de <span class="fw-semibold">[[${totalUsuarios != null ? totalUsuarios : 0}]]</span> usuarios
+                                </span>
+                                <span th:unless="${busqueda != null || tipoUsuario != null || estado != null}">
+                                    usuarios en total
+                                </span>
                             </div>
 
-                            <nav aria-label="Paginación" th:if="${totalUsuarios > 10}">
-                                <ul class="pagination pagination-sm mb-0">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </nav>
+                            <!-- INDICADOR DE FILTROS ACTIVOS -->
+                            <div th:if="${busqueda != null || tipoUsuario != null || estado != null}" 
+                                 class="text-muted small">
+                                <i class="fa-solid fa-filter me-1"></i>
+                                Filtros activos
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-        </div> 
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
     </body>
 </html>
