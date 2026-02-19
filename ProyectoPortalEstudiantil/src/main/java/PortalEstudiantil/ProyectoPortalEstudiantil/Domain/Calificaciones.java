@@ -5,6 +5,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
 /**
  *
@@ -24,8 +25,44 @@ public class Calificaciones {
     private java.math.BigDecimal calificacion;
   
     // Aquí falta el FK de Estados
-    // Falta el de Matrícula
-    // Falta el de Evaluación
-    
-    
+    @ManyToOne
+    @JoinColumn(name = "ID_MATRICULA_FK")
+    private Matricula matricula;
+ 
+    @ManyToOne
+    @JoinColumn(name = "ID_EVALUACION_FK")
+    private Evaluacion evaluacion;
+
+    public Long getIdCalificaciones() {
+        return idCalificaciones;
+    }
+
+    public void setIdCalificaciones(Long idCalificaciones) {
+        this.idCalificaciones = idCalificaciones;
+    }
+
+    public BigDecimal getCalificacion() {
+        return calificacion;
+    }
+
+    public void setCalificacion(BigDecimal calificacion) {
+        this.calificacion = calificacion;
+    }
+
+    public Matricula getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(Matricula matricula) {
+        this.matricula = matricula;
+    }
+
+    public Evaluacion getEvaluacion() {
+        return evaluacion;
+    }
+
+    public void setEvaluacion(Evaluacion evaluacion) {
+        this.evaluacion = evaluacion;
+    }
+   
 }
