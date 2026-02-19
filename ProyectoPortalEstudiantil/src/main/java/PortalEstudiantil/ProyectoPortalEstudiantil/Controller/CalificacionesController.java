@@ -27,7 +27,7 @@ public class CalificacionesController {
         this.calificacionesService = calificacionesService;
     }
 
-    @GetMapping("/listado")
+    @GetMapping("")
     public String listado(Model model) {
         var lista = calificacionesService.listarCalificacionesParaVista();
         model.addAttribute("calificaciones", lista);
@@ -35,20 +35,20 @@ public class CalificacionesController {
     }
 
     @GetMapping("/nuevo")
-    public String nuevaCalificacion(Model model) { 
-        model.addAttribute("calificaciones", new Calificaciones()); 
-        return "/calificaciones/modificar";
+    public String nuevaCalificacion(Model model) {
+        model.addAttribute("calificacion", new Calificaciones());
+        return "calificaciones/modificar";
     }
-    
+
     @PostMapping("/guardar")
-    public String guardar(Calificaciones calificacion){
+    public String guardar(Calificaciones calificacion) {
         calificacionesService.guardarCalificaciones(calificacion);
         return "redirect:/calificaciones/listado";
     }
-    
+
     @GetMapping("/eliminar/{idCalificaciones}")
-    public String eliminar(@PathVariable("idCalificaciones") Long idCalificaciones){
+    public String eliminar(@PathVariable("idCalificaciones") Long idCalificaciones) {
         calificacionesService.eliminar(idCalificaciones);
-        return "redirect:/calificaciones/listado"; 
+        return "redirect:/calificaciones/listado";
     }
 }
