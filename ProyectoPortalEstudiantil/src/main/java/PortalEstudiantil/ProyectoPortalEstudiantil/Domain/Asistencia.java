@@ -1,7 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "ASISTENCIAS_TB")
@@ -13,8 +13,7 @@ public class Asistencia {
     private Long idAsistencia;
 
     @Column(name = "FECHA_ASISTENCIA")
-    @Temporal(TemporalType.DATE)
-    private Date fechaAsistencia;
+    private LocalDate fechaAsistencia;
 
     @Column(name = "ID_MATRICULA_FK")
     private Long idMatriculaFk;
@@ -25,7 +24,7 @@ public class Asistencia {
     @Column(name = "ID_ESTADO_FK")
     private Long idEstadoFk;
 
-    // Getters y Setters
+    // ── Getters / Setters ──────────────────────────────────────
     public Long getIdAsistencia() {
         return idAsistencia;
     }
@@ -34,11 +33,11 @@ public class Asistencia {
         this.idAsistencia = idAsistencia;
     }
 
-    public Date getFechaAsistencia() {
+    public LocalDate getFechaAsistencia() {
         return fechaAsistencia;
     }
 
-    public void setFechaAsistencia(Date fechaAsistencia) {
+    public void setFechaAsistencia(LocalDate fechaAsistencia) {
         this.fechaAsistencia = fechaAsistencia;
     }
 

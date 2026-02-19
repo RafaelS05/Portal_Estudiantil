@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<th:block th:fragment="head">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Portal Estudiantil – Asistencias</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/gestionAcademica.css}">
+</th:block>
+
+<th:block th:fragment="contenido">
+    <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
+        <section id="contenido">
+
+            <!-- ── Alertas flash ──────────────────────────────────────── -->
+            <div th:if="${mensajeExito}"
+                 class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <span th:text="${mensajeExito}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${mensajeError}"
+                 class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-xmark me-2"></i>
+                <span th:text="${mensajeError}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ── Cabecera ───────────────────────────────────────────── -->
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fa-solid fa-clipboard-check text-primary me-2"></i>Asistencias
+                    </h2>
+                    <p class="text-muted mb-0 small">Consulta y gestiona el registro de asistencia</p>
+                </div>
+                <a th:href="@{/asistencias/paseLista}" class="btn btn-primary">
+                    <i class="fa-solid fa-list-check me-1"></i>Tomar Pase de Lista
+                </a>
+            </div>
+
+            <!-- ── Tarjetas de estadísticas ───────────────────────────── -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card p-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Total registros</div>
+                        <div class="stat-val text-primary" th:text="${total}">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card p-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Presentes</div>
+                        <div class="stat-val text-success" th:text="${totalPresentes}">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card p-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Ausentes</div>
+                        <div class="stat-val text-danger" th:text="${totalAusentes}">0</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card stat-card p-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Justificados</div>
+                        <div class="stat-val text-warning" th:text="${totalJustificados}">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Filtros ────────────────────────────────────────────── -->
+            <div class="card tbl-card mb-3">
+                <div class="card-body">
+                    <form th:action="@{/asistencias}" method="get"
+                          class="row g-2 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-semibold">Sección-Materia (ID)</label>
+                            <input type="number" name="idSeccionMateria" class="form-control form-control-sm"
+                                   placeholder="ID de sección-materia"
+                                   th:value="${idSeccionMateria}">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-semibold">Fecha</label>
+                            <input type="date" name="fecha" class="form-control form-control-sm"
+                                   th:value="${fecha}">
+                        </div>
+                        <div class="col-12 col-md-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Filtrar
+                            </button>
+                            <a th:href="@{/asistencias}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fa-solid fa-xmark"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ── Tabla ──────────────────────────────────────────────── -->
+            <div class="card tbl-card">
+                <div class="card-header d-flex align-items-center gap-2 flex-wrap">
+                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
+                           placeholder="Buscar en tabla…"
+                           oninput="filterTable('tbl-asistencias', this.value)">
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-asistencias" class="table mb-0">
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Estudiante</th>
+                            <th>Materia</th>
+                            <th>Sección</th>
+                            <th>Docente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="a : ${asistencias}">
+                            <td class="fw-semibold" th:text="${a.fechaAsistencia}"></td>
+                            <td th:text="${a.nombreEstudiante}"></td>
+                            <td th:text="${a.nombreMateria}"></td>
+                            <td><span class="chip-sec" th:text="${a.numeroSeccion}"></span></td>
+                            <td th:text="${a.nombreDocente}"></td>
+                            <td>
+                                <span th:switch="${a.idEstadoFk}">
+                                    <span th:case="1" class="badge bg-success-subtle text-success">Presente</span>
+                                    <span th:case="2" class="badge bg-danger-subtle text-danger">Ausente</span>
+                                    <span th:case="3" class="badge bg-warning-subtle text-warning">Justificado</span>
+                                    <span th:case="*"  class="badge bg-secondary-subtle text-secondary"
+                                          th:text="${a.estadoDescripcion}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <!-- Justificar ausencia (solo visible si está Ausente) -->
+                                    <form th:if="${a.idEstadoFk == 2}"
+                                          th:action="@{/asistencias/justificar/{id}(id=${a.idAsistencia})}"
+                                          method="post" class="m-0">
+                                        <input type="hidden" name="idSeccionMateria"
+                                               th:value="${idSeccionMateria}">
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Justificar ausencia">
+                                            <i class="fa-solid fa-file-circle-check"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Cambiar estado (modal) -->
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            th:attr="data-id=${a.idAsistencia},
+                                                     data-estado=${a.idEstadoFk},
+                                                     data-sm=${idSeccionMateria}"
+                                            onclick="llenarModalEstado(this)"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modal-cambiar-estado"
+                                            title="Cambiar estado">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(asistencias)}">
+                            <td colspan="7" class="text-center text-muted py-4">
+                                No hay registros de asistencia para los filtros aplicados.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    Mostrando <strong th:text="${total}">0</strong> registros
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════
+                 MODAL – Cambiar Estado
+                 ══════════════════════════════════════════════════════════ -->
+            <div class="modal fade" id="modal-cambiar-estado" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold">
+                                <i class="fa-solid fa-pen me-2 text-primary"></i>Cambiar Estado
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="form-cambiar-estado" method="post">
+                            <div class="modal-body">
+                                <input type="hidden" name="idSeccionMateria" id="ce-sm">
+                                <div class="mb-3">
+                                    <label class="lbl">Nuevo estado</label>
+                                    <select name="idEstado" id="ce-estado" class="form-select" required>
+                                        <option value="1">Presente</option>
+                                        <option value="2">Ausente</option>
+                                        <option value="3">Justificado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+</th:block>
+
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script th:inline="javascript">
+    function filterTable(tableId, query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    function llenarModalEstado(btn) {
+        const id     = btn.getAttribute('data-id');
+        const estado = btn.getAttribute('data-estado');
+        const sm     = btn.getAttribute('data-sm');
+
+        document.getElementById('form-cambiar-estado').action =
+            '/asistencias/cambiarEstado/' + id;
+        document.getElementById('ce-estado').value = estado || '1';
+        document.getElementById('ce-sm').value = sm || '';
+    }
+</script>
