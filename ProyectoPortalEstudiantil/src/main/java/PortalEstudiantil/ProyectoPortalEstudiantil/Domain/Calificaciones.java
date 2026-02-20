@@ -21,10 +21,12 @@ public class Calificaciones {
     @Column(name = "ID_CALIFICACIONES")
     private Long idCalificaciones;
     
+    @Column(name = "ID_ESTADO_FK")
+    private Long idEstadoFk;
+    
     @Column(name = "CALIFICACION", precision = 5, scale = 2)
     private java.math.BigDecimal calificacion;
   
-    // Aquí falta el FK de Estados
     @ManyToOne
     @JoinColumn(name = "ID_MATRICULA_FK")
     private Matricula matricula;
@@ -64,5 +66,14 @@ public class Calificaciones {
     public void setEvaluacion(Evaluacion evaluacion) {
         this.evaluacion = evaluacion;
     }
+
+    public Long getIdEstadoFk() {
+        return idEstadoFk;
+    }
+
+    public void setIdEstadoFk(Long idEstadoFk) {
+        this.idEstadoFk = idEstadoFk;
+    }
+    
    
 }

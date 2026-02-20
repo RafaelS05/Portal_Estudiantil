@@ -1,8 +1,4 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
 <html xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="head">
@@ -37,20 +33,39 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                         </thead>
                         <tbody>
                             <tr th:each="c : ${calificaciones}">
-                                <td class="fw-semibold" th:text="${c.estudiante}"></td>
-                                <td th:text="${c.evaluacion}"></td>
+                                <td class="fw-semibold" th:text="${c.estudiante}">Nombre Estudiante</td>
+                                <td th:text="${c.evaluacion}">Tipo Evaluación</td>
                                 <td>
                                     <span class="badge bg-primary-subtle text-primary" th:text="${c.nota}">0.0</span>
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <a th:href="@{/calificaciones/eliminar/{id}(id=${c.id})}" 
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('¿Estás seguro de eliminar esta calificación?')">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="'#deleteModal' + ${c.id}">
                                             <i class="fa-solid fa-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
-                                </td>
+
+                                    <div class="modal fade" th:id="'deleteModal' + ${c.id}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    ¿Estás seguro de que deseas eliminar la calificación de <strong th:text="${c.estudiante}"></strong>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <a th:href="@{/calificaciones/eliminar/{id}(id=${c.id})}" class="btn btn-danger">Eliminar</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(calificaciones)}">
                                 <td colspan="4" class="text-center text-muted py-4">No hay calificaciones registradas.</td>
@@ -62,7 +77,6 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     Total de registros: <strong th:text="${#lists.size(calificaciones)}">0</strong>
                 </div>
             </div>
-
         </section>
     </div>
 </th:block>

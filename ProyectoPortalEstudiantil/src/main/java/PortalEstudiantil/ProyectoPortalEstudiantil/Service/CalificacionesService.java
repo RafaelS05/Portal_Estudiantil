@@ -17,6 +17,9 @@ import java.util.*;
 @Service
 public class CalificacionesService {
 
+    private static final Long ESTADO_ACTIVO = 1L;
+    private static final Long ESTADO_INACTIVO = 2L;
+
     private final CalificacionesRepository calificacionesRepository;
     private final MatriculaRepository matriculaRepository;
     private final EvaluacionRepository evaluacionRepository;
@@ -33,6 +36,9 @@ public class CalificacionesService {
 
     @Transactional
     public void guardarCalificaciones(Calificaciones calificacion) {
+        if (calificacion.getIdEstadoFk() == null) {
+            calificacion.setIdEstadoFk(ESTADO_ACTIVO);
+        }
         calificacionesRepository.save(calificacion);
     }
 
@@ -43,7 +49,9 @@ public class CalificacionesService {
 
     @Transactional
     public void eliminar(Long id) {
-        calificacionesRepository.deleteById(id);
+        Calificaciones calificacion = obtenerPorId(id);
+        calificacion.setIdEstadoFk(ESTADO_INACTIVO); 
+        calificacionesRepository.save(calificacion);
     }
 
     public List<Map<String, Object>> listarCalificacionesParaVista() {
@@ -51,16 +59,16 @@ public class CalificacionesService {
         List<Map<String, Object>> out = new ArrayList<>();
 
         for (Calificaciones c : lista) {
-            Map<String, Object> row = new HashMap<>();
-            row.put("id", c.getIdCalificaciones());
-            row.put("nota", c.getCalificacion());
-
-            row.put("estudiante", c.getMatricula().getEstudiante().getNombre() + " " + c.getMatricula().getEstudiante().getPrimerApellido());
-            row.put("evaluacion", c.getEvaluacion().getTipo());
-
-            out.add(row);
+            if (ESTADO_ACTIVO.equals(c.getIdEstadoFk())) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("id", c.getIdCalificaciones());
+                row.put("nota", c.getCalificacion());
+                row.put("estudiante", c.getMatricula().getEstudiante().getNombre() + " "
+                        + c.getMatricula().getEstudiante().getPrimerApellido());
+                row.put("evaluacion", c.getEvaluacion().getTipo());
+                out.add(row);
+            }
         }
         return out;
     }
-
 }
