@@ -45,7 +45,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/css/*", "/js/", "/img/", "/webjars/*", "/favicon.ico");
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**", "/favicon.ico");
     }
 
     @Bean
@@ -58,6 +58,7 @@ public class SecurityConfig {
                     "/index",
                     "/login",
                     "/error",
+                    "/img/**",
                     "/resetContrasenna/**",
                     "/gestionAcademica/**"
                 ).permitAll()

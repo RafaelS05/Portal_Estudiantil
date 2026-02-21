@@ -27,6 +27,52 @@ body {
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    position: relative;
+}
+
+/* Blobs de fondo en body (aplica a TODAS las páginas del login/reset) */
+body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: .4;
+    z-index: 0;
+}
+body::before {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #fbd7b8 0%, transparent 70%);
+    top: -120px; left: -100px;
+}
+body::after {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, #fde8d0 0%, transparent 70%);
+    bottom: -80px; right: -80px;
+}
+
+/* ── login-container: usado por recuperar/reset-password ─────
+   Mismo visual que .login-card pero lo arman los hijos
+   card-left + card-right que vienen de los fragmentos          */
+.login-container {
+    position: relative; z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    max-width: 860px;
+    min-height: 520px;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255,255,255,.8);
+    overflow: hidden;
+    animation: cardIn .5s cubic-bezier(.22,.68,0,1.2) both;
 }
 
 /* ── Fondo decorativo con blobs suaves ───────────── */
@@ -252,6 +298,40 @@ body {
 }
 .eye-btn:hover { color: var(--accent); }
 
+/* ── Alerta de éxito ─────────────────────────────── */
+.success-alert {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    font-size: .875rem;
+    margin-bottom: 1.2rem;
+}
+
+/* ── Campo deshabilitado ─────────────────────────── */
+.field-disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    background: #f3f4f6 !important;
+}
+
+/* ── Reglas de contraseña ────────────────────────── */
+.password-rules {
+    font-size: .78rem;
+    color: var(--muted);
+    background: #f9fafb;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .6rem .85rem;
+    margin-bottom: .75rem;
+    line-height: 1.6;
+}
+.password-rules i { color: var(--accent); }
+
 /* ── Botón submit ────────────────────────────────── */
 .btn-submit {
     width: 100%;
@@ -303,7 +383,8 @@ body {
 
 /* Tablet */
 @media (max-width: 768px) {
-    .login-card {
+    .login-card,
+    .login-container {
         flex-direction: column;
         max-width: 460px;
         min-height: auto;
