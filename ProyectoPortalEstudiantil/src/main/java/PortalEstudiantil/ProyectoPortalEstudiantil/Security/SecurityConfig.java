@@ -19,9 +19,11 @@ public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
-    public SecurityConfig(PortalUserDetailsService userDetailsService,
+    public SecurityConfig(
+            PortalUserDetailsService userDetailsService,
             LoginSuccessHandler loginSuccessHandler,
-            LoginFailureHandler loginFailureHandler) {
+            LoginFailureHandler loginFailureHandler
+    ) {
         this.userDetailsService = userDetailsService;
         this.loginSuccessHandler = loginSuccessHandler;
         this.loginFailureHandler = loginFailureHandler;
@@ -43,33 +45,40 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .requestMatchers("/css/**", "/js/**", "/img/**", "/webjars/**", "/favicon.ico");
+                .requestMatchers("/css/*", "/js/", "/img/", "/webjars/*", "/favicon.ico");
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index", "/login", "/error","/resetContrasenna/**, /gestionAcademica/**").permitAll()
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/index",
+                    "/login",
+                    "/error",
+                    "/resetContrasenna/**",
+                    "/gestionAcademica/**"
+                ).permitAll()
                 .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
+            )
+            .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email") //
-                .passwordParameter("password") // 
-                .successHandler(loginSuccessHandler) // 
-                .failureHandler(loginFailureHandler) // 
+                .usernameParameter("email")      // tu input name="email"
+                .passwordParameter("password")   // tu input name="password"
+                .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler)
                 .permitAll()
-                )
-                .logout(logout -> logout
+            )
+            .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-                );
+            );
 
         return http.build();
     }
