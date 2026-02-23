@@ -20,11 +20,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     long countByIdEstadoFk(Long idEstadoFk);
 
     long countByIdTipoUsuarioFk(Long idTipoUsuarioFk);
-    
 
     // (para la regla del último admin)
     long countByIdTipoUsuarioFkAndIdEstadoFk(Long idTipoUsuarioFk, Long idEstadoFk);
-
 
     @Query("SELECT u FROM Usuario u WHERE CONCAT(u.nombre, ' ', u.primerApellido, ' ', u.segundoApellido) LIKE %:nombreCompleto%")
     List<Usuario> findByNombreCompletoContaining(@Param("nombreCompleto") String nombreCompleto);
@@ -41,16 +39,23 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
           AND co.ID_ESTADO_FK = 1
     """, nativeQuery = true)
     List<Usuario> buscarEncargadosPorCorreo(@Param("correo") String correo,
-                                           @Param("idTipoEncargado") Long idTipoEncargado);
+            @Param("idTipoEncargado") Long idTipoEncargado);
 
     // LISTADO ESTUDIANTES (vista completa con contacto y encargado)
     interface EstudianteListadoRow {
+
         Long getIdUsuario();
+
         String getNombre();
+
         String getPrimerApellido();
+
         String getSegundoApellido();
+
         String getTelefono();
+
         String getCorreoLogin();
+
         String getEncargadoNombre();
     }
 
@@ -132,7 +137,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     );
 
     // CRUD
-
     @Query(value = """
         CALL USUARIOS_INSERTAR(
             :nombre,
@@ -181,5 +185,15 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
             @Param("idUsuario") Long idUsuario,
             @Param("idEstado") Long idEstado
     );
-    
+
+    //Busca el Tipo de usuario 3 = Estudiante para la matricula
+    @Query(value = """
+    SELECT *
+    FROM USUARIOS_TB
+    WHERE ID_TIPOUSUARIO_FK = 3
+      AND ID_ESTADO_FK = 1
+    ORDER BY PRIMER_APELLIDO, NOMBRE
+""", nativeQuery = true)
+    List<Usuario> listarEstudiantes();
+
 }
