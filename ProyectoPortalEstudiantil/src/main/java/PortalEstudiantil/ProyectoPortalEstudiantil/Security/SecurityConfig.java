@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity          // ← necesario para que @PreAuthorize funcione
+@EnableMethodSecurity          //  necesario para que @PreAuthorize funcione
 public class SecurityConfig {
 
     private final PortalUserDetailsService userDetailsService;
