@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- Cabecera -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-0">
+                            <i class="fa-solid fa-file-lines text-primary me-2"></i>Reportes Académicos
+                        </h4>
+                        <nav aria-label="breadcrumb" class="mt-1">
+                            <ol class="breadcrumb mb-0 small">
+                                <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
+                                <li class="breadcrumb-item active">Reportes Académicos</li>
+                            </ol>
+                        </nav>
+                    </div>
+                    <a th:href="@{/reportes/nuevo}" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i>Nueva Boleta
+                    </a>
+                </div>
+
+                <!-- Alerta flash -->
+                <div th:if="${mensaje}"
+                     th:class="'alert alert-' + ${tipoMensaje} + ' alert-dismissible fade show'"
+                     role="alert">
+                    <i th:class="${tipoMensaje == 'success'}
+                       ? 'fa-solid fa-circle-check me-2'
+                       : 'fa-solid fa-triangle-exclamation me-2'"></i>
+                    <span th:text="${mensaje}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Tarjeta resumen — solo total, sin filtros SpEL sobre proyecciones -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3 py-3">
+                                <div class="rounded-3 bg-primary bg-opacity-10 p-3">
+                                    <i class="fa-solid fa-file-lines fa-lg text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Total de Reportes</div>
+                                    <div class="fs-5 fw-bold" th:text="${total}">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3 py-3">
+                                <div class="rounded-3 bg-success bg-opacity-10 p-3">
+                                    <i class="fa-solid fa-file-circle-check fa-lg text-success"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Boletas</div>
+                                    <div class="fs-5 fw-bold" th:text="${totalBoletas}">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3 py-3">
+                                <div class="rounded-3 bg-info bg-opacity-10 p-3">
+                                    <i class="fa-solid fa-boxes-stacked fa-lg text-info"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small">Historiales</div>
+                                    <div class="fs-5 fw-bold" th:text="${totalHistoriales}">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buscador -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body py-3">
+                        <form th:action="@{/reportes}" method="get" class="row g-2 align-items-end">
+                            <div class="col-12 col-md-9">
+                                <label class="form-label small fw-semibold mb-1">
+                                    <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                    Buscar por estudiante, sección o período
+                                </label>
+                                <input type="text" name="busqueda" class="form-control"
+                                       placeholder="Ej: Juan Pérez, 10A, 2024..."
+                                       th:value="${busqueda}">
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa-solid fa-magnifying-glass me-1"></i>Buscar
+                                </button>
+                            </div>
+                            <div class="col-6 col-md-1">
+                                <a th:href="@{/reportes}" class="btn btn-outline-secondary w-100" title="Limpiar">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+                        <span class="fw-semibold small text-secondary">
+                            <i class="fa-solid fa-list me-1"></i>
+                            <span th:text="${total}">0</span> registro(s)
+                        </span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="px-4">#</th>
+                                        <th>Estudiante</th>
+                                        <th>Sección</th>
+                                        <th>Período</th>
+                                        <th>Tipo</th>
+                                        <th class="text-center">Promedio</th>
+                                        <th>Fecha</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${#lists.isEmpty(reportes)}">
+                                        <td colspan="8" class="text-center text-muted py-5">
+                                            <i class="fa-solid fa-folder-open fa-2x d-block mb-2 opacity-50"></i>
+                                            No hay reportes registrados
+                                            <br>
+                                            <a th:href="@{/reportes/nuevo}" class="btn btn-sm btn-primary mt-3">
+                                                <i class="fa-solid fa-plus me-1"></i>Crear primera boleta
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:each="r : ${reportes}">
+                                        <td class="px-4 text-muted small" th:text="${r.idReporte}"></td>
+                                        <td class="fw-semibold" th:text="${r.nombreEstudiante}"></td>
+                                        <td>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal"
+                                                  th:text="${r.nombreSeccion}"></span>
+                                        </td>
+                                        <td class="small" th:text="${r.nombrePeriodo}"></td>
+                                        <td>
+                                            <span th:class="${r.nombreTipoReporte == 'BOLETA'}
+                                                  ? 'badge bg-primary bg-opacity-10 text-primary fw-normal'
+                                                  : 'badge bg-info bg-opacity-10 text-info fw-normal'"
+                                                  th:text="${r.nombreTipoReporte}"></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${r.promedioPonderado != null}"
+                                                  th:class="${r.promedioPonderado >= 70} ? 'badge bg-success' : 'badge bg-danger'"
+                                                  th:text="${#numbers.formatDecimal(r.promedioPonderado,1,1)}"></span>
+                                            <span th:if="${r.promedioPonderado == null}" class="text-muted">—</span>
+                                        </td>
+                                        <td class="small text-muted"
+                                            th:text="${r.fechaCreacionReporte != null ? #temporals.format(r.fechaCreacionReporte,'dd/MM/yyyy') : '—'}"></td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <a th:href="@{/reportes/ver/{id}(id=${r.idReporte})}"
+                                                   class="btn btn-outline-primary" title="Ver detalle">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </a>
+                                                <a th:href="@{/reportes/editar/{id}(id=${r.idReporte})}"
+                                                   class="btn btn-outline-warning" title="Editar">
+                                                    <i class="fa-solid fa-pencil"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-outline-danger" title="Eliminar"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEliminar"
+                                                        th:data-id="${r.idReporte}"
+                                                        th:data-nombre="${r.nombreEstudiante}"
+                                                        onclick="prepararEliminar(this)">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal eliminar -->
+                <div class="modal fade" id="modalEliminar" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header border-0 bg-danger bg-opacity-10">
+                                <h5 class="modal-title text-danger fw-semibold">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Confirmar eliminación
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-1 text-muted small">Se eliminará la boleta de:</p>
+                                <p class="fw-bold fs-6 mb-2" id="modalNombreEstudiante"></p>
+                                <p class="text-muted small mb-0">
+                                    <i class="fa-solid fa-circle-info me-1"></i>
+                                    Esta acción desactiva el reporte (eliminación lógica).
+                                </p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                    Cancelar
+                                </button>
+                                <form id="formEliminar" method="post">
+                                    
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fa-solid fa-trash me-1"></i>Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function prepararEliminar(btn) {
+                        document.getElementById('modalNombreEstudiante').textContent = btn.dataset.nombre;
+                        document.getElementById('formEliminar').action = '/reportes/eliminar/' + btn.dataset.id;
+                    }
+                </script>
+
+            </div>
+        </div>
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>

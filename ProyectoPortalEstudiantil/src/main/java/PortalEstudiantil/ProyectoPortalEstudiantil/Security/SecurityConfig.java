@@ -4,6 +4,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Service.PortalUserDetailsServ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -13,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity          // ← necesario para que @PreAuthorize funcione
 public class SecurityConfig {
 
     private final PortalUserDetailsService userDetailsService;
@@ -61,14 +63,15 @@ public class SecurityConfig {
                     "/img/**",
                     "/resetContrasenna/**",
                     "/gestionAcademica/**"
+                    
                 ).permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email")      // tu input name="email"
-                .passwordParameter("password")   // tu input name="password"
+                .usernameParameter("email")
+                .passwordParameter("password")
                 .successHandler(loginSuccessHandler)
                 .failureHandler(loginFailureHandler)
                 .permitAll()

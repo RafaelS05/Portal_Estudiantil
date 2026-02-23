@@ -16,7 +16,7 @@
               href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        
+
         <script th:src="@{/js/gestionAcademica.js}"></script>
         <link rel="stylesheet" th:href="@{/css/gestionAcademica.css}">
     </head>
@@ -38,7 +38,6 @@
                             <div class="logo">
                                 <img th:src="@{/img/Escuela_Neftali.png}" alt="Escuela Neftalí"/>
                             </div>
-
                             <div class="text-truncate">
                                 Portal Estudiantil <br/>
                                 y Administrativo
@@ -59,6 +58,7 @@
                             </a>
                         </div>
 
+                        <!-- Solo Administrador -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/usuarios/}">
                                 <i class="fa-solid fa-users"></i> Usuarios
@@ -89,7 +89,8 @@
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <!-- Solo Administrador -->
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/reportes}">
                                 <i class="fa-solid fa-file-lines"></i> Reportes
                             </a>
@@ -123,17 +124,13 @@
                     <div class="app-topbar">
 
                         <div class="topbar-left">
-
-                            <!-- Botón hamburguesa -->
                             <button class="sidebar-toggle" id="sidebarToggle">
                                 <i class="fa-solid fa-bars"></i>
                             </button>
-
                             <h1 class="page-title"
                                 th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">
                                 Dashboard
                             </h1>
-
                         </div>
 
                         <div class="topbar-right d-flex align-items-center gap-2">
@@ -145,44 +142,28 @@
 
                             <!-- Usuario autenticado -->
                             <div class="dropdown" sec:authorize="isAuthenticated()">
-
                                 <a class="chip dropdown-toggle text-decoration-none"
-                                   href="#"
-                                   id="userDropdown"
-                                   role="button"
+                                   href="#" id="userDropdown" role="button"
                                    data-bs-toggle="dropdown">
-
                                     <i class="fa-regular fa-user"></i>
-
                                     <span class="d-none d-sm-inline"
-                                          sec:authentication="name">
-                                        Usuario
-                                    </span>
-
+                                          sec:authentication="name">Usuario</span>
                                 </a>
-
                                 <ul class="dropdown-menu dropdown-menu-end">
-
                                     <li>
-                                        <a class="dropdown-item"
-                                           th:href="@{/informacion-personal}">
-                                            <i class="fa-regular fa-id-card me-2"></i>
-                                            Mi perfil
+                                        <a class="dropdown-item" th:href="@{/informacion-personal}">
+                                            <i class="fa-regular fa-id-card me-2"></i>Mi perfil
                                         </a>
                                     </li>
-
                                     <li><hr class="dropdown-divider"/></li>
-
                                     <li>
                                         <form th:action="@{/logout}" method="post" class="m-0">
-                                            <button type="submit"
-                                                    class="dropdown-item text-danger">
+                                            <button type="submit" class="dropdown-item text-danger">
                                                 <i class="fa-solid fa-right-from-bracket me-2"></i>
                                                 Cerrar sesión
                                             </button>
                                         </form>
                                     </li>
-
                                 </ul>
                             </div>
 
@@ -221,9 +202,6 @@
                 <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span>
             </small>
         </footer>
-
-
-
 
     </body>
 </html>
