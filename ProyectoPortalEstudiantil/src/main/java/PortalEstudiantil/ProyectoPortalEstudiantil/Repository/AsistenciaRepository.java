@@ -1,0 +1,293 @@
+package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
+
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Asistencia;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDate;
+import java.util.List;
+
+public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
+
+    // ══════════════════════════════════════════════════════════════════
+    // PROYECCIONES
+    // ══════════════════════════════════════════════════════════════════
+    /**
+     * Fila del listado principal de asistencias.
+     */
+    interface AsistenciaListadoRow {
+
+        Long getIdAsistencia();
+
+        String getFechaAsistencia();
+
+        Long getIdMatriculaFk();
+
+        String getNombreEstudiante();
+
+        Long getIdSeccionMateriaFk();
+
+        String getNombreMateria();
+
+        String getNumeroSeccion();
+
+        String getNombreDocente();
+
+        Long getIdEstadoFk();
+
+        String getEstadoDescripcion();
+    }
+
+    /**
+     * Fila del pase de lista (un alumno por matrícula/sección-materia).
+     */
+    interface PaseListaRow {
+
+        Long getIdMatriculaFk();
+
+        String getNombreEstudiante();
+
+        String getNombreMateria();
+
+        String getNumeroSeccion();
+
+        Long getIdAsistencia();   // null si todavía no existe el registro
+
+        Long getIdEstadoFk();     // null si todavía no existe el registro
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // CONSULTAS – LISTADO
+    // ══════════════════════════════════════════════════════════════════
+    /**
+     * Todos los registros de asistencia (join completo).
+     */
+    @Query(value = """
+        SELECT
+            a.ID_ASISTENCIA          AS idAsistencia,
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            a.ID_MATRICULA_FK        AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante,
+            a.ID_SECCIONMATERIA_FK   AS idSeccionMateriaFk,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            CONCAT(d.NOMBRE, ' ', d.PRIMER_APELLIDO,
+                   CASE WHEN d.SEGUNDO_APELLIDO IS NULL OR d.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', d.SEGUNDO_APELLIDO) END
+            )                        AS nombreDocente,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN USUARIOS_TB        d  ON d.ID_USUARIO          = sm.ID_USUARIO_DOCENTE_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        ORDER BY a.FECHA_ASISTENCIA DESC, a.ID_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<AsistenciaListadoRow> listarTodas();
+
+    /**
+     * Filtro por sección-materia.
+     */
+    @Query(value = """
+        SELECT
+            a.ID_ASISTENCIA          AS idAsistencia,
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            a.ID_MATRICULA_FK        AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante,
+            a.ID_SECCIONMATERIA_FK   AS idSeccionMateriaFk,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            CONCAT(d.NOMBRE, ' ', d.PRIMER_APELLIDO,
+                   CASE WHEN d.SEGUNDO_APELLIDO IS NULL OR d.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', d.SEGUNDO_APELLIDO) END
+            )                        AS nombreDocente,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN USUARIOS_TB        d  ON d.ID_USUARIO          = sm.ID_USUARIO_DOCENTE_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        WHERE a.ID_SECCIONMATERIA_FK = :idSeccionMateria
+        ORDER BY a.FECHA_ASISTENCIA DESC, a.ID_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<AsistenciaListadoRow> listarPorSeccionMateria(
+            @Param("idSeccionMateria") Long idSeccionMateria);
+
+    /**
+     * Filtro por fecha.
+     */
+    @Query(value = """
+        SELECT
+            a.ID_ASISTENCIA          AS idAsistencia,
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            a.ID_MATRICULA_FK        AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante,
+            a.ID_SECCIONMATERIA_FK   AS idSeccionMateriaFk,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            CONCAT(d.NOMBRE, ' ', d.PRIMER_APELLIDO,
+                   CASE WHEN d.SEGUNDO_APELLIDO IS NULL OR d.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', d.SEGUNDO_APELLIDO) END
+            )                        AS nombreDocente,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN USUARIOS_TB        d  ON d.ID_USUARIO          = sm.ID_USUARIO_DOCENTE_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        WHERE a.FECHA_ASISTENCIA = :fecha
+        ORDER BY a.ID_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<AsistenciaListadoRow> listarPorFecha(
+            @Param("fecha") LocalDate fecha);
+
+    /**
+     * Filtro por sección-materia Y fecha.
+     */
+    @Query(value = """
+        SELECT
+            a.ID_ASISTENCIA          AS idAsistencia,
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            a.ID_MATRICULA_FK        AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante,
+            a.ID_SECCIONMATERIA_FK   AS idSeccionMateriaFk,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            CONCAT(d.NOMBRE, ' ', d.PRIMER_APELLIDO,
+                   CASE WHEN d.SEGUNDO_APELLIDO IS NULL OR d.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', d.SEGUNDO_APELLIDO) END
+            )                        AS nombreDocente,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN USUARIOS_TB        d  ON d.ID_USUARIO          = sm.ID_USUARIO_DOCENTE_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        WHERE a.ID_SECCIONMATERIA_FK = :idSeccionMateria
+          AND a.FECHA_ASISTENCIA = :fecha
+        ORDER BY a.ID_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<AsistenciaListadoRow> listarPorSeccionMateriaYFecha(
+            @Param("idSeccionMateria") Long idSeccionMateria,
+            @Param("fecha") LocalDate fecha);
+
+    // ══════════════════════════════════════════════════════════════════
+    // CONSULTAS – PASE DE LISTA
+    // ══════════════════════════════════════════════════════════════════
+    /**
+     * Devuelve todos los alumnos matriculados en la sección a la que pertenece
+     * la sección-materia, con el estado de asistencia existente para la fecha
+     * indicada (null si aún no hay registro).
+     */
+    @Query(value = """
+        SELECT
+            mt.ID_MATRICULA         AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                       AS nombreEstudiante,
+            m.NOMBRE                AS nombreMateria,
+            s.NUMERO                AS numeroSeccion,
+            a.ID_ASISTENCIA         AS idAsistencia,
+            a.ID_ESTADO_FK          AS idEstadoFk
+        FROM SECCIONMATERIA_TB sm
+        JOIN SECCION_TB        s   ON s.ID_SECCION  = sm.ID_SECCION_FK
+        JOIN MATERIA_TB        m   ON m.ID_MATERIA  = sm.ID_MATERIA_FK
+        JOIN MATRICULA_TB      mt  ON mt.ID_SECCION_FK = sm.ID_SECCION_FK
+                                  AND mt.ID_ESTADO_FK  = 1
+        JOIN USUARIOS_TB       u   ON u.ID_USUARIO  = mt.ID_USUARIO_ESTUDIANTE_FK
+        LEFT JOIN ASISTENCIAS_TB a ON a.ID_MATRICULA_FK       = mt.ID_MATRICULA
+                                  AND a.ID_SECCIONMATERIA_FK  = sm.ID_SECCIONMATERIA
+                                  AND a.FECHA_ASISTENCIA      = :fecha
+        WHERE sm.ID_SECCIONMATERIA = :idSeccionMateria
+          AND sm.ID_ESTADO_FK      = 1
+        ORDER BY u.PRIMER_APELLIDO, u.NOMBRE
+    """, nativeQuery = true)
+    List<PaseListaRow> cargarPaseLista(
+            @Param("idSeccionMateria") Long idSeccionMateria,
+            @Param("fecha") LocalDate fecha);
+
+    // ══════════════════════════════════════════════════════════════════
+    // CONTADORES (para tarjetas de estadísticas)
+    // ══════════════════════════════════════════════════════════════════
+    long countByIdEstadoFk(Long idEstadoFk);
+
+    // ══════════════════════════════════════════════════════════════════
+    // CRUD – stored procedures
+    // ══════════════════════════════════════════════════════════════════
+    @Modifying
+    @Transactional
+    @Query(value = """
+        CALL ASISTENCIAS_INSERTAR(
+            :fecha,
+            :idMatricula,
+            :idSeccionMateria,
+            :idEstado
+        )
+    """, nativeQuery = true)
+    void insertarAsistencia(
+            @Param("fecha") LocalDate fecha,
+            @Param("idMatricula") Long idMatricula,
+            @Param("idSeccionMateria") Long idSeccionMateria,
+            @Param("idEstado") Long idEstado
+    );
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        CALL ASISTENCIAS_MODIFICAR(
+            :idAsistencia,
+            :fecha,
+            :idMatricula,
+            :idSeccionMateria
+        )
+    """, nativeQuery = true)
+    void modificarAsistencia(
+            @Param("idAsistencia") Long idAsistencia,
+            @Param("fecha") LocalDate fecha,
+            @Param("idMatricula") Long idMatricula,
+            @Param("idSeccionMateria") Long idSeccionMateria
+    );
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        CALL ASISTENCIAS_CAMBIAR_ESTADO(
+            :idAsistencia,
+            :idEstado
+        )
+    """, nativeQuery = true)
+    void cambiarEstadoAsistencia(
+            @Param("idAsistencia") Long idAsistencia,
+            @Param("idEstado") Long idEstado
+    );
+}

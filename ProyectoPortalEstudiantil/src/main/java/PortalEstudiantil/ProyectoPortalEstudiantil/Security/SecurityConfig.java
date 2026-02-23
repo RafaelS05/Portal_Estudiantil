@@ -4,6 +4,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Service.PortalUserDetailsServ
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -13,15 +14,18 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity          // ← necesario para que @PreAuthorize funcione
 public class SecurityConfig {
 
     private final PortalUserDetailsService userDetailsService;
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
-    public SecurityConfig(PortalUserDetailsService userDetailsService,
+    public SecurityConfig(
+            PortalUserDetailsService userDetailsService,
             LoginSuccessHandler loginSuccessHandler,
-            LoginFailureHandler loginFailureHandler) {
+            LoginFailureHandler loginFailureHandler
+    ) {
         this.userDetailsService = userDetailsService;
         this.loginSuccessHandler = loginSuccessHandler;
         this.loginFailureHandler = loginFailureHandler;
@@ -49,27 +53,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index", "/login", "/error","/resetContrasenna/**, /gestionAcademica/**").permitAll()
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/",
+                    "/index",
+                    "/login",
+                    "/error",
+                    "/img/**",
+                    "/resetContrasenna/**",
+                    "/gestionAcademica/**"
+                    
+                ).permitAll()
                 .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
+            )
+            .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email") //
-                .passwordParameter("password") // 
-                .successHandler(loginSuccessHandler) // 
-                .failureHandler(loginFailureHandler) // 
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler)
                 .permitAll()
-                )
-                .logout(logout -> logout
+            )
+            .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-                );
+            );
 
         return http.build();
     }
