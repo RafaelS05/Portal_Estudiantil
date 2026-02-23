@@ -28,6 +28,10 @@ public class GestionAcademicaController {
     private SeccionMateriaService seccionMateriaService;
     @Autowired
     private HorarioService horarioService;
+    @Autowired
+    private MatriculaService matriculaService;
+    @Autowired
+    private UsuarioService usuarioService;
 
     @Autowired
     private PeriodoRepository periodoRepository;
@@ -39,6 +43,10 @@ public class GestionAcademicaController {
     private AulaRepository aulaRepository;
     @Autowired
     private SeccionMateriaRepository seccionMateriaRepository;
+    @Autowired
+    private MatriculaRepository matriculaRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @GetMapping
     public String index(@RequestParam(required = false, defaultValue = "periodos") String tab,
@@ -75,6 +83,11 @@ public class GestionAcademicaController {
         model.addAttribute("diasSemana", diasSemanaMap());
         model.addAttribute("horasDisponibles", horasDisponibles());
         model.addAttribute("totalHorariosActivos", horarioService.contarActivos());
+
+        //Matricula
+        model.addAttribute("todasMatriculas", matriculaService.listTodos());
+        model.addAttribute("estudiantesActivos", usuarioRepository.listarEstudiantes());
+        model.addAttribute("totalMatriculasActivas", matriculaService.contarActivas());
 
         //Comunes y js
         model.addAttribute("tabActivo", tab);

@@ -47,6 +47,6 @@ public class AulaController {
         aulaService.cambiarEstado(idAula, idEstado);
         String msg = idEstado == 1L ? "Aula activada." : "Aula desactivada.";
         flash.addFlashAttribute("mensajeExito", msg);
-        return "redirect:/gestion-academica/aulas/editar/" + idAula;
+        return "redirect:/gestionAcademica?tab=aulas";
     }
 }

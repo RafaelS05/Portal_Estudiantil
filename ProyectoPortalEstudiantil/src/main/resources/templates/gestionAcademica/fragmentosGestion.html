@@ -78,6 +78,13 @@
                         <i class="fa-solid fa-clock me-1"></i>Horarios
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-matriculas"
+                            data-bs-toggle="pill" data-bs-target="#panel-matriculas" type="button">
+                        <i class="fa-solid fa-user-graduate me-1"></i>Matrículas
+                    </button>
+                </li>
+
             </ul>
             <div th:replace="~{gestionAcademica/fragmentosGestion :: tabContenido}"></div>
         </section>
@@ -275,6 +282,12 @@
                                                 data-bs-toggle="modal" data-bs-target="#modal-seccion-editar">
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
+
+                                        <a class="btn btn-sm btn-outline-info"
+                                           th:href="@{/gestionAcademica/matricula/seccion/{id}(id=${s.idSeccion})}"
+                                           title="Ver estudiantes matriculados">
+                                            <i class="fa-solid fa-user-graduate"></i>
+                                        </a>
                                         <form th:action="@{/gestionAcademica/seccion/cambiar-estado}" method="post" class="m-0">
                                             <input type="hidden" name="idSeccion" th:value="${s.idSeccion}">
                                             <input type="hidden" name="idEstado"  th:value="${s.activa==1}?2:1">
@@ -500,6 +513,77 @@
                 </div>
             </div>
         </div><!-- /horarios -->
+
+        <!-- ═══════════════════════════════════════════════
+             PANEL 7 · MATRICULA
+             ═══════════════════════════════════════════════ -->
+        <div class="tab-pane fade" id="panel-matriculas" role="tabpanel">
+            <div class="row g-3 mb-3">
+                <div class="col-6 col-md-2">
+                    <div class="card stat-card p-3">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Activas</div>
+                        <div class="stat-val text-primary" th:text="${totalMatriculasActivas}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card tbl-card">
+                <div class="card-header d-flex align-items-center gap-2 flex-wrap">
+                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
+                           placeholder="Buscar matrícula…" oninput="filterTable('tbl-matriculas',this.value)">
+                    <button class="btn btn-primary btn-sm ms-auto"
+                            data-bs-toggle="modal" data-bs-target="#modal-matricula-nuevo">
+                        <i class="fa-solid fa-plus me-1"></i>Nueva Matrícula
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-matriculas" class="table mb-0">
+                        <thead><tr>
+                                <th>Sección</th><th>Estudiante</th>
+                                <th>Fecha Matrícula</th><th>Estado</th><th>Acciones</th>
+                            </tr></thead>
+                        <tbody>
+                            <tr th:each="m : ${todasMatriculas}">
+                                <td><span class="chip-sec" th:text="${m.numeroSeccion}"></span></td>
+                                <td th:text="${m.nombreCompleto}"></td>
+                                <td th:text="${m.fechaMatricula}"></td>
+                                <td>
+                                    <span th:class="${m.idEstadoFk==1}
+                                          ?'badge bg-success-subtle text-success'
+                                          :'badge bg-danger-subtle text-danger'"
+                                          th:text="${m.idEstadoFk==1}?'Activa':'Inactiva'"></span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/gestionAcademica/matricula/cambiar-estado}"
+                                          method="post" class="m-0">
+                                        <input type="hidden" name="idMatricula" th:value="${m.idMatricula}">
+                                        <input type="hidden" name="idEstado"
+                                               th:value="${m.idEstadoFk==1}?2:1">
+                                        <input type="hidden" name="tab" value="matriculas">
+                                        <button type="submit"
+                                                th:class="${m.idEstadoFk==1}
+                                                ?'btn btn-sm btn-outline-danger'
+                                                :'btn btn-sm btn-outline-success'">
+                                            <i th:class="${m.idEstadoFk==1}
+                                               ?'fa-solid fa-toggle-on'
+                                               :'fa-solid fa-toggle-off'"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(todasMatriculas)}">
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No hay matrículas registradas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    Mostrando <strong th:text="${#lists.size(todasMatriculas)}">0</strong> matrículas
+                </div>
+            </div>
+        </div><!-- /matriculas -->
+
 
     </div><!-- /tab-content -->
 
@@ -963,6 +1047,52 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════
+     MODALES · MATRÍCULAS
+     ════════════════════════════════════════════════════════════ -->
+
+    <!-- Nueva Matrícula -->
+    <div class="modal fade" id="modal-matricula-nuevo" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-user-graduate me-2 text-primary"></i>
+                        Nueva Matrícula
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/gestionAcademica/matricula/guardar}" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="tab" value="matriculas">
+                        <div class="mb-3">
+                            <label class="lbl">Sección</label>
+                            <select name="idSeccion" class="form-select" required>
+                                <option value="">Seleccione una sección…</option>
+                                <option th:each="s : ${seccionesActivas}"
+                                        th:value="${s.idSeccion}"
+                                        th:text="${s.numero}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="lbl">Estudiante</label>
+                            <select name="idEstudiante" class="form-select" required>
+                                <option value="">Seleccione un estudiante…</option>
+                                <option th:each="e : ${estudiantesActivos}"
+                                        th:value="${e.idUsuario}"
+                                        th:text="${e.nombre + ' ' + e.primerApellido}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Matricular</button>
                     </div>
                 </form>
             </div>
