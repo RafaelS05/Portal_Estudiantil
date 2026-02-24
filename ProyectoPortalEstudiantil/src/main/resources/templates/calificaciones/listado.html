@@ -7,6 +7,8 @@
     <title>Portal Estudiantil - Calificaciones</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <!-- REFERENCIA AL NUEVO ARCHIVO CSS DE CALIFICACIONES -->
+    <link rel="stylesheet" th:href="@{/css/calificaciones.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </th:block>
@@ -14,20 +16,43 @@
 <th:block th:fragment="contenido">
     <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
         <section id="contenido">
-            <div class="mb-3 d-flex justify-content-end">
-                <a th:href="@{/calificaciones/nuevo}" class="btn btn-primary btn-sm">
-                    <i class="fa-solid fa-plus me-1"></i>Ingresar Nota
-                </a>
+
+            <!-- NUEVA SECCIÓN: Controles de Búsqueda y Filtro -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+                <!-- Izquierda: Búsqueda -->
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="form-control" placeholder="Buscar estudiante...">
+                </div>
+
+                <!-- Derecha: Filtro y Botón Ingresar Nota (REUBICADO) -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Filtrar por grupo:</span>
+                        <select class="filter-select">
+                            <option value="todos" selected>Todos</option>
+                            <option value="grupoA">Grupo A</option>
+                            <option value="grupoB">Grupo B</option>
+                        </select>
+                    </div>
+                    <!-- Botón Ingresar Nota original, reubicado y con nuevo estilo -->
+                    <a th:href="@{/calificaciones/nuevo}" class="btn btn-primary-custom">
+                        <i class="fa-solid fa-plus me-1"></i>Ingresar Nota
+                    </a>
+                </div>
             </div>
 
+            <!-- Tarjeta de la tabla (con sombra y bordes redondeados) -->
             <div class="card tbl-card">
                 <div class="table-responsive">
-                    <table class="table mb-0">
+                    <!-- Añadida clase table-striped para filas alternadas -->
+                    <table class="table table-striped mb-0">
                         <thead>
                             <tr>
+                                <!-- ENCABEZADOS ACTUALIZADOS -->
                                 <th>Estudiante</th>
                                 <th>Evaluación</th>
-                                <th>Nota</th>
+                                <th>Calificación</th> <!-- Antes decía "Nota" -->
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -36,10 +61,17 @@
                                 <td class="fw-semibold" th:text="${c.estudiante}">Nombre Estudiante</td>
                                 <td th:text="${c.evaluacion}">Tipo Evaluación</td>
                                 <td>
+                                    <!-- Badge sin cambios funcionales -->
                                     <span class="badge bg-primary-subtle text-primary" th:text="${c.nota}">0.0</span>
                                 </td>
                                 <td>
-                                    <div class="d-flex gap-1 justify-content-center">
+                                    <!-- NUEVO: Grupo de botones con Editar y Eliminar -->
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <!-- NUEVO BOTÓN DE EDITAR (solo visual por ahora) -->
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </button>
+                                        <!-- BOTÓN DE ELIMINAR (sin cambios) -->
                                         <button type="button" 
                                                 class="btn btn-sm btn-outline-danger" 
                                                 data-bs-toggle="modal" 
@@ -48,6 +80,7 @@
                                         </button>
                                     </div>
 
+                                    <!-- MODAL DE ELIMINACIÓN (sin cambios) -->
                                     <div class="modal fade" th:id="'deleteModal' + ${c.id}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
@@ -65,7 +98,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    </td>
+                                </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(calificaciones)}">
                                 <td colspan="4" class="text-center text-muted py-4">No hay calificaciones registradas.</td>
@@ -73,8 +106,22 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer">
-                    Total de registros: <strong th:text="${#lists.size(calificaciones)}">0</strong>
+                <!-- NUEVO PIE DE TABLA: Información y Paginación -->
+                <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between py-3">
+                    <!-- Lado izquierdo: texto informativo (se puede mantener dinámico con Thymeleaf) -->
+                    <div class="text-muted small">
+                        Mostrando <span th:text="${#lists.size(calificaciones)}">6</span> de <span th:text="${totalCalificaciones} ?: ${#lists.size(calificaciones)}">100</span> calificaciones
+                    </div>
+                    <!-- Lado derecho: Controles de paginación (estáticos por ahora) -->
+                    <nav aria-label="Navegación de tabla">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item active" aria-current="page"><span class="page-link">1</span></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </section>
