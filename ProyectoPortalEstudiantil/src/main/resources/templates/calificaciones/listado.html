@@ -7,6 +7,7 @@
     <title>Portal Estudiantil - Calificaciones</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/calificaciones.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </th:block>
@@ -14,32 +15,64 @@
 <th:block th:fragment="contenido">
     <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
         <section id="contenido">
-            <div class="mb-3 d-flex justify-content-end">
-                <a th:href="@{/calificaciones/nuevo}" class="btn btn-primary btn-sm">
-                    <i class="fa-solid fa-plus me-1"></i>Ingresar Nota
-                </a>
-            </div>
+
+            <form method="get" action="/calificaciones/paginado" class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" name="busqueda" class="form-control" 
+                           placeholder="Buscar estudiante..." 
+                           th:value="${busquedaActual}">
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Filtrar por sección:</span>
+                        <select name="seccion" class="filter-select" onchange="this.form.submit()">
+                            <option value="">Todas las secciones</option>
+                            <option th:each="s : ${secciones}" 
+                                    th:value="${s.id}" 
+                                    th:text="${s.nombre}"
+                                    th:selected="${s.id == seccionActual}">
+                            </option>
+                        </select>
+                    </div>
+                    <a th:href="@{/calificaciones/nuevo}" class="btn btn-primary-custom">
+                        <i class="fa-solid fa-plus me-1"></i>Ingresar Nota
+                    </a>
+                </div>
+                
+                <input type="hidden" name="pagina" value="1" />
+            </form>
 
             <div class="card tbl-card">
                 <div class="table-responsive">
-                    <table class="table mb-0">
+                    <table class="table table-striped mb-0">
                         <thead>
                             <tr>
                                 <th>Estudiante</th>
+                                <th>Sección</th>       
+                                <th>Correo</th>         
+                                <th>Materia</th>         
                                 <th>Evaluación</th>
-                                <th>Nota</th>
+                                <th>Calificación</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="c : ${calificaciones}">
                                 <td class="fw-semibold" th:text="${c.estudiante}">Nombre Estudiante</td>
+                                <td th:text="${c.seccion}">7-A</td>                   
+                                <td th:text="${c.correo}">estudiante@email.com</td>    
+                                <td th:text="${c.materia}">Matemáticas</td>          
                                 <td th:text="${c.evaluacion}">Tipo Evaluación</td>
                                 <td>
                                     <span class="badge bg-primary-subtle text-primary" th:text="${c.nota}">0.0</span>
                                 </td>
                                 <td>
-                                    <div class="d-flex gap-1 justify-content-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </button>
                                         <button type="button" 
                                                 class="btn btn-sm btn-outline-danger" 
                                                 data-bs-toggle="modal" 
@@ -65,16 +98,51 @@
                                             </div>
                                         </div>
                                     </div>
-                                    </td>
+                                </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(calificaciones)}">
-                                <td colspan="4" class="text-center text-muted py-4">No hay calificaciones registradas.</td>
+                                <td colspan="7" class="text-center text-muted py-4">No hay calificaciones registradas.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer">
-                    Total de registros: <strong th:text="${#lists.size(calificaciones)}">0</strong>
+                
+                <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between py-3">
+
+                    <div class="text-muted small">
+                        Mostrando <span th:text="${#lists.size(calificaciones)}"></span> de 
+                        <span th:text="${totalElementos}"></span> calificaciones
+                    </div>
+                    
+                    <nav aria-label="Navegación de páginas" th:if="${totalPaginas > 1}">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/calificaciones/paginado(busqueda=${busquedaActual}, seccion=${seccionActual}, pagina=${paginaActual - 1})}"
+                                   aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            <th:block th:with="startPage=${(paginaActual - 2) < 1 ? 1 : (paginaActual - 2)},
+                                               endPage=${(startPage + 4) > totalPaginas ? totalPaginas : (startPage + 4)}">
+                                <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" 
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link" 
+                                       th:href="@{/calificaciones/paginado(busqueda=${busquedaActual}, seccion=${seccionActual}, pagina=${i})}"
+                                       th:text="${i}">1</a>
+                                </li>
+                            </th:block>
+                            
+                            <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/calificaciones/paginado(busqueda=${busquedaActual}, seccion=${seccionActual}, pagina=${paginaActual + 1})}"
+                                   aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </section>
