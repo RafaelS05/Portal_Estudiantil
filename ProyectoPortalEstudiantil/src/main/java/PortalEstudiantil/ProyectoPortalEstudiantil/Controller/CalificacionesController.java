@@ -8,6 +8,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Calificaciones;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EvaluacionRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MatriculaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.CalificacionesService;
+import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 /**
  *
@@ -41,6 +44,31 @@ public class CalificacionesController {
         var lista = calificacionesService.listarCalificacionesParaVista();
         model.addAttribute("calificaciones", lista);
         return "calificaciones/listado";
+    }
+    
+    @GetMapping("/paginado")
+    public String listadoPaginado(
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(required = false) Long seccion,
+            @RequestParam(defaultValue = "1") int pagina,
+            Model model) {
+        
+        int tamanoPagina = 10;
+        
+        Map<String, Object> resultado = calificacionesService.listarCalificacionesParaVistaPaginado(
+                busqueda, seccion, pagina, tamanoPagina);
+        
+        model.addAttribute("calificaciones", resultado.get("calificaciones"));
+        model.addAttribute("paginaActual", resultado.get("paginaActual"));
+        model.addAttribute("totalPaginas", resultado.get("totalPaginas"));
+        model.addAttribute("totalElementos", resultado.get("totalElementos"));
+        model.addAttribute("tamanoPagina", resultado.get("tamanoPagina"));
+        
+        model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
+        model.addAttribute("busquedaActual", busqueda);
+        model.addAttribute("seccionActual", seccion);
+        
+        return "calificaciones/listado-paginado"; 
     }
 
     @GetMapping("/nuevo")

@@ -11,29 +11,38 @@ import java.math.BigDecimal;
  *
  * @author marjo
  */
-
 @Entity
 @Table(name = "CALIFICACIONES_TB")
 
 public class Calificaciones {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID_CALIFICACIONES")
     private Long idCalificaciones;
-    
+
     @Column(name = "ID_ESTADO_FK")
     private Long idEstadoFk;
-    
+
     @Column(name = "CALIFICACION", precision = 5, scale = 2)
     private java.math.BigDecimal calificacion;
-  
+
     @ManyToOne
     @JoinColumn(name = "ID_MATRICULA_FK")
     private Matricula matricula;
- 
+
     @ManyToOne
     @JoinColumn(name = "ID_EVALUACION_FK")
     private Evaluacion evaluacion;
+
+    @Transient
+    private String seccion;
+
+    @Transient
+    private String correo;
+
+    @Transient
+    private String materia;
 
     public Long getIdCalificaciones() {
         return idCalificaciones;
@@ -74,6 +83,29 @@ public class Calificaciones {
     public void setIdEstadoFk(Long idEstadoFk) {
         this.idEstadoFk = idEstadoFk;
     }
-    
-   
+
+    public String getSeccion() {
+        return seccion;
+    }
+
+    public void setSeccion(String seccion) {
+        this.seccion = seccion;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getMateria() {
+        return materia;
+    }
+
+    public void setMateria(String materia) {
+        this.materia = materia;
+    }
+
 }
