@@ -235,17 +235,20 @@
 
         <script th:inline="javascript">
             /*<![CDATA[*/
-            const seccionLabels   = /*[[${seccionLabels}]]*/   [];
-            const seccionData     = /*[[${seccionPromedios}]]*/ [];
-            const materiaLabels   = /*[[${materiaLabels}]]*/   [];
-            const materiaData     = /*[[${materiaPromedios}]]*/ [];
-            const umbral          = /*[[${umbral}]]*/ 70;
+            const seccionLabels = JSON.parse(/*[[${seccionLabels}]]*/ '[]');
+            const seccionData = JSON.parse(/*[[${seccionPromedios}]]*/ '[]');
+            const materiaLabels = JSON.parse(/*[[${materiaLabels}]]*/ '[]');
+            const materiaData = JSON.parse(/*[[${materiaPromedios}]]*/ '[]');
+            const umbral = /*[[${umbral}]]*/ 70;
 
             // Colores según rendimiento
             function colorBarra(valor) {
-                if (valor >= 80) return 'rgba(56,142,60,0.75)';
-                if (valor >= umbral) return 'rgba(25,118,210,0.75)';
-                if (valor >= 60) return 'rgba(245,124,0,0.75)';
+                if (valor >= 80)
+                    return 'rgba(56,142,60,0.75)';
+                if (valor >= umbral)
+                    return 'rgba(25,118,210,0.75)';
+                if (valor >= 60)
+                    return 'rgba(245,124,0,0.75)';
                 return 'rgba(211,47,47,0.75)';
             }
 
@@ -257,22 +260,22 @@
                     data: {
                         labels: seccionLabels,
                         datasets: [{
-                            label: 'Promedio',
-                            data: seccionData,
-                            backgroundColor: seccionData.map(colorBarra),
-                            borderRadius: 6
-                        }]
+                                label: 'Promedio',
+                                data: seccionData,
+                                backgroundColor: seccionData.map(colorBarra),
+                                borderRadius: 6
+                            }]
                     },
                     options: {
                         responsive: true,
-                        plugins: { legend: { display: false } },
+                        plugins: {legend: {display: false}},
                         scales: {
                             y: {
                                 min: 0, max: 100,
-                                ticks: { stepSize: 20 },
-                                grid: { color: '#f0f0f0' }
+                                ticks: {stepSize: 20},
+                                grid: {color: '#f0f0f0'}
                             },
-                            x: { grid: { display: false } }
+                            x: {grid: {display: false}}
                         }
                     }
                 });
@@ -286,23 +289,23 @@
                     data: {
                         labels: materiaLabels,
                         datasets: [{
-                            label: 'Promedio',
-                            data: materiaData,
-                            backgroundColor: materiaData.map(colorBarra),
-                            borderRadius: 6
-                        }]
+                                label: 'Promedio',
+                                data: materiaData,
+                                backgroundColor: materiaData.map(colorBarra),
+                                borderRadius: 6
+                            }]
                     },
                     options: {
                         indexAxis: 'y',
                         responsive: true,
-                        plugins: { legend: { display: false } },
+                        plugins: {legend: {display: false}},
                         scales: {
                             x: {
                                 min: 0, max: 100,
-                                ticks: { stepSize: 20 },
-                                grid: { color: '#f0f0f0' }
+                                ticks: {stepSize: 20},
+                                grid: {color: '#f0f0f0'}
                             },
-                            y: { grid: { display: false } }
+                            y: {grid: {display: false}}
                         }
                     }
                 });

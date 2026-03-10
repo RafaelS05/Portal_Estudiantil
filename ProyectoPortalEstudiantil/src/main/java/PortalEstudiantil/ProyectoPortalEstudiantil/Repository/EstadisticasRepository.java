@@ -18,7 +18,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // RESOLVER ID_USUARIO DESDE CREDENCIAL (sin tocar AuthRepository)
     // =========================================================
-
     @Query(value = """
         SELECT ID_USUARIO_FK
         FROM CREDENCIALES_TB
@@ -30,7 +29,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // PERÍODO MÁS RECIENTE
     // =========================================================
-
     @Query(value = """
         SELECT p.*
         FROM PERIODOS_TB p
@@ -43,38 +41,41 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // KPI GENERAL (tarjetas superiores del dashboard)
     // =========================================================
-
     @Query(value = """
-        SELECT
-            ROUND(AVG(c.CALIFICACION), 2)                          AS promedioGlobal,
-            ROUND(
-                SUM(CASE WHEN est_a.DESCRIPCION = 'PRESENTE' THEN 1 ELSE 0 END)
-                * 100.0
-                / NULLIF(COUNT(DISTINCT a.ID_ASISTENCIA), 0)
-            , 2)                                                    AS porcentajeAsistenciaGlobal,
-            (SELECT COUNT(*) FROM USUARIOS_TB u
-             WHERE u.ID_TIPOUSUARIO_FK = (
-                 SELECT ID_TIPOUSUARIO FROM TIPOUSUARIO_TB WHERE NOMBRE = 'Estudiante' LIMIT 1)
-             AND u.ID_ESTADO_FK = (
-                 SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' LIMIT 1)
-            )                                                       AS totalEstudiantesActivos,
-            (SELECT COUNT(*) FROM (
-                SELECT sm.ID_SECCION_FK
-                FROM CALIFICACIONES_TB cal
-                JOIN EVALUACION_TB ev      ON cal.ID_EVALUACION_FK = ev.ID_EVALUACION
-                JOIN SECCIONMATERIA_TB sm  ON ev.ID_SECCIONMATERIA_FK = sm.ID_SECCIONMATERIA
-                WHERE ev.ID_PERIODO_FK = :idPeriodo
-                GROUP BY sm.ID_SECCION_FK
-                HAVING AVG(cal.CALIFICACION) < :umbralCritico
-            ) alertas)                                             AS totalAlertasCalificacion
-        FROM CALIFICACIONES_TB c
-        JOIN EVALUACION_TB ev          ON c.ID_EVALUACION_FK = ev.ID_EVALUACION
-        JOIN SECCIONMATERIA_TB sm      ON ev.ID_SECCIONMATERIA_FK = sm.ID_SECCIONMATERIA
-        LEFT JOIN MATRICULA_TB m       ON c.ID_MATRICULA_FK = m.ID_MATRICULA
-        LEFT JOIN ASISTENCIAS_TB a     ON a.ID_MATRICULA_FK = m.ID_MATRICULA
-        LEFT JOIN ESTADOS_TB est_a     ON a.ID_ESTADO_FK = est_a.ID_ESTADO
-        WHERE ev.ID_PERIODO_FK = :idPeriodo
-    """, nativeQuery = true)
+    SELECT
+        ROUND(AVG(c.CALIFICACION), 2) AS promedioGlobal,
+        (SELECT ROUND(
+            SUM(CASE WHEN est_a.DESCRIPCION = 'PRESENTE' THEN 1 ELSE 0 END)
+            * 100.0 / NULLIF(COUNT(a.ID_ASISTENCIA), 0)
+        , 2)
+        FROM ASISTENCIAS_TB a
+        JOIN ESTADOS_TB est_a ON a.ID_ESTADO_FK = est_a.ID_ESTADO
+        WHERE a.ID_MATRICULA_FK IN (
+            SELECT m.ID_MATRICULA
+            FROM MATRICULA_TB m
+            JOIN SECCION_TB sc ON m.ID_SECCION_FK = sc.ID_SECCION
+            WHERE sc.ID_PERIODO_FK = :idPeriodo
+        )
+        ) AS porcentajeAsistenciaGlobal,
+        (SELECT COUNT(*) FROM USUARIOS_TB u
+         WHERE u.ID_TIPOUSUARIO_FK = (
+             SELECT ID_TIPOUSUARIO FROM TIPOUSUARIO_TB WHERE NOMBRE = 'Estudiante' LIMIT 1)
+         AND u.ID_ESTADO_FK = (
+             SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' LIMIT 1)
+        ) AS totalEstudiantesActivos,
+        (SELECT COUNT(*) FROM (
+            SELECT sm.ID_SECCION_FK
+            FROM CALIFICACIONES_TB cal
+            JOIN EVALUACION_TB ev      ON cal.ID_EVALUACION_FK = ev.ID_EVALUACION
+            JOIN SECCIONMATERIA_TB sm  ON ev.ID_SECCIONMATERIA_FK = sm.ID_SECCIONMATERIA
+            WHERE ev.ID_PERIODO_FK = :idPeriodo
+            GROUP BY sm.ID_SECCION_FK
+            HAVING AVG(cal.CALIFICACION) < :umbralCritico
+        ) alertas) AS totalAlertasCalificacion
+    FROM CALIFICACIONES_TB c
+    JOIN EVALUACION_TB ev ON c.ID_EVALUACION_FK = ev.ID_EVALUACION
+    WHERE ev.ID_PERIODO_FK = :idPeriodo
+""", nativeQuery = true)
     KpiGeneralRow obtenerKpiGeneral(
             @Param("idPeriodo") Long idPeriodo,
             @Param("umbralCritico") Double umbralCritico
@@ -83,7 +84,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // CALIFICACIONES POR SECCIÓN
     // =========================================================
-
     @Query(value = """
         SELECT
             s.NUMERO                         AS seccion,
@@ -105,7 +105,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // CALIFICACIONES POR MATERIA
     // =========================================================
-
     @Query(value = """
         SELECT
             mt.NOMBRE                         AS materia,
@@ -124,7 +123,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     // =========================================================
     // ASISTENCIA DE ESTUDIANTES DE UN ENCARGADO
     // =========================================================
-
     @Query(value = """
         SELECT
             u.ID_USUARIO                                             AS idEstudiante,
@@ -151,13 +149,12 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     """, nativeQuery = true)
     List<AsistenciaEstudianteRow> asistenciaHijosEncargado(
             @Param("idEncargado") Long idEncargado,
-            @Param("idPeriodo")   Long idPeriodo
+            @Param("idPeriodo") Long idPeriodo
     );
 
     // =========================================================
     // ALERTAS — secciones con promedio por debajo del umbral
     // =========================================================
-
     @Query(value = """
         SELECT
             'SECCIÓN'                        AS tipo,
@@ -193,6 +190,6 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
     """, nativeQuery = true)
     List<AlertaEstadisticaRow> obtenerAlertas(
             @Param("idPeriodo") Long idPeriodo,
-            @Param("umbral")    Double umbral
+            @Param("umbral") Double umbral
     );
 }
