@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- ENCABEZADO -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">Estadísticas de Asistencia</h2>
+                        <p class="text-muted mb-0">
+                            Período: <span class="fw-semibold" th:text="${periodo.nombre}">—</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- MENSAJE -->
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}"
+                     role="alert">
+                    [[${mensaje}]]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- SIN HIJOS VINCULADOS -->
+                <div th:if="${asistencias == null || asistencias.isEmpty()}"
+                     class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5 text-muted">
+                        <i class="fa-solid fa-child fa-3x mb-3 d-block"></i>
+                        <h5>Sin datos de asistencia</h5>
+                        <p class="mb-0 small">
+                            No hay registros de asistencia para sus hijos en este período,
+                            o aún no tiene estudiantes vinculados.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CONTENIDO CON DATOS -->
+                <div th:unless="${asistencias == null || asistencias.isEmpty()}">
+
+                    <!-- ======================================================== -->
+                    <!-- GRÁFICO DE DONA + TABLA RESUMEN                          -->
+                    <!-- ======================================================== -->
+                    <div class="row g-4 mb-4">
+
+                        <!-- Gráfico de dona -->
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                    <h6 class="fw-semibold mb-0">
+                                        <i class="fa-solid fa-chart-pie me-2 text-primary"></i>
+                                        % Asistencia por Estudiante
+                                    </h6>
+                                </div>
+                                <div class="card-body d-flex align-items-center justify-content-center">
+                                    <canvas id="chartDona" style="max-height:280px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tarjetas individuales por hijo -->
+                        <div class="col-lg-7">
+                            <div class="row g-3">
+                                <div class="col-12" th:each="est, stat : ${asistencias}">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-body py-3">
+
+                                            <!-- Nombre y sección -->
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                                         th:with="colorIndex=${stat.index % 5}"
+                                                         th:style="${colorIndex == 0 ? 'width:38px;height:38px;font-size:13px;font-weight:600;background:#e3f2fd;color:#1976d2' :
+                                                                   colorIndex == 1 ? 'width:38px;height:38px;font-size:13px;font-weight:600;background:#f3e5f5;color:#7b1fa2' :
+                                                                   colorIndex == 2 ? 'width:38px;height:38px;font-size:13px;font-weight:600;background:#e8f5e9;color:#388e3c' :
+                                                                   colorIndex == 3 ? 'width:38px;height:38px;font-size:13px;font-weight:600;background:#fff3e0;color:#f57c00' :
+                                                                                    'width:38px;height:38px;font-size:13px;font-weight:600;background:#fce4ec;color:#c2185b'}">
+                                                        <span th:text="${#strings.toUpperCase(#strings.substring(est.nombreEstudiante,0,1))}">A</span>
+                                                    </div>
+                                                    <div>
+                                                        <p class="fw-semibold mb-0" th:text="${est.nombreEstudiante}">Nombre</p>
+                                                        <small class="text-muted">Sección <span th:text="${est.seccion}">—</span></small>
+                                                    </div>
+                                                </div>
+                                                <!-- % con color semáforo -->
+                                                <span class="fs-5 fw-bold"
+                                                      th:classappend="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80 ? ' text-success' :
+                                                                       est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 ? ' text-warning' : ' text-danger'}"
+                                                      th:text="${est.porcentajeAsistencia != null ? #numbers.formatDecimal(est.porcentajeAsistencia,1,1) + '%' : '—'}">
+                                                    —
+                                                </span>
+                                            </div>
+
+                                            <!-- Barra de progreso -->
+                                            <div class="progress" style="height:8px;">
+                                                <div class="progress-bar"
+                                                     th:classappend="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80 ? ' bg-success' :
+                                                                      est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 ? ' bg-warning' : ' bg-danger'}"
+                                                     role="progressbar"
+                                                     th:style="'width:' + (est.porcentajeAsistencia != null ? est.porcentajeAsistencia : 0) + '%'">
+                                                </div>
+                                            </div>
+
+                                            <!-- Detalle presentes / ausentes -->
+                                            <div class="d-flex gap-3 mt-2">
+                                                <small class="text-success">
+                                                    <i class="fa-solid fa-circle-check me-1"></i>
+                                                    Presentes: <span th:text="${est.totalPresente}">0</span>
+                                                </small>
+                                                <small class="text-danger">
+                                                    <i class="fa-solid fa-circle-xmark me-1"></i>
+                                                    Ausentes: <span th:text="${est.totalAusente}">0</span>
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fa-solid fa-calendar me-1"></i>
+                                                    Total clases: <span th:text="${est.totalClases}">0</span>
+                                                </small>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ======================================================== -->
+                    <!-- TABLA RESUMEN COMPLETA                                   -->
+                    <!-- ======================================================== -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white pt-3 pb-2">
+                            <h6 class="fw-semibold mb-0">
+                                <i class="fa-solid fa-table me-2 text-secondary"></i>
+                                Resumen Detallado
+                            </h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Estudiante</th>
+                                            <th>Sección</th>
+                                            <th>Total clases</th>
+                                            <th>Presentes</th>
+                                            <th>Ausentes</th>
+                                            <th>% Asistencia</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="est : ${asistencias}">
+                                            <td class="fw-semibold" th:text="${est.nombreEstudiante}">—</td>
+                                            <td th:text="${est.seccion}">—</td>
+                                            <td th:text="${est.totalClases}">0</td>
+                                            <td class="text-success fw-semibold" th:text="${est.totalPresente}">0</td>
+                                            <td class="text-danger fw-semibold" th:text="${est.totalAusente}">0</td>
+                                            <td class="fw-bold"
+                                                th:classappend="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80 ? ' text-success' :
+                                                                 est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 ? ' text-warning' : ' text-danger'}"
+                                                th:text="${est.porcentajeAsistencia != null ? #numbers.formatDecimal(est.porcentajeAsistencia,1,1) + '%' : '—'}">
+                                                —
+                                            </td>
+                                            <td>
+                                                <span th:if="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80}"
+                                                      class="badge bg-success-subtle text-success">Buena</span>
+                                                <span th:if="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 && est.porcentajeAsistencia < 80}"
+                                                      class="badge bg-warning-subtle text-warning">Regular</span>
+                                                <span th:if="${est.porcentajeAsistencia == null || est.porcentajeAsistencia < 60}"
+                                                      class="badge bg-danger-subtle text-danger">Crítica</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- fin th:unless -->
+
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const hijosLabels     = /*[[${hijosLabels}]]*/     [];
+            const hijosAsistencia = /*[[${hijosAsistencia}]]*/ [];
+
+            const coloresDona = [
+                'rgba(25,118,210,0.8)',
+                'rgba(123,31,162,0.8)',
+                'rgba(56,142,60,0.8)',
+                'rgba(245,124,0,0.8)',
+                'rgba(194,24,91,0.8)'
+            ];
+
+            const ctxDona = document.getElementById('chartDona');
+            if (ctxDona && hijosLabels.length > 0) {
+                new Chart(ctxDona, {
+                    type: 'doughnut',
+                    data: {
+                        labels: hijosLabels,
+                        datasets: [{
+                            data: hijosAsistencia,
+                            backgroundColor: coloresDona.slice(0, hijosLabels.length),
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ` ${ctx.parsed.toFixed(1)}% asistencia`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            /*]]>*/
+        </script>
+    </body>
+</html>

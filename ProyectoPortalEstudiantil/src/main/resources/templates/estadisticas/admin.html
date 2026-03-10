@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- ENCABEZADO -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">Panel de Estadísticas</h2>
+                        <p class="text-muted mb-0">
+                            Período: <span class="fw-semibold" th:text="${periodo.nombre}">—</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- MENSAJE DE ERROR -->
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}"
+                     role="alert">
+                    [[${mensaje}]]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- TARJETAS KPI                                              -->
+                <!-- ======================================================== -->
+                <div class="row g-3 mb-4">
+
+                    <!-- Promedio global -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:52px;height:52px;background:#e3f2fd;">
+                                    <i class="fa-solid fa-graduation-cap fa-lg" style="color:#1976d2;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-muted small mb-0">Promedio Global</p>
+                                    <h4 class="fw-bold mb-0"
+                                        th:text="${kpi != null && kpi.promedioGlobal != null ? #numbers.formatDecimal(kpi.promedioGlobal,1,2) : '—'}">
+                                        —
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- % Asistencia global -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:52px;height:52px;background:#e8f5e9;">
+                                    <i class="fa-solid fa-clipboard-check fa-lg" style="color:#388e3c;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-muted small mb-0">Asistencia Global</p>
+                                    <h4 class="fw-bold mb-0"
+                                        th:text="${kpi != null && kpi.porcentajeAsistenciaGlobal != null ? #numbers.formatDecimal(kpi.porcentajeAsistenciaGlobal,1,1) + '%' : '—'}">
+                                        —
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total estudiantes activos -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:52px;height:52px;background:#f3e5f5;">
+                                    <i class="fa-solid fa-users fa-lg" style="color:#7b1fa2;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-muted small mb-0">Estudiantes Activos</p>
+                                    <h4 class="fw-bold mb-0"
+                                        th:text="${kpi != null && kpi.totalEstudiantesActivos != null ? kpi.totalEstudiantesActivos : '—'}">
+                                        —
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alertas activas -->
+                    <div class="col-sm-6 col-xl-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width:52px;height:52px;background:#fff3e0;">
+                                    <i class="fa-solid fa-triangle-exclamation fa-lg" style="color:#f57c00;"></i>
+                                </div>
+                                <div>
+                                    <p class="text-muted small mb-0">Alertas Activas</p>
+                                    <h4 class="fw-bold mb-0"
+                                        th:text="${kpi != null && kpi.totalAlertasCalificacion != null ? kpi.totalAlertasCalificacion : '0'}">
+                                        0
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- GRÁFICOS                                                  -->
+                <!-- ======================================================== -->
+                <div class="row g-4 mb-4">
+
+                    <!-- Gráfico de barras: promedio por sección -->
+                    <div class="col-lg-7">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                <h6 class="fw-semibold mb-0">
+                                    <i class="fa-solid fa-chart-bar me-2 text-primary"></i>
+                                    Promedio de Calificaciones por Sección
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${porSeccion == null || porSeccion.isEmpty()}"
+                                     class="text-center text-muted py-5">
+                                    <i class="fa-solid fa-chart-bar fa-3x mb-3 d-block"></i>
+                                    <p class="mb-0">Sin datos para este período</p>
+                                </div>
+                                <canvas th:unless="${porSeccion == null || porSeccion.isEmpty()}"
+                                        id="chartSeccion" style="max-height:320px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico horizontal: promedio por materia -->
+                    <div class="col-lg-5">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                <h6 class="fw-semibold mb-0">
+                                    <i class="fa-solid fa-book-open me-2 text-success"></i>
+                                    Promedio por Materia
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${porMateria == null || porMateria.isEmpty()}"
+                                     class="text-center text-muted py-5">
+                                    <i class="fa-solid fa-book fa-3x mb-3 d-block"></i>
+                                    <p class="mb-0">Sin datos para este período</p>
+                                </div>
+                                <canvas th:unless="${porMateria == null || porMateria.isEmpty()}"
+                                        id="chartMateria" style="max-height:320px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================================================== -->
+                <!-- PANEL DE ALERTAS                                         -->
+                <!-- ======================================================== -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white pt-3 pb-2 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-warning"></i>
+                        <h6 class="fw-semibold mb-0">
+                            Alertas — Promedios por debajo de
+                            <span th:text="${umbral}">70</span>
+                        </h6>
+                    </div>
+
+                    <div class="card-body p-0">
+
+                        <!-- Sin alertas -->
+                        <div th:if="${alertas == null || alertas.isEmpty()}"
+                             class="text-center text-muted py-5">
+                            <i class="fa-solid fa-circle-check fa-3x mb-3 d-block text-success"></i>
+                            <h6>¡Todo en orden!</h6>
+                            <p class="mb-0 small">No hay secciones ni materias con promedios críticos.</p>
+                        </div>
+
+                        <!-- Tabla de alertas -->
+                        <div th:unless="${alertas == null || alertas.isEmpty()}"
+                             class="table-responsive">
+                            <table class="table align-middle table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tipo</th>
+                                        <th>Nombre</th>
+                                        <th>Promedio</th>
+                                        <th>Estudiantes afectados</th>
+                                        <th>Nivel</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="alerta : ${alertas}">
+                                        <td>
+                                            <span th:if="${alerta.tipo == 'SECCIÓN'}"
+                                                  class="badge bg-primary-subtle text-primary">
+                                                <i class="fa-solid fa-layer-group me-1"></i>Sección
+                                            </span>
+                                            <span th:unless="${alerta.tipo == 'SECCIÓN'}"
+                                                  class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-book me-1"></i>Materia
+                                            </span>
+                                        </td>
+                                        <td class="fw-semibold" th:text="${alerta.nombre}">—</td>
+                                        <td>
+                                            <span class="fw-bold"
+                                                  th:classappend="${alerta.promedio < 60 ? ' text-danger' : ' text-warning'}"
+                                                  th:text="${#numbers.formatDecimal(alerta.promedio,1,2)}">
+                                                0
+                                            </span>
+                                        </td>
+                                        <td th:text="${alerta.totalAfectados}">0</td>
+                                        <td>
+                                            <span th:if="${alerta.promedio < 60}"
+                                                  class="badge bg-danger">Crítico</span>
+                                            <span th:unless="${alerta.promedio < 60}"
+                                                  class="badge bg-warning text-dark">Atención</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const seccionLabels   = /*[[${seccionLabels}]]*/   [];
+            const seccionData     = /*[[${seccionPromedios}]]*/ [];
+            const materiaLabels   = /*[[${materiaLabels}]]*/   [];
+            const materiaData     = /*[[${materiaPromedios}]]*/ [];
+            const umbral          = /*[[${umbral}]]*/ 70;
+
+            // Colores según rendimiento
+            function colorBarra(valor) {
+                if (valor >= 80) return 'rgba(56,142,60,0.75)';
+                if (valor >= umbral) return 'rgba(25,118,210,0.75)';
+                if (valor >= 60) return 'rgba(245,124,0,0.75)';
+                return 'rgba(211,47,47,0.75)';
+            }
+
+            // Gráfico barras — por sección
+            const ctxSec = document.getElementById('chartSeccion');
+            if (ctxSec) {
+                new Chart(ctxSec, {
+                    type: 'bar',
+                    data: {
+                        labels: seccionLabels,
+                        datasets: [{
+                            label: 'Promedio',
+                            data: seccionData,
+                            backgroundColor: seccionData.map(colorBarra),
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                min: 0, max: 100,
+                                ticks: { stepSize: 20 },
+                                grid: { color: '#f0f0f0' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico barras horizontales — por materia
+            const ctxMat = document.getElementById('chartMateria');
+            if (ctxMat) {
+                new Chart(ctxMat, {
+                    type: 'bar',
+                    data: {
+                        labels: materiaLabels,
+                        datasets: [{
+                            label: 'Promedio',
+                            data: materiaData,
+                            backgroundColor: materiaData.map(colorBarra),
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                min: 0, max: 100,
+                                ticks: { stepSize: 20 },
+                                grid: { color: '#f0f0f0' }
+                            },
+                            y: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+            /*]]>*/
+        </script>
+    </body>
+</html>
