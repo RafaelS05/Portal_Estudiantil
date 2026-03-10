@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="head">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Portal Estudiantil - Evaluaciones</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/evaluaciones.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</th:block>
+
+<th:block th:fragment="contenido">
+    <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
+        <section id="contenido">
+
+            <form method="get" action="/evaluaciones/paginado" 
+                  class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+                <div class="search-input-group">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" name="busqueda" class="form-control" 
+                           placeholder="Buscar evaluación..." 
+                           th:value="${busquedaActual}">
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a th:href="@{/evaluaciones/nuevo}" class="btn btn-primary-custom">
+                        <i class="fa-solid fa-plus me-1"></i>Nueva Evaluación
+                    </a>
+                </div>
+                
+                <input type="hidden" name="pagina" value="1" />
+            </form>
+
+            <div class="card tbl-card">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Porcentaje</th>
+                                <th>Sección</th>
+                                <th>Periodo</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="e : ${evaluaciones}">
+                                <td class="fw-semibold" th:text="${e.tipo}">Examen Parcial</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary" 
+                                          th:text="${e.porcentaje}">0.0</span>
+                                </td>
+                                <td th:text="${e.seccionMateria?.nombreCompleto}">7-A</td>
+                                <td th:text="${e.periodo?.nombre}">2026-I</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a th:href="@{/evaluaciones/actualizar/{id}(id=${e.idEvaluacion})}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fa-solid fa-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/evaluaciones/estado/{id}(id=${e.idEvaluacion}, estado=2)}" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="fa-solid fa-ban"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(evaluaciones)}">
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No hay evaluaciones registradas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+
+                <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between py-3">
+                    <div class="text-muted small">
+                        Mostrando <span th:text="${#lists.size(evaluaciones)}"></span> de 
+                        <span th:text="${totalElementos}"></span> evaluaciones
+                    </div>
+                    
+                    <nav aria-label="Navegación de páginas" th:if="${totalPaginas > 1}">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/evaluaciones/paginado(busqueda=${busquedaActual}, pagina=${paginaActual - 1})}"
+                                   aria-label="Anterior">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            <th:block th:with="startPage=${(paginaActual - 2) < 1 ? 1 : (paginaActual - 2)},
+                                               endPage=${(startPage + 4) > totalPaginas ? totalPaginas : (startPage + 4)}">
+                                <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" 
+                                    th:classappend="${i == paginaActual} ? 'active'">
+                                    <a class="page-link" 
+                                       th:href="@{/evaluaciones/paginado(busqueda=${busquedaActual}, pagina=${i})}"
+                                       th:text="${i}">1</a>
+                                </li>
+                            </th:block>
+                            
+                            <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/evaluaciones/paginado(busqueda=${busquedaActual}, pagina=${paginaActual + 1})}"
+                                   aria-label="Siguiente">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </section>
+    </div>
+</th:block>
+</html>

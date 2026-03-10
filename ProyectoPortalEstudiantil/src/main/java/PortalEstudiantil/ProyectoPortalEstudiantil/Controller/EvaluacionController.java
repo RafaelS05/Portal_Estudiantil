@@ -8,9 +8,9 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
  *
  * @author marjo
  */
-
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Evaluacion;
-import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.PeriodoRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.EvaluacionService;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
@@ -22,14 +22,16 @@ import org.springframework.web.bind.annotation.*;
 public class EvaluacionController {
 
     private final EvaluacionService evaluacionService;
-    private final SeccionRepository seccionRepository;
+    private final SeccionMateriaRepository seccionMateriaRepository;
+    private final PeriodoRepository periodoRepository;
 
-    public EvaluacionController(EvaluacionService evaluacionService,
-                                SeccionRepository seccionRepository) {
-        this.evaluacionService = evaluacionService;
-        this.seccionRepository = seccionRepository;
-    }
-    
+   public EvaluacionController(EvaluacionService evaluacionService,
+                            SeccionMateriaRepository seccionMateriaRepository,
+                            PeriodoRepository periodoRepository) {
+    this.evaluacionService = evaluacionService;
+    this.seccionMateriaRepository = seccionMateriaRepository;
+    this.periodoRepository = periodoRepository;
+}
     @GetMapping("")
     public String listado(Model model) {
         var lista = evaluacionService.listarTodas();
@@ -60,7 +62,7 @@ public class EvaluacionController {
         model.addAttribute("tamanoPagina", resultado.get("tamanoPagina"));
 
         model.addAttribute("busquedaActual", busqueda);
-        model.addAttribute("secciones", seccionRepository.findAll());
+        model.addAttribute("secciones", seccionMateriaRepository.findAll());
 
         return "evaluaciones/listado-paginado";
     }
@@ -68,7 +70,8 @@ public class EvaluacionController {
     @GetMapping("/nuevo")
     public String nuevaEvaluacion(Model model) {
         model.addAttribute("evaluacion", new Evaluacion());
-        model.addAttribute("secciones", seccionRepository.findAll());
+        model.addAttribute("secciones", seccionMateriaRepository.findAll());
+        model.addAttribute("periodos", periodoRepository.findAll());
         return "evaluaciones/modificar";
     }
 
@@ -80,14 +83,23 @@ public class EvaluacionController {
 
     @PostMapping("/actualizar/{id}")
     public String actualizar(@PathVariable("id") Long id,
-                             @ModelAttribute("evaluacion") Evaluacion evaluacion) {
+            @ModelAttribute("evaluacion") Evaluacion evaluacion) {
         evaluacionService.actualizarEvaluacion(id, evaluacion);
         return "redirect:/evaluaciones";
     }
 
+    @GetMapping("/actualizar/{id}")
+    public String editarEvaluacion(@PathVariable("id") Long id, Model model) {
+        var evaluacion = evaluacionService.obtenerPorId(id);
+        model.addAttribute("evaluacion", evaluacion);
+        model.addAttribute("secciones", seccionMateriaRepository.findAll());
+        model.addAttribute("periodos", periodoRepository.findAll());
+        return "evaluaciones/modificar";
+    }
+
     @GetMapping("/estado/{id}")
     public String cambiarEstado(@PathVariable("id") Long id,
-                                @RequestParam("estado") Long estado) {
+            @RequestParam("estado") Long estado) {
         evaluacionService.cambiarEstado(id, estado);
         return "redirect:/evaluaciones";
     }
