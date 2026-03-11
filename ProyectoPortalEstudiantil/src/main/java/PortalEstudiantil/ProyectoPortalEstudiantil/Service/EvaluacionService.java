@@ -32,7 +32,7 @@ public class EvaluacionService {
     }
 
     public List<Evaluacion> listarTodas() {
-        return evaluacionRepository.findAll();
+        return evaluacionRepository.findByIdEstadoFk(ESTADO_ACTIVO);
     }
 
     @Transactional
@@ -75,12 +75,15 @@ public class EvaluacionService {
     }
 
     public Page<Evaluacion> listarEvaluacionesPaginado(String busqueda, int pagina, int tamanoPagina) {
+
         Pageable pageable = PageRequest.of(pagina - 1, tamanoPagina, Sort.by("idEvaluacion").descending());
 
         if (busqueda != null && !busqueda.trim().isEmpty()) {
-            return evaluacionRepository.findByTipoContainingIgnoreCase(busqueda, pageable);
+            return evaluacionRepository
+                    .findByTipoContainingIgnoreCaseAndIdEstadoFk(busqueda, ESTADO_ACTIVO, pageable);
         } else {
-            return evaluacionRepository.findAll(pageable);
+            return evaluacionRepository
+                    .findByIdEstadoFk(ESTADO_ACTIVO, pageable);
         }
     }
 }
