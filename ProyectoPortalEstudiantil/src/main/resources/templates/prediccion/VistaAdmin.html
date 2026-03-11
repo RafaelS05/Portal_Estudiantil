@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="fa-solid fa-chart-bar text-primary me-2"></i>
+                Estadísticas de Rendimiento
+            </h4>
+
+        </div>
+    </div>
+
+    <!-- Filtro -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <form th:action="@{/prediccion/admin}" method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small fw-semibold mb-1">Período académico</label>
+                    <select name="idPeriodo" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="">— Seleccione un período —</option>
+                        <option th:each="p : ${periodos}"
+                                th:value="${p.idPeriodo}"
+                                th:text="${p.nombre}"
+                                th:selected="${p.idPeriodo == idPeriodoSel}"></option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tarjetas globales -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm border-start border-danger border-3 h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Riesgo Alto</div>
+                    <div class="fs-3 fw-bold text-danger" th:text="${totalAlto}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-3 h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Riesgo Medio</div>
+                    <div class="fs-3 fw-bold text-warning" th:text="${totalMedio}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm border-start border-success border-3 h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Riesgo Bajo</div>
+                    <div class="fs-3 fw-bold text-success" th:text="${totalBajo}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm border-start border-secondary border-3 h-100">
+                <div class="card-body">
+                    <div class="small text-muted">Sin Calificaciones</div>
+                    <div class="fs-3 fw-bold text-secondary" th:text="${totalSinDatos}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen por sección -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+            <span class="fw-semibold">
+                <i class="fa-solid fa-layer-group me-2 text-primary"></i>Resumen por Sección
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(estadisticas)}" class="text-center py-4 text-muted small">
+                Selecciona un período para ver estadísticas.
+            </div>
+            <div th:if="${not #lists.isEmpty(estadisticas)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Sección</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center text-danger">Alto</th>
+                            <th class="text-center text-warning">Medio</th>
+                            <th class="text-center text-success">Bajo</th>
+                            <th class="text-center text-secondary">Sin datos</th>
+                            <th>Distribución</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="stat : ${estadisticas}">
+                            <td class="ps-3 fw-semibold" th:text="${stat.seccion}"></td>
+                            <td class="text-center" th:text="${stat.totalEstudiantes}"></td>
+                            <td class="text-center"><span class="badge bg-danger rounded-pill" th:text="${stat.riesgoAlto}"></span></td>
+                            <td class="text-center"><span class="badge bg-warning text-dark rounded-pill" th:text="${stat.riesgoMedio}"></span></td>
+                            <td class="text-center"><span class="badge bg-success rounded-pill" th:text="${stat.riesgoBajo}"></span></td>
+                            <td class="text-center"><span class="badge bg-secondary rounded-pill" th:text="${stat.sinCalificaciones}"></span></td>
+                            <td style="min-width:140px;">
+                                <div class="progress" style="height:8px;border-radius:4px;">
+                                    <div class="progress-bar bg-danger"
+                                         th:style="'width:' + (${stat.totalEstudiantes > 0 ? stat.riesgoAlto * 100 / stat.totalEstudiantes : 0}) + '%'"></div>
+                                    <div class="progress-bar bg-warning"
+                                         th:style="'width:' + (${stat.totalEstudiantes > 0 ? stat.riesgoMedio * 100 / stat.totalEstudiantes : 0}) + '%'"></div>
+                                    <div class="progress-bar bg-success"
+                                         th:style="'width:' + (${stat.totalEstudiantes > 0 ? stat.riesgoBajo * 100 / stat.totalEstudiantes : 0}) + '%'"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalle por estudiante -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom py-3">
+            <span class="fw-semibold">
+                <i class="fa-solid fa-users me-2 text-primary"></i>Detalle por Estudiante
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(estudiantes)}" class="text-center py-4 text-muted small">
+                Selecciona un período para ver el detalle.
+            </div>
+            <div th:if="${not #lists.isEmpty(estudiantes)}" class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">#</th>
+                            <th>Estudiante</th>
+                            <th>Sección</th>
+                            <th class="text-center">Promedio</th>
+                            <th class="text-center">Riesgo</th>
+                            <th>Encargado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="est, idx : ${estudiantes}"
+                            th:classappend="${est.nivelRiesgo == 'ALTO'} ? 'table-danger' :
+                                            (${est.nivelRiesgo == 'MEDIO'} ? 'table-warning' : '')">
+                            <td class="ps-3 text-muted small" th:text="${idx.count}"></td>
+                            <td>
+                                <div class="fw-semibold small" th:text="${est.nombreEstudiante}"></div>
+                            </td>
+                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal"
+                                      th:text="${est.seccion}"></span></td>
+                            <td class="text-center fw-bold"
+                                th:classappend="${est.promedio < 65} ? 'text-danger' :
+                                                (${est.promedio < 75} ? 'text-warning' : 'text-success')"
+                                th:text="${est.promedio > 0} ? ${#numbers.formatDecimal(est.promedio,1,2)} : '—'"></td>
+                            <td class="text-center">
+                                <span th:switch="${est.nivelRiesgo}">
+                                    <span th:case="'ALTO'"  class="badge bg-danger">⚠ ALTO</span>
+                                    <span th:case="'MEDIO'" class="badge bg-warning text-dark">⚡ MEDIO</span>
+                                    <span th:case="'BAJO'"  class="badge bg-success">✅ BAJO</span>
+                                    <span th:case="*"       class="badge bg-secondary">Sin datos</span>
+                                </span>
+                            </td>
+                            <td class="small" th:text="${est.nombreEncargado}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+<footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>
