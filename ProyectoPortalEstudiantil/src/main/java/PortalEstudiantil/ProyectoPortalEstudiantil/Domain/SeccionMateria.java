@@ -30,4 +30,11 @@ public class SeccionMateria {
     public boolean isActiva() {
         return idEstadoFk != null && idEstadoFk == 1;
     }
+
+    @Transient
+    public String getNombreCompleto() {
+        String seccion = (idSeccionFk != null) ? "Sección " + idSeccionFk : "Sin sección";
+        String materia = (idMateriaFk != null) ? "Materia " + idMateriaFk : "Sin materia";
+        return seccion + " - " + materia;
+    }
 }
