@@ -1,6 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.ReporteAcademico;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
 
 @Repository
 public interface ReporteAcademicoRepository extends JpaRepository<ReporteAcademico, Long> {
@@ -235,31 +237,62 @@ public interface ReporteAcademicoRepository extends JpaRepository<ReporteAcademi
     // ============================================================
     //  STORED PROCEDURES
     // ============================================================
-    @Procedure(procedureName = "REPORTESACADEMICOS_INSERTAR")
-    void insertarReporte(
-            @Param("p_fecha_creacion_reporte") LocalDate fechaCreacion,
-            @Param("p_promedio_ponderado") BigDecimal promedioPonderado,
-            @Param("p_id_tiporeporte_fk") Long idTipoReporte,
-            @Param("p_id_generado_por_fk") Long idGeneradoPor,
-            @Param("p_id_matricula_fk") Long idMatricula,
-            @Param("p_id_periodo_fk") Long idPeriodo,
-            @Param("p_id_estado_fk") Long idEstado
-    );
+        @Modifying
+        @Transactional
+        @Query(value = """
+        CALL REPORTESACADEMICOS_INSERTAR(
+            :fechaCreacion,
+            :promedioPonderado,
+            :idTipoReporte,
+            :idGeneradoPor,
+            :idMatricula,
+            :idPeriodo,
+            :idEstado
+        )
+    """, nativeQuery = true)
+        void insertarReporte(
+                @Param("fechaCreacion") LocalDate fechaCreacion,
+                @Param("promedioPonderado") BigDecimal promedioPonderado,
+                @Param("idTipoReporte") Long idTipoReporte,
+                @Param("idGeneradoPor") Long idGeneradoPor,
+                @Param("idMatricula") Long idMatricula,
+                @Param("idPeriodo") Long idPeriodo,
+                @Param("idEstado") Long idEstado
+        );
 
-    @Procedure(procedureName = "REPORTESACADEMICOS_MODIFICAR")
-    void modificarReporte(
-            @Param("p_id_reporteacademico") Long idReporte,
-            @Param("p_fecha_creacion_reporte") LocalDate fechaCreacion,
-            @Param("p_promedio_ponderado") BigDecimal promedioPonderado,
-            @Param("p_id_tiporeporte_fk") Long idTipoReporte,
-            @Param("p_id_generado_por_fk") Long idGeneradoPor,
-            @Param("p_id_matricula_fk") Long idMatricula,
-            @Param("p_id_periodo_fk") Long idPeriodo
-    );
+        @Modifying
+        @Transactional
+        @Query(value = """
+        CALL REPORTESACADEMICOS_MODIFICAR(
+            :idReporte,
+            :fechaCreacion,
+            :promedioPonderado,
+            :idTipoReporte,
+            :idGeneradoPor,
+            :idMatricula,
+            :idPeriodo
+        )
+    """, nativeQuery = true)
+        void modificarReporte(
+                @Param("idReporte") Long idReporte,
+                @Param("fechaCreacion") LocalDate fechaCreacion,
+                @Param("promedioPonderado") BigDecimal promedioPonderado,
+                @Param("idTipoReporte") Long idTipoReporte,
+                @Param("idGeneradoPor") Long idGeneradoPor,
+                @Param("idMatricula") Long idMatricula,
+                @Param("idPeriodo") Long idPeriodo
+        );
 
-    @Procedure(procedureName = "REPORTESACADEMICOS_CAMBIAR_ESTADO")
-    void cambiarEstadoReporte(
-            @Param("p_id_reporteacademico") Long idReporte,
-            @Param("p_id_estado_fk") Long idEstado
+        @Modifying
+        @Transactional
+        @Query(value = """
+        CALL REPORTESACADEMICOS_CAMBIAR_ESTADO(
+            :idReporte,
+            :idEstado
+        )
+    """, nativeQuery = true)
+        void cambiarEstadoReporte(
+                @Param("idReporte") Long idReporte,
+                @Param("idEstado") Long idEstado
     );
 }

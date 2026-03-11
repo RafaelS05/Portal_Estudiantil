@@ -108,6 +108,25 @@
                             </a>
                         </div>
 
+                        <!-- Análisis Predictivo — cada rol ve solo su enlace -->
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
+                            <a class="sidebar-link" th:href="@{/prediccion/admin}">
+                                <i class="fa-solid fa-brain"></i> Análisis Predictivo
+                            </a>
+                        </div>
+
+                        <div class="nav-item" sec:authorize="hasRole('PROFESOR')">
+                            <a class="sidebar-link" th:href="@{/prediccion/docente}">
+                                <i class="fa-solid fa-brain"></i> Análisis Predictivo
+                            </a>
+                        </div>
+
+                        <div class="nav-item" sec:authorize="hasRole('ENCARGADO')">
+                            <a class="sidebar-link" th:href="@{/prediccion/encargado}">
+                                <i class="fa-solid fa-brain"></i> Análisis Predictivo
+                            </a>
+                        </div>
+
                         <div class="nav-item">
                             <a class="sidebar-link" th:href="@{/eventos}">
                                 <i class="fa-solid fa-calendar-plus"></i> Gestión de Eventos
