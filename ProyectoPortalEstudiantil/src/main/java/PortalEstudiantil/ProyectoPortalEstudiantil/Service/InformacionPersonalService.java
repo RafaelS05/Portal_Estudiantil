@@ -18,6 +18,7 @@ public class InformacionPersonalService {
     private final ProvinciaRepository provinciaRepo;
     private final CantonRepository cantonRepo;
     private final DistritoRepository distritoRepo;
+    private final EncargadoEstudianteRepository encargadoEstudianteRepo; // ← AGREGADO
 
     public InformacionPersonalService(
             UsuarioRepository usuarioRepo,
@@ -26,7 +27,8 @@ public class InformacionPersonalService {
             DireccionRepository direccionRepo,
             ProvinciaRepository provinciaRepo,
             CantonRepository cantonRepo,
-            DistritoRepository distritoRepo
+            DistritoRepository distritoRepo,
+            EncargadoEstudianteRepository encargadoEstudianteRepo // ← AGREGADO
     ) {
         this.usuarioRepo = usuarioRepo;
         this.telefonoRepo = telefonoRepo;
@@ -35,6 +37,7 @@ public class InformacionPersonalService {
         this.provinciaRepo = provinciaRepo;
         this.cantonRepo = cantonRepo;
         this.distritoRepo = distritoRepo;
+        this.encargadoEstudianteRepo = encargadoEstudianteRepo; // ← AGREGADO
     }
 
     // ==========================
@@ -54,6 +57,17 @@ public class InformacionPersonalService {
 
     public Direccion obtenerDireccion(Long idUsuario) {
         return direccionRepo.findByUsuario_IdUsuario(idUsuario);
+    }
+
+    // ← AGREGADO: obtener ID de usuario a partir del email del login
+    public Long obtenerIdUsuarioPorEmail(String email) {
+        Correo correo = correoRepo.findByCorreo(email);
+        return correo.getUsuario().getIdUsuario();
+    }
+
+    // ← AGREGADO: obtener hijos vinculados si el usuario es Encargado
+    public List<EncargadoEstudiante> obtenerHijosVinculados(Long idEncargado) {
+        return encargadoEstudianteRepo.listarActivosPorEncargado(idEncargado);
     }
 
     // ==========================
@@ -86,10 +100,10 @@ public class InformacionPersonalService {
         Correo correo = correoRepo.findByUsuario_IdUsuarioAndEsLogin(usuario.getIdUsuario(), "S");
         if (correo != null) {
             correoRepo.modificarCorreo(
-                    correo.getIdCorreo(), // id_correo
-                    correoTxt, // correo nuevo
-                    "S", // es_login
-                    usuario.getIdUsuario() // id_usuario_fk
+                    correo.getIdCorreo(),
+                    correoTxt,
+                    "S",
+                    usuario.getIdUsuario()
             );
         }
 
@@ -98,10 +112,8 @@ public class InformacionPersonalService {
         // ==========================
         Telefono telefono = telefonoRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
         if (telefono == null) {
-            // Insertar nuevo teléfono usando SP
-            telefonoRepo.insertarTelefono(numeroTxt, usuario.getIdUsuario(), 1L); // estado activo
+            telefonoRepo.insertarTelefono(numeroTxt, usuario.getIdUsuario(), 1L);
         } else {
-            // Modificar teléfono usando SP
             telefonoRepo.modificarTelefono(telefono.getIdTelefono(), numeroTxt, usuario.getIdUsuario());
         }
 
@@ -111,17 +123,15 @@ public class InformacionPersonalService {
         Direccion direccion = direccionRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
 
         if (direccion == null) {
-            // Insertar nueva dirección usando SP
             direccionRepo.insertarDireccion(
                     otrasSenas,
                     usuario.getIdUsuario(),
                     idProvincia,
                     idCanton,
                     idDistrito,
-                    1L // activo
+                    1L
             );
         } else {
-            // Modificar existente usando SP
             direccionRepo.modificarDireccion(
                     direccion.getIdDireccion(),
                     otrasSenas,
