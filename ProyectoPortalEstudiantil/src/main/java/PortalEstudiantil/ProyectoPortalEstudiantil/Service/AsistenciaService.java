@@ -18,9 +18,9 @@ public class AsistenciaService {
     private static final Logger log = LoggerFactory.getLogger(AsistenciaService.class);
 
     // Estados de asistencia (coinciden con ESTADOS_TB)
-    public static final Long ESTADO_PRESENTE = 1L;
-    public static final Long ESTADO_AUSENTE = 2L;
-    public static final Long ESTADO_JUSTIFICADO = 3L;
+    public static final Long ESTADO_PRESENTE = 7L;
+    public static final Long ESTADO_AUSENTE = 8L;
+    public static final Long ESTADO_JUSTIFICADO = 10L;
 
     private final AsistenciaRepository asistenciaRepository;
 

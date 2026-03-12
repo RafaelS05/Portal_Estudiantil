@@ -111,66 +111,66 @@
                 <div class="table-responsive">
                     <table id="tbl-asistencias" class="table mb-0">
                         <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Estudiante</th>
-                            <th>Materia</th>
-                            <th>Sección</th>
-                            <th>Docente</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Estudiante</th>
+                                <th>Materia</th>
+                                <th>Sección</th>
+                                <th>Docente</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="a : ${asistencias}">
-                            <td class="fw-semibold" th:text="${a.fechaAsistencia}"></td>
-                            <td th:text="${a.nombreEstudiante}"></td>
-                            <td th:text="${a.nombreMateria}"></td>
-                            <td><span class="chip-sec" th:text="${a.numeroSeccion}"></span></td>
-                            <td th:text="${a.nombreDocente}"></td>
-                            <td>
-                                <span th:switch="${a.idEstadoFk}">
-                                    <span th:case="1" class="badge bg-success-subtle text-success">Presente</span>
-                                    <span th:case="2" class="badge bg-danger-subtle text-danger">Ausente</span>
-                                    <span th:case="3" class="badge bg-warning-subtle text-warning">Justificado</span>
-                                    <span th:case="*"  class="badge bg-secondary-subtle text-secondary"
-                                          th:text="${a.estadoDescripcion}"></span>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <!-- Justificar ausencia (solo visible si está Ausente) -->
-                                    <form th:if="${a.idEstadoFk == 2}"
-                                          th:action="@{/asistencias/justificar/{id}(id=${a.idAsistencia})}"
-                                          method="post" class="m-0">
-                                        <input type="hidden" name="idSeccionMateria"
-                                               th:value="${idSeccionMateria}">
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-warning"
-                                                title="Justificar ausencia">
-                                            <i class="fa-solid fa-file-circle-check"></i>
-                                        </button>
-                                    </form>
+                            <tr th:each="a : ${asistencias}">
+                                <td class="fw-semibold" th:text="${a.fechaAsistencia}"></td>
+                                <td th:text="${a.nombreEstudiante}"></td>
+                                <td th:text="${a.nombreMateria}"></td>
+                                <td><span class="chip-sec" th:text="${a.numeroSeccion}"></span></td>
+                                <td th:text="${a.nombreDocente}"></td>
+                                <td>
+                                    <span th:switch="${a.idEstadoFk}">
+                                        <span th:case="7"  class="badge bg-success-subtle text-success">Presente</span>
+                                        <span th:case="8"  class="badge bg-danger-subtle text-danger">Ausente</span>
+                                        <span th:case="10" class="badge bg-warning-subtle text-warning">Justificado</span>
+                                        <span th:case="*"  class="badge bg-secondary-subtle text-secondary"
+                                              th:text="${a.estadoDescripcion}"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <!-- Justificar ausencia (solo visible si está Ausente) -->
+                                        <form th:if="${a.idEstadoFk == 8}"
+                                              th:action="@{/asistencias/justificar/{id}(id=${a.idAsistencia})}"
+                                              method="post" class="m-0">
+                                            <input type="hidden" name="idSeccionMateria"
+                                                   th:value="${idSeccionMateria}">
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-warning"
+                                                    title="Justificar ausencia">
+                                                <i class="fa-solid fa-file-circle-check"></i>
+                                            </button>
+                                        </form>
 
-                                    <!-- Cambiar estado (modal) -->
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            th:attr="data-id=${a.idAsistencia},
-                                                     data-estado=${a.idEstadoFk},
-                                                     data-sm=${idSeccionMateria}"
-                                            onclick="llenarModalEstado(this)"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modal-cambiar-estado"
-                                            title="Cambiar estado">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(asistencias)}">
-                            <td colspan="7" class="text-center text-muted py-4">
-                                No hay registros de asistencia para los filtros aplicados.
-                            </td>
-                        </tr>
+                                        <!-- Cambiar estado (modal) -->
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                th:attr="data-id=${a.idAsistencia},
+                                                data-estado=${a.idEstadoFk},
+                                                data-sm=${idSeccionMateria}"
+                                                onclick="llenarModalEstado(this)"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modal-cambiar-estado"
+                                                title="Cambiar estado">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(asistencias)}">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No hay registros de asistencia para los filtros aplicados.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -197,9 +197,9 @@
                                 <div class="mb-3">
                                     <label class="lbl">Nuevo estado</label>
                                     <select name="idEstado" id="ce-estado" class="form-select" required>
-                                        <option value="1">Presente</option>
-                                        <option value="2">Ausente</option>
-                                        <option value="3">Justificado</option>
+                                        <option value="7">Presente</option>
+                                        <option value="8">Ausente</option>
+                                        <option value="10">Justificado</option>
                                     </select>
                                 </div>
                             </div>
@@ -227,12 +227,12 @@
     }
 
     function llenarModalEstado(btn) {
-        const id     = btn.getAttribute('data-id');
+        const id = btn.getAttribute('data-id');
         const estado = btn.getAttribute('data-estado');
-        const sm     = btn.getAttribute('data-sm');
+        const sm = btn.getAttribute('data-sm');
 
         document.getElementById('form-cambiar-estado').action =
-            '/asistencias/cambiarEstado/' + id;
+                '/asistencias/cambiarEstado/' + id;
         document.getElementById('ce-estado').value = estado || '1';
         document.getElementById('ce-sm').value = sm || '';
     }

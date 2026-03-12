@@ -36,9 +36,9 @@ public class AsistenciaController {
         LocalDate fecha = parseFecha(fechaStr);
         List<AsistenciaListadoRow> asistencias = asistenciaService.listar(idSeccionMateria, fecha);
 
-        long totalPresentes = asistencias.stream().filter(a -> Long.valueOf(1L).equals(a.getIdEstadoFk())).count();
-        long totalAusentes = asistencias.stream().filter(a -> Long.valueOf(2L).equals(a.getIdEstadoFk())).count();
-        long totalJustificados = asistencias.stream().filter(a -> Long.valueOf(3L).equals(a.getIdEstadoFk())).count();
+        long totalPresentes = asistencias.stream().filter(a -> Long.valueOf(7L).equals(a.getIdEstadoFk())).count();
+        long totalAusentes = asistencias.stream().filter(a -> Long.valueOf(8L).equals(a.getIdEstadoFk())).count();
+        long totalJustificados = asistencias.stream().filter(a -> Long.valueOf(10L).equals(a.getIdEstadoFk())).count();
 
         model.addAttribute("asistencias", asistencias);
         model.addAttribute("total", asistencias.size());
