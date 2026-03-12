@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/estadisticas")
@@ -30,74 +31,83 @@ public class EstadisticasController {
     // =========================================================
     // PANEL ADMINISTRADOR / DIRECTOR
     // =========================================================
-
     @GetMapping("/admin")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'DIRECTOR')")
-    public String panelAdmin(Model model, RedirectAttributes redirectAttributes) {
-        try {
-            Periodo periodo = estadisticasService.obtenerPeriodoActual();
-            Long idPeriodo  = periodo.getIdPeriodo();
+    public String admin(@RequestParam(value = "idSeccion", required = false) Long idSeccion,
+            Model model) {
 
-            KpiGeneralRow                  kpi        = estadisticasService.obtenerKpiGeneral(idPeriodo);
-            List<CalificacionPorSeccionRow> porSeccion = estadisticasService.obtenerCalificacionesPorSeccion(idPeriodo);
-            List<CalificacionPorMateriaRow> porMateria = estadisticasService.obtenerCalificacionesPorMateria(idPeriodo);
-            List<AlertaEstadisticaRow>      alertas    = estadisticasService.obtenerAlertas(idPeriodo);
-
-            // Arrays JSON para Chart.js
-            String seccionLabels    = toJsonStringArray(porSeccion.stream()
-                    .map(CalificacionPorSeccionRow::getSeccion).toList());
-            String seccionPromedios = toJsonDoubleArray(porSeccion.stream()
-                    .map(r -> r.getPromedio() != null ? r.getPromedio() : 0.0).toList());
-
-            String materiaLabels    = toJsonStringArray(porMateria.stream()
-                    .map(CalificacionPorMateriaRow::getMateria).toList());
-            String materiaPromedios = toJsonDoubleArray(porMateria.stream()
-                    .map(r -> r.getPromedio() != null ? r.getPromedio() : 0.0).toList());
-
-            model.addAttribute("periodo",          periodo);
-            model.addAttribute("kpi",              kpi);
-            model.addAttribute("porSeccion",       porSeccion);
-            model.addAttribute("porMateria",       porMateria);
-            model.addAttribute("alertas",          alertas);
-            model.addAttribute("umbral",           estadisticasService.getUmbralCritico());
-            model.addAttribute("seccionLabels",    seccionLabels);
-            model.addAttribute("seccionPromedios", seccionPromedios);
-            model.addAttribute("materiaLabels",    materiaLabels);
-            model.addAttribute("materiaPromedios", materiaPromedios);
-
+        Periodo periodo = estadisticasService.obtenerPeriodoActual();
+        if (periodo == null) {
+            model.addAttribute("sinPeriodo", true);
             return "estadisticas/admin";
-
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje", "Error al cargar estadísticas: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
-            return "redirect:/";
         }
+
+        Long idPeriodo = periodo.getIdPeriodo();
+
+        // KPI siempre global
+        KpiGeneralRow kpi = estadisticasService.obtenerKpiGeneral(idPeriodo);
+
+        // Secciones para el dropdown
+        var secciones = estadisticasService.obtenerSecciones(idPeriodo);
+
+        // Calificaciones por sección (siempre global — muestra panorama completo)
+        List<CalificacionPorSeccionRow> porSeccion
+                = estadisticasService.obtenerCalificacionesPorSeccion(idPeriodo);
+
+        // Calificaciones por materia y alertas — filtradas si se seleccionó sección
+        List<CalificacionPorMateriaRow> porMateria
+                = estadisticasService.obtenerCalificacionesPorMateria(idPeriodo, idSeccion);
+
+        List<AlertaEstadisticaRow> alertas
+                = estadisticasService.obtenerAlertas(idPeriodo, idSeccion);
+
+        // Serializar arrays para Chart.js
+        String seccionLabels = toJsonStringArray(porSeccion.stream()
+                .map(r -> "Sección " + r.getSeccion()).toList());
+        String seccionPromedios = toJsonDoubleArray(porSeccion.stream()
+                .map(CalificacionPorSeccionRow::getPromedio).toList());
+
+        String materiaLabels = toJsonStringArray(porMateria.stream()
+                .map(CalificacionPorMateriaRow::getMateria).toList());
+        String materiaPromedios = toJsonDoubleArray(porMateria.stream()
+                .map(CalificacionPorMateriaRow::getPromedio).toList());
+
+        model.addAttribute("periodo", periodo);
+        model.addAttribute("kpi", kpi);
+        model.addAttribute("secciones", secciones);
+        model.addAttribute("idSeccionActual", idSeccion);
+        model.addAttribute("alertas", alertas);
+        model.addAttribute("seccionLabels", seccionLabels);
+        model.addAttribute("seccionPromedios", seccionPromedios);
+        model.addAttribute("materiaLabels", materiaLabels);
+        model.addAttribute("materiaPromedios", materiaPromedios);
+
+        return "estadisticas/admin";
     }
 
     // =========================================================
     // PANEL ENCARGADO (PADRE DE FAMILIA)
     // =========================================================
-
     @GetMapping("/encargado")
     @PreAuthorize("hasRole('ENCARGADO')")
     public String panelEncargado(Authentication authentication,
-                                 Model model,
-                                 RedirectAttributes redirectAttributes) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
         try {
             Periodo periodo = estadisticasService.obtenerPeriodoActual();
-            Long idPeriodo  = periodo.getIdPeriodo();
+            Long idPeriodo = periodo.getIdPeriodo();
 
-            List<AsistenciaEstudianteRow> asistencias =
-                    estadisticasService.obtenerAsistenciaHijos(authentication, idPeriodo);
+            List<AsistenciaEstudianteRow> asistencias
+                    = estadisticasService.obtenerAsistenciaHijos(authentication, idPeriodo);
 
-            String hijosLabels      = toJsonStringArray(asistencias.stream()
+            String hijosLabels = toJsonStringArray(asistencias.stream()
                     .map(AsistenciaEstudianteRow::getNombreEstudiante).toList());
-            String hijosAsistencia  = toJsonDoubleArray(asistencias.stream()
+            String hijosAsistencia = toJsonDoubleArray(asistencias.stream()
                     .map(r -> r.getPorcentajeAsistencia() != null ? r.getPorcentajeAsistencia() : 0.0).toList());
 
-            model.addAttribute("periodo",         periodo);
-            model.addAttribute("asistencias",     asistencias);
-            model.addAttribute("hijosLabels",     hijosLabels);
+            model.addAttribute("periodo", periodo);
+            model.addAttribute("asistencias", asistencias);
+            model.addAttribute("hijosLabels", hijosLabels);
             model.addAttribute("hijosAsistencia", hijosAsistencia);
 
             return "estadisticas/encargado";
@@ -112,7 +122,6 @@ public class EstadisticasController {
     // =========================================================
     // REDIRECCIONADOR — link del sidebar /estadisticas
     // =========================================================
-
     @GetMapping({"", "/"})
     public String redirigir(Authentication authentication) {
         if (authentication.getAuthorities().stream()
@@ -125,26 +134,33 @@ public class EstadisticasController {
     // =========================================================
     // UTILIDADES
     // =========================================================
-
     private String toJsonStringArray(List<String> list) {
-        if (list == null || list.isEmpty()) return "[]";
+        if (list == null || list.isEmpty()) {
+            return "[]";
+        }
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
             sb.append("\"").append(
                     list.get(i) == null ? "" : list.get(i).replace("\"", "'")
             ).append("\"");
-            if (i < list.size() - 1) sb.append(",");
+            if (i < list.size() - 1) {
+                sb.append(",");
+            }
         }
         sb.append("]");
         return sb.toString();
     }
 
     private String toJsonDoubleArray(List<Double> list) {
-        if (list == null || list.isEmpty()) return "[]";
+        if (list == null || list.isEmpty()) {
+            return "[]";
+        }
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
             sb.append(list.get(i));
-            if (i < list.size() - 1) sb.append(",");
+            if (i < list.size() - 1) {
+                sb.append(",");
+            }
         }
         sb.append("]");
         return sb.toString();

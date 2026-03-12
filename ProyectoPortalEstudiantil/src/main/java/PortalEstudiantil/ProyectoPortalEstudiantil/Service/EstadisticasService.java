@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EstadisticasRepository.SeccionRow;
 
 import java.util.List;
 
@@ -31,17 +32,15 @@ public class EstadisticasService {
     // =========================================================
     // PERÍODO
     // =========================================================
-
     public Periodo obtenerPeriodoActual() {
         return estadisticasRepository.findPeriodoMasReciente()
                 .orElseThrow(() -> new RuntimeException(
-                        "No se encontró ningún período activo en el sistema."));
+                "No se encontró ningún período activo en el sistema."));
     }
 
     // =========================================================
     // DASHBOARD ADMINISTRADOR / DIRECTOR
     // =========================================================
-
     public KpiGeneralRow obtenerKpiGeneral(Long idPeriodo) {
         return estadisticasRepository.obtenerKpiGeneral(idPeriodo, UMBRAL_CRITICO);
     }
@@ -50,20 +49,25 @@ public class EstadisticasService {
         return estadisticasRepository.calificacionesPorSeccion(idPeriodo);
     }
 
-    public List<CalificacionPorMateriaRow> obtenerCalificacionesPorMateria(Long idPeriodo) {
+    public List<CalificacionPorMateriaRow> obtenerCalificacionesPorMateria(Long idPeriodo, Long idSeccion) {
+        if (idSeccion != null) {
+            return estadisticasRepository.calificacionesPorMateriaEnSeccion(idPeriodo, idSeccion);
+        }
         return estadisticasRepository.calificacionesPorMateria(idPeriodo);
     }
 
-    public List<AlertaEstadisticaRow> obtenerAlertas(Long idPeriodo) {
+    public List<AlertaEstadisticaRow> obtenerAlertas(Long idPeriodo, Long idSeccion) {
+        if (idSeccion != null) {
+            return estadisticasRepository.obtenerAlertasEnSeccion(idPeriodo, idSeccion, UMBRAL_CRITICO);
+        }
         return estadisticasRepository.obtenerAlertas(idPeriodo, UMBRAL_CRITICO);
     }
 
     // =========================================================
     // DASHBOARD ENCARGADO (PADRE DE FAMILIA)
     // =========================================================
-
     public List<AsistenciaEstudianteRow> obtenerAsistenciaHijos(Authentication authentication,
-                                                                Long idPeriodo) {
+            Long idPeriodo) {
         Long idEncargado = obtenerIdUsuarioDesdeAuth(authentication);
         return estadisticasRepository.asistenciaHijosEncargado(idEncargado, idPeriodo);
     }
@@ -71,7 +75,6 @@ public class EstadisticasService {
     // =========================================================
     // UTILIDADES
     // =========================================================
-
     public Double getUmbralCritico() {
         return UMBRAL_CRITICO;
     }
@@ -86,5 +89,9 @@ public class EstadisticasService {
             throw new RuntimeException("No se pudo resolver el usuario de la sesión actual.");
         }
         return idUsuario;
+    }
+
+    public List<SeccionRow> obtenerSecciones(Long idPeriodo) {
+        return estadisticasRepository.listarSeccionesPorPeriodo(idPeriodo);
     }
 }

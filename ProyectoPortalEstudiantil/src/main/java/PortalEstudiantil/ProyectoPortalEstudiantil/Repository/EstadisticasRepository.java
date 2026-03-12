@@ -192,4 +192,69 @@ public interface EstadisticasRepository extends JpaRepository<Periodo, Long> {
             @Param("idPeriodo") Long idPeriodo,
             @Param("umbral") Double umbral
     );
+    // =========================================================
+// LISTAR SECCIONES DEL PERÍODO (para el dropdown de filtro)
+// =========================================================
+
+    interface SeccionRow {
+
+        Long getIdSeccion();
+
+        String getNumero();
+    }
+
+    @Query(value = """
+    SELECT s.ID_SECCION AS idSeccion, s.NUMERO AS numero
+    FROM SECCION_TB s
+    WHERE s.ID_PERIODO_FK = :idPeriodo
+      AND s.ID_ESTADO_FK = (SELECT ID_ESTADO FROM ESTADOS_TB WHERE DESCRIPCION = 'ACTIVO' LIMIT 1)
+    ORDER BY s.NUMERO ASC
+""", nativeQuery = true)
+    List<SeccionRow> listarSeccionesPorPeriodo(@Param("idPeriodo") Long idPeriodo);
+
+// =========================================================
+// CALIFICACIONES POR MATERIA FILTRADAS POR SECCIÓN
+// =========================================================
+    @Query(value = """
+    SELECT
+        mt.NOMBRE                         AS materia,
+        ROUND(AVG(c.CALIFICACION), 2)     AS promedio,
+        COUNT(c.ID_CALIFICACIONES)        AS totalEvaluaciones
+    FROM CALIFICACIONES_TB c
+    JOIN EVALUACION_TB ev         ON c.ID_EVALUACION_FK = ev.ID_EVALUACION
+    JOIN SECCIONMATERIA_TB sm     ON ev.ID_SECCIONMATERIA_FK = sm.ID_SECCIONMATERIA
+    JOIN MATERIA_TB mt            ON sm.ID_MATERIA_FK = mt.ID_MATERIA
+    WHERE ev.ID_PERIODO_FK = :idPeriodo
+      AND sm.ID_SECCION_FK = :idSeccion
+    GROUP BY mt.ID_MATERIA, mt.NOMBRE
+    ORDER BY promedio DESC
+""", nativeQuery = true)
+    List<CalificacionPorMateriaRow> calificacionesPorMateriaEnSeccion(
+            @Param("idPeriodo") Long idPeriodo,
+            @Param("idSeccion") Long idSeccion);
+
+// =========================================================
+// ALERTAS FILTRADAS POR SECCIÓN
+// =========================================================
+    @Query(value = """
+    SELECT
+        'MATERIA'                        AS tipo,
+        mt.NOMBRE                        AS nombre,
+        ROUND(AVG(c.CALIFICACION), 2)    AS promedio,
+        COUNT(DISTINCT m.ID_USUARIO_ESTUDIANTE_FK) AS totalAfectados
+    FROM CALIFICACIONES_TB c
+    JOIN EVALUACION_TB ev         ON c.ID_EVALUACION_FK = ev.ID_EVALUACION
+    JOIN SECCIONMATERIA_TB sm     ON ev.ID_SECCIONMATERIA_FK = sm.ID_SECCIONMATERIA
+    JOIN MATERIA_TB mt            ON sm.ID_MATERIA_FK = mt.ID_MATERIA
+    JOIN MATRICULA_TB m           ON c.ID_MATRICULA_FK = m.ID_MATRICULA
+    WHERE ev.ID_PERIODO_FK = :idPeriodo
+      AND sm.ID_SECCION_FK = :idSeccion
+    GROUP BY mt.ID_MATERIA, mt.NOMBRE
+    HAVING AVG(c.CALIFICACION) < :umbral
+    ORDER BY promedio ASC
+""", nativeQuery = true)
+    List<AlertaEstadisticaRow> obtenerAlertasEnSeccion(
+            @Param("idPeriodo") Long idPeriodo,
+            @Param("idSeccion") Long idSeccion,
+            @Param("umbral") Double umbral);
 }

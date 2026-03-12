@@ -192,8 +192,8 @@
 
         <script th:inline="javascript">
             /*<![CDATA[*/
-            const hijosLabels     = /*[[${hijosLabels}]]*/     [];
-            const hijosAsistencia = /*[[${hijosAsistencia}]]*/ [];
+            const hijosLabels     = JSON.parse(/*[[${hijosLabels}]]*/     '[]');
+const hijosAsistencia = JSON.parse(/*[[${hijosAsistencia}]]*/ '[]');
 
             const coloresDona = [
                 'rgba(25,118,210,0.8)',
