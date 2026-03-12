@@ -42,6 +42,10 @@ public class SeccionMateriaService {
         return seccionMateriaRepository.findByIdSeccionMateria(id);
     }
 
+    public List<SeccionMateriaRow> listarResumenPorDocente(Long idDocente) {
+        return seccionMateriaRepository.listarResumenPorDocente(idDocente);
+    }
+
     @Transactional
     public Long insertar(Long idSeccionFk, Long idMateriaFk, Long idUsuarioDocenteFk) {
         if (seccionRepository.findByIdSeccion(idSeccionFk) == null) {

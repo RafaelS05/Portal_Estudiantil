@@ -128,4 +128,25 @@ public interface SeccionMateriaRepository extends JpaRepository<SeccionMateria, 
     """, nativeQuery = true)
     void cambiarEstadoSeccionMateria(@Param("idSeccionMateria") Long idSeccionMateria,
             @Param("idEstado") Long idEstado);
+    
+    @Query(value = """
+    SELECT
+        sm.ID_SECCIONMATERIA      AS idSeccionMateria,
+        sm.ID_SECCION_FK          AS idSeccionFk,
+        s.NUMERO                  AS numeroSeccion,
+        sm.ID_MATERIA_FK          AS idMateriaFk,
+        m.NOMBRE                  AS nombreMateria,
+        sm.ID_USUARIO_DOCENTE_FK  AS idUsuarioDocenteFk,
+        CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO) AS nombreDocente,
+        sm.ID_ESTADO_FK           AS idEstadoFk
+    FROM SECCIONMATERIA_TB sm
+    JOIN SECCION_TB  s ON s.ID_SECCION = sm.ID_SECCION_FK
+    JOIN MATERIA_TB  m ON m.ID_MATERIA = sm.ID_MATERIA_FK
+    JOIN USUARIOS_TB u ON u.ID_USUARIO = sm.ID_USUARIO_DOCENTE_FK
+    WHERE sm.ID_USUARIO_DOCENTE_FK = :idDocente
+      AND sm.ID_ESTADO_FK = 1
+    ORDER BY s.NUMERO, m.NOMBRE
+""", nativeQuery = true)
+List<SeccionMateriaRow> listarResumenPorDocente(@Param("idDocente") Long idDocente);
+
 }

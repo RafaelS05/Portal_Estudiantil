@@ -4,6 +4,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.FeedBackRequest;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.FeedBackResumen;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.FeedBackService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.SeccionMateriaService;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -25,15 +26,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/feedBack")
+@RequestMapping("/feedback")
 public class FeedBackController {
-
 
     @Autowired
     private FeedBackService feedBackService;
+    @Autowired
+    private SeccionMateriaService seccionMateriaService;
 
     @GetMapping("/feedBack360")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','PROFESOR','ESTUDIANTE','ENCARGADO')")
     public String vista(
             @RequestParam(required = false) Integer idSeccionmateria,
             @RequestParam(required = false) Integer idMateria,
@@ -47,26 +48,34 @@ public class FeedBackController {
         String rol = userDetails.getRole();
 
         switch (rol) {
-            case "PROFESOR"      -> cargarDocente(userDetails, idSeccionmateria, model);
-            case "ESTUDIANTE"    -> cargarEstudiante(userDetails, idMateria, model);
-            case "ENCARGADO"     -> cargarEncargado(userDetails, idMateria, model);
-            case "ADMINISTRADOR" -> cargarAdmin(periodo1, periodo2, model);
-            default              -> { }
+            case "PROFESOR" ->
+                cargarDocente(userDetails, idSeccionmateria, model);
+            case "ESTUDIANTE" ->
+                cargarEstudiante(userDetails, idMateria, model);
+            case "ENCARGADO" ->
+                cargarEncargado(userDetails, idMateria, model);
+            case "ADMINISTRADOR" ->
+                cargarAdmin(periodo1, periodo2, model);
+            default -> {
+            }
         }
 
         model.addAttribute("rolActual", rol);
 
-        return "feedBack/feedBack360";
+        return "feedback/feedBack360";
     }
 
     // CARGA DE DATOS POR ROL (métodos privados)
-
     //PROFESOR
     private void cargarDocente(PortalUserDetails userDetails,
-                                Integer idSeccionmateria,
-                                Model model) {
+            Integer idSeccionmateria,
+            Model model) {
 
         Long idDocente = userDetails.getIdUsuario();
+
+        // ✅ Secciones-materia del docente para el selector
+        model.addAttribute("seccionMaterias",
+                seccionMateriaService.listarResumenPorDocente(idDocente));
 
         model.addAttribute("idSeccionmateriaSeleccionada", idSeccionmateria);
         model.addAttribute("historial",
@@ -76,49 +85,46 @@ public class FeedBackController {
             model.addAttribute("estudiantes",
                     feedBackService.listarEstudiantesConFeedback(idSeccionmateria));
         }
-
         // TODO: agregar secciones-materia del docente cuando SeccionMateriaService esté listo
         // model.addAttribute("seccionMaterias",
         //         seccionMateriaService.listarPorDocente(idDocente));
     }
 
-    
-     //ESTUDIANTE
-
+    //ESTUDIANTE
     private void cargarEstudiante(PortalUserDetails userDetails,
-                                   Integer idMateria,
-                                   Model model) {
+            Integer idMateria,
+            Model model) {
 
         Long idEstudiante = userDetails.getIdUsuario();
 
-        List<FeedBackResumen> feedbacks =
-                feedBackService.listarPorEstudiante(idEstudiante, idMateria);
+        List<FeedBackResumen> feedbacks
+                = feedBackService.listarPorEstudiante(idEstudiante, idMateria);
 
         double promedio = calcularPromedio(feedbacks);
 
-        model.addAttribute("feedbacks",         feedbacks);
-        model.addAttribute("idMateriaFiltro",   idMateria);
-        model.addAttribute("promedioGeneral",   String.format("%.1f", promedio));
+        model.addAttribute("feedbacks", feedbacks);
+        model.addAttribute("idMateriaFiltro", idMateria);
+        model.addAttribute("promedioGeneral", String.format("%.1f", promedio));
         model.addAttribute("totalEvaluaciones", feedbacks.size());
 
         // TODO: model.addAttribute("materias", materiaService.listarActivas());
     }
 
-     //ENCARGADO
+    //ENCARGADO
     private void cargarEncargado(PortalUserDetails userDetails,
-                                  Integer idMateria,
-                                  Model model) {
+            Integer idMateria,
+            Model model) {
 
         Long idEncargado = userDetails.getIdUsuario();
 
-        List<FeedBackResumen> feedbacks =
-                feedBackService.listarPorEncargado(idEncargado, idMateria);
+        List<FeedBackResumen> feedbacks
+                = feedBackService.listarPorEncargado(idEncargado, idMateria);
 
         double promedio = calcularPromedio(feedbacks);
 
-        model.addAttribute("feedbacks",         feedbacks);
-        model.addAttribute("idMateriaFiltro",   idMateria);
-        model.addAttribute("promedioGeneral",   String.format("%.1f", promedio));
+        model.addAttribute("feedbacks", feedbacks);
+        model.addAttribute("idMateriaFiltro", idMateria);
+        model.addAttribute("promedioGeneral", String.format("%.1f", promedio));
         model.addAttribute("totalEvaluaciones", feedbacks.size());
 
         // TODO: model.addAttribute("materias", materiaService.listarActivas());
@@ -126,17 +132,17 @@ public class FeedBackController {
 
     private void cargarAdmin(Integer periodo1, Integer periodo2, Model model) {
 
-        List<FeedBackResumen> todos   = feedBackService.listarTodos();
+        List<FeedBackResumen> todos = feedBackService.listarTodos();
         List<FeedBackResumen> alertas = feedBackService.listarAlertas();
-        double promGeneral               = calcularPromedio(todos);
+        double promGeneral = calcularPromedio(todos);
 
-        model.addAttribute("todosFeedbacks",      todos);
-        model.addAttribute("totalEvaluaciones",   todos.size());
-        model.addAttribute("promedioGeneral",      String.format("%.1f", promGeneral));
-        model.addAttribute("promediosPorSeccion",  feedBackService.promediosPorSeccion());
-        model.addAttribute("promediosPorDocente",  feedBackService.promediosPorDocente());
-        model.addAttribute("alertas",              alertas);
-        model.addAttribute("totalAlertas",         alertas.size());
+        model.addAttribute("todosFeedbacks", todos);
+        model.addAttribute("totalEvaluaciones", todos.size());
+        model.addAttribute("promedioGeneral", String.format("%.1f", promGeneral));
+        model.addAttribute("promediosPorSeccion", feedBackService.promediosPorSeccion());
+        model.addAttribute("promediosPorDocente", feedBackService.promediosPorDocente());
+        model.addAttribute("alertas", alertas);
+        model.addAttribute("totalAlertas", alertas.size());
 
         if (periodo1 != null && periodo2 != null && !periodo1.equals(periodo2)) {
             try {
@@ -153,7 +159,6 @@ public class FeedBackController {
     }
 
     // POST /feedBack/registrar — solo PROFESOR
-
     @PostMapping("/registrar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','PROFESOR')")
     @ResponseBody
@@ -163,24 +168,23 @@ public class FeedBackController {
         Map<String, Object> resp = new HashMap<>();
         try {
             feedBackService.registrarBatch(request);
-            resp.put("ok",      true);
+            resp.put("ok", true);
             resp.put("mensaje", "Evaluaciones guardadas correctamente.");
             return ResponseEntity.ok(resp);
 
         } catch (IllegalArgumentException | IllegalStateException e) {
-            resp.put("ok",      false);
+            resp.put("ok", false);
             resp.put("mensaje", e.getMessage());
             return ResponseEntity.badRequest().body(resp);
 
         } catch (Exception e) {
-            resp.put("ok",      false);
+            resp.put("ok", false);
             resp.put("mensaje", "Error interno al guardar las evaluaciones.");
             return ResponseEntity.internalServerError().body(resp);
         }
     }
 
     // GET /feedBack/pdf — descarga PDF encargado / estudiante
-
     @GetMapping("/pdf")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','ENCARGADO','ESTUDIANTE')")
     public ResponseEntity<byte[]> descargarPdf(
@@ -201,7 +205,6 @@ public class FeedBackController {
         // TODO: descomentar cuando FeedBackPDFService esté listo
         // byte[] pdf = pdfService.generarReporteEstudiante(
         //         feedbacks, nombreEstudiante, userDetails.getDisplayName());
-
         byte[] pdf = ("Reporte de " + nombreEstudiante).getBytes();
 
         String archivo = String.format("Feedback360_%s_%s.pdf",
@@ -223,7 +226,6 @@ public class FeedBackController {
 
         // TODO: descomentar cuando FeedBackPDFService esté listo
         // byte[] pdf = pdfService.generarReporteAdmin(feedbacks, null);
-
         byte[] pdf = "Reporte Admin Feedback360".getBytes();
 
         String archivo = "Feedback360_Admin_"
@@ -243,13 +245,12 @@ public class FeedBackController {
     public ResponseEntity<Map<String, Object>> alertasJson() {
         List<FeedBackResumen> alertas = feedBackService.listarAlertas();
         Map<String, Object> resp = new HashMap<>();
-        resp.put("total",   alertas.size());
+        resp.put("total", alertas.size());
         resp.put("alertas", alertas);
         return ResponseEntity.ok(resp);
     }
 
     // UTILIDAD
-
     private double calcularPromedio(List<FeedBackResumen> feedbacks) {
         return feedbacks.stream()
                 .filter(f -> f.getCalificacion() != null)

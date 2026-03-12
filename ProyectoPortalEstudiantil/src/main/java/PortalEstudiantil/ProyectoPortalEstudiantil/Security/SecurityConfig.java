@@ -63,7 +63,7 @@ public class SecurityConfig {
                     "/img/**",
                     "/resetContrasenna/**",
                     "/gestionAcademica/**",
-                    "/feedBack/**"
+                    "/feedback/**"
                     
                 ).permitAll()
                 .anyRequest().authenticated()
