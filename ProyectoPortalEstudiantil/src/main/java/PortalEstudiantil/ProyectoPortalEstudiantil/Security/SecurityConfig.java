@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity          //  necesario para que @PreAuthorize funcione
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final PortalUserDetailsService userDetailsService;
@@ -62,7 +62,8 @@ public class SecurityConfig {
                     "/error",
                     "/img/**",
                     "/resetContrasenna/**",
-                    "/gestionAcademica/**"
+                    "/gestionAcademica/**",
+                    "/feedBack/**"
                     
                 ).permitAll()
                 .anyRequest().authenticated()

@@ -22,7 +22,7 @@ public class AuthRepository {
     public AuthRepository(DataSource dataSource) {
         this.getUserByEmailCall = new SimpleJdbcCall(dataSource)
                 .withProcedureName("AUTH_GET_USER_BY_EMAIL")
-                .withoutProcedureColumnMetaDataAccess() // 🔥 CLAVE
+                .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
                         new SqlParameter("p_email", Types.VARCHAR),
                         new SqlOutParameter("p_username", Types.VARCHAR),
@@ -31,7 +31,9 @@ public class AuthRepository {
                         new SqlOutParameter("p_intentos", Types.INTEGER),
                         new SqlOutParameter("p_bloqueado_hasta", Types.TIMESTAMP),
                         new SqlOutParameter("p_enabled", Types.INTEGER),
-                        new SqlOutParameter("p_id_credencial", Types.INTEGER)
+                        new SqlOutParameter("p_id_credencial", Types.INTEGER),
+                        new org.springframework.jdbc.core.SqlOutParameter(
+                                "p_id_usuario", Types.INTEGER)
                 );
 
         this.loginSuccessCall = new SimpleJdbcCall(dataSource)
@@ -73,6 +75,8 @@ public class AuthRepository {
         Object idCred = out.get("p_id_credencial");
         u.setIdCredencial(idCred == null ? null : ((Number) idCred).longValue());
 
+        Object idUsr = out.get("p_id_usuario");
+        u.setIdUsuario(idUsr == null ? null : ((Number) idUsr).longValue());
         return u;
     }
 

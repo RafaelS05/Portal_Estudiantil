@@ -20,19 +20,20 @@ public class PortalUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AuthUserData data = authRepository.getUserByEmail(email);
-        
+
         if (data.getUsername() == null) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + email);
         }
 
         return new PortalUserDetails(
-            email,
-            data.getUsername(),
-            data.getPasswordHash(),
-            data.getRole(),
-            data.getEnabled(),
-            data.getBloqueadoHasta(),
-            data.getIdCredencial()
+                email,
+                data.getUsername(),
+                data.getPasswordHash(),
+                data.getRole(),
+                data.getEnabled(),
+                data.getBloqueadoHasta(),
+                data.getIdCredencial(),
+                data.getIdUsuario()
         );
     }
 }

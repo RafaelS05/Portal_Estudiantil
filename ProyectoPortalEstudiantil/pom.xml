@@ -116,6 +116,21 @@
             <version>3.3.3</version>
         </dependency>
 
+        <!-- Flying Saucer: convierte HTML/XHTML a PDF -->
+        <dependency>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf-openpdf</artifactId>
+            <version>9.4.0</version>
+        </dependency>
+
+        <!-- motor PDF libre -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>

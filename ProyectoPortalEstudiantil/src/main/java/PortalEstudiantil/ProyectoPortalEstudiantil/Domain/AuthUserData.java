@@ -10,6 +10,7 @@ public class AuthUserData {
     private Timestamp bloqueadoHasta;
     private Integer enabled; // 1 o 0
     private Long idCredencial;
+    private Long idUsuario;
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -31,4 +32,7 @@ public class AuthUserData {
 
     public Long getIdCredencial() { return idCredencial; }
     public void setIdCredencial(Long idCredencial) { this.idCredencial = idCredencial; }
+
+    public Long getIdUsuario() { return idUsuario; }
+    public void setIdUsuario (Long idUsuario) { this.idUsuario = idUsuario; }
 }
