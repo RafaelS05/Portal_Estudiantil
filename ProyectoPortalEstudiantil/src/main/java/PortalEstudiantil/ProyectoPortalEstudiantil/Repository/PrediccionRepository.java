@@ -17,32 +17,31 @@ public class PrediccionRepository {
         this.jdbc = jdbc;
     }
 
-
     //  ENCARGADO: lista de hijos activos con su matrícula y período
 
-    public List<Map<String, Object>> listarHijosDeEncargado(Long idEncargado) {
+    public List<Map<String, Object>> listarHijosDeEncargado(Long idUsuario) {
         return jdbc.queryForList("""
                 SELECT
-                    u.ID_USUARIO  AS idUsuario,
+                    u.ID_USUARIO   AS idUsuario,
                     CONCAT(u.NOMBRE,' ',u.PRIMER_APELLIDO,
                            CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO=''
                                 THEN '' ELSE CONCAT(' ',u.SEGUNDO_APELLIDO) END
-                    )             AS nombreEstudiante,
+                    )              AS nombreEstudiante,
                     m.ID_MATRICULA AS idMatricula,
                     s.NUMERO       AS seccion,
                     p.NOMBRE       AS periodo,
                     p.ID_PERIODO   AS idPeriodo
                 FROM ENCARGADOESTUDIANTE_TB ee
-                JOIN USUARIOS_TB  u ON u.ID_USUARIO  = ee.ID_USUARIO_ESTUDIANTE_FK
-                JOIN MATRICULA_TB m ON m.ID_USUARIO_ESTUDIANTE_FK = u.ID_USUARIO
-                                   AND m.ID_ESTADO_FK = 1
-                JOIN SECCION_TB   s ON s.ID_SECCION  = m.ID_SECCION_FK
-                JOIN PERIODOS_TB  p ON p.ID_PERIODO  = s.ID_PERIODO_FK
+                JOIN USUARIOS_TB      u  ON u.ID_USUARIO  = ee.ID_USUARIO_ESTUDIANTE_FK
+                JOIN MATRICULA_TB     m  ON m.ID_USUARIO_ESTUDIANTE_FK = u.ID_USUARIO
+                                        AND m.ID_ESTADO_FK IN (1, 3)
+                JOIN SECCION_TB       s  ON s.ID_SECCION  = m.ID_SECCION_FK
+                JOIN PERIODOS_TB      p  ON p.ID_PERIODO  = s.ID_PERIODO_FK
                 WHERE ee.ID_USUARIO_ENCARGADO_FK = ?
                   AND ee.ID_ESTADO_FK = 1
                   AND u.ID_ESTADO_FK  = 1
                 ORDER BY p.FECHA_INICIO DESC, u.PRIMER_APELLIDO
-                """, idEncargado);
+                """, idUsuario);
     }
 
 
@@ -93,10 +92,10 @@ public class PrediccionRepository {
         return r != null ? r : BigDecimal.ZERO;
     }
 
-
+  
     //  ASISTENCIA — resumen del estudiante en el período
-
-
+ 
+   
     public Map<String, Object> resumenAsistencia(Long idMatricula, Long idPeriodo) {
         return jdbc.queryForMap("""
                 SELECT
@@ -114,7 +113,7 @@ public class PrediccionRepository {
                 """, idMatricula, idPeriodo);
     }
 
-
+ 
     //  PREDICCIÓN DOCENTE — todos sus estudiantes en el período
 
     public List<Map<String, Object>> prediccionDocente(Long idDocente, Long idPeriodo) {
@@ -163,9 +162,9 @@ public class PrediccionRepository {
                 """, idDocente, idPeriodo);
     }
 
-
+   
     //  PREDICCIÓN ADMIN — todas las secciones de un período
-
+  
     public List<Map<String, Object>> prediccionAdmin(Long idPeriodo) {
         return jdbc.queryForList("""
                 SELECT
@@ -211,9 +210,9 @@ public class PrediccionRepository {
                 """, idPeriodo);
     }
 
-
-    //  ESTADÍSTICAS por sección 
-
+    
+    //  ESTADÍSTICAS por sección (admin)
+ 
     public List<Map<String, Object>> estadisticasPorPeriodo(Long idPeriodo) {
         return jdbc.queryForList("""
                 SELECT

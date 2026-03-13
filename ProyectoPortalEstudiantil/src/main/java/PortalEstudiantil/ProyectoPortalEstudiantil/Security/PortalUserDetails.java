@@ -18,9 +18,11 @@ public class PortalUserDetails implements UserDetails {
     private final Integer enabled;
     private final Timestamp bloqueadoHasta;
     private final Long idCredencial;
+    private final Long idUsuario;
 
     public PortalUserDetails(String email, String username, String passwordHash, String role,
-                             Integer enabled, Timestamp bloqueadoHasta, Long idCredencial) {
+                             Integer enabled, Timestamp bloqueadoHasta, Long idCredencial,
+                             Long idUsuario) {
         this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -28,11 +30,11 @@ public class PortalUserDetails implements UserDetails {
         this.enabled = enabled;
         this.bloqueadoHasta = bloqueadoHasta;
         this.idCredencial = idCredencial;
+        this.idUsuario = idUsuario;
     }
 
-    public Long getIdCredencial() { 
-        return idCredencial; 
-    }
+    public Long getIdCredencial() { return idCredencial; }
+    public Long getIdUsuario()    { return idUsuario; }
     
     public String getDisplayName() { 
         return username; 

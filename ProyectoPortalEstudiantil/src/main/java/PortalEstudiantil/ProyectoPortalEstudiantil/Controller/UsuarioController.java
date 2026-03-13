@@ -3,6 +3,7 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TipoUsuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.TipoUsuarioRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.CredencialService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.EstudianteService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class UsuarioController {
 
     @Autowired
     private TipoUsuarioRepository tipoUsuarioRepository;
+
+    @Autowired
+    private CredencialService credencialService;
 
     private Long obtenerTipoId(String nombreTipo) {
         return tipoUsuarioRepository.findByNombreIgnoreCase(nombreTipo)
@@ -193,14 +197,44 @@ public class UsuarioController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            // 1. Crear el usuario
             Long idNuevo = usuarioService.crearUsuario(usuario);
+            
+            // 2. Actualizar contacto (teléfono y correo)
             usuarioService.actualizarContacto(idNuevo, telefonoNumero, correoLogin);
 
-            redirectAttributes.addFlashAttribute("mensaje", "Usuario creado exitosamente");
-            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+            // 3. ✅ NUEVO: Generar credencial automáticamente
+            String passwordTemporal = null;
+            try {
+                passwordTemporal = credencialService.crearCredencialTemporal(
+                        idNuevo, 
+                        correoLogin, 
+                        "SISTEMA"
+                );
+            } catch (Exception e) {
+                // Si falla la creación de credencial, registrar pero no fallar todo
+                redirectAttributes.addFlashAttribute("advertencia", 
+                    "Usuario creado pero hubo un error al generar la credencial: " + e.getMessage());
+            }
+
+            // 4. Mensaje de éxito con contraseña temporal
+            if (passwordTemporal != null) {
+                redirectAttributes.addFlashAttribute("mensaje", 
+                    "Usuario creado exitosamente");
+                redirectAttributes.addFlashAttribute("passwordTemporal", passwordTemporal);
+                redirectAttributes.addFlashAttribute("correoUsuario", correoLogin);
+                redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+            } else {
+                redirectAttributes.addFlashAttribute("mensaje", 
+                    "Usuario creado exitosamente");
+                redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+            }
+            
             return "redirect:/usuarios";
+            
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje", "Error al crear usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("mensaje", 
+                "Error al crear usuario: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
             return "redirect:/usuarios/nuevo";
         }
