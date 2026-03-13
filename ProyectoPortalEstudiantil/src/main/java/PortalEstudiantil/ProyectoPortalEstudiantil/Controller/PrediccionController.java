@@ -36,7 +36,7 @@ public class PrediccionController {
             @AuthenticationPrincipal PortalUserDetails usuario,
             Model model) {
 
-        Long idEncargado = usuario.getIdCredencial();
+        Long idEncargado = usuario.getIdUsuario();
         List<Map<String, Object>> hijos = service.hijosDeEncargado(idEncargado);
         model.addAttribute("hijos", hijos);
 
@@ -55,6 +55,14 @@ public class PrediccionController {
                         .map(h -> toLong(h.get("idPeriodo")))
                         .findFirst().orElse(null);
             }
+
+            // Hijo seleccionado para mostrar en el perfil — se resuelve en Java, no en SpEL
+            final Long idMatFinal = idMatricula;
+            Map<String, Object> hijoSel = hijos.stream()
+                    .filter(h -> toLong(h.get("idMatricula")).equals(idMatFinal))
+                    .findFirst()
+                    .orElse(hijos.get(0));
+            model.addAttribute("hijoSel", hijoSel);
 
             if (idMatricula != null && idPeriodo != null) {
                 BigDecimal promedio   = service.promedioGeneral(idMatricula, idPeriodo);
@@ -87,7 +95,7 @@ public class PrediccionController {
             @AuthenticationPrincipal PortalUserDetails usuario,
             Model model) {
 
-        Long idDocente = usuario.getIdCredencial();
+        Long idDocente = usuario.getIdUsuario();
 
         if (idPeriodo == null) {
             var actual = periodoRepo.obtenerPeriodoActualEnCurso();
