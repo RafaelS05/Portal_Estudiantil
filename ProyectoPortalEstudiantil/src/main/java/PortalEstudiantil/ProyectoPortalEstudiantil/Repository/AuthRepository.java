@@ -24,11 +24,11 @@ public class AuthRepository {
                 .withProcedureName("AUTH_GET_USER_BY_EMAIL")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
-                        new SqlParameter("p_email", Types.VARCHAR),
-                        new SqlOutParameter("p_username", Types.VARCHAR),
-                        new SqlOutParameter("p_password_hash", Types.VARCHAR),
-                        new SqlOutParameter("p_role", Types.VARCHAR),
-                        new SqlOutParameter("p_intentos", Types.INTEGER),
+                        new SqlParameter("p_email",           Types.VARCHAR),
+                        new SqlOutParameter("p_username",     Types.VARCHAR),
+                        new SqlOutParameter("p_password_hash",Types.VARCHAR),
+                        new SqlOutParameter("p_role",         Types.VARCHAR),
+                        new SqlOutParameter("p_intentos",     Types.INTEGER),
                         new SqlOutParameter("p_bloqueado_hasta", Types.TIMESTAMP),
                         new SqlOutParameter("p_enabled", Types.INTEGER),
                         new SqlOutParameter("p_id_credencial", Types.INTEGER),
@@ -47,8 +47,8 @@ public class AuthRepository {
                 .withProcedureName("AUTH_LOGIN_FAIL")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
-                        new SqlParameter("p_id_credencial", Types.INTEGER),
-                        new SqlParameter("p_max_intentos", Types.INTEGER),
+                        new SqlParameter("p_id_credencial",   Types.INTEGER),
+                        new SqlParameter("p_max_intentos",    Types.INTEGER),
                         new SqlParameter("p_minutos_bloqueo", Types.INTEGER)
                 );
     }
@@ -56,7 +56,6 @@ public class AuthRepository {
     public AuthUserData getUserByEmail(String email) {
         MapSqlParameterSource in = new MapSqlParameterSource()
                 .addValue("p_email", email);
-
         Map<String, Object> out = getUserByEmailCall.execute(in);
 
         AuthUserData u = new AuthUserData();
@@ -66,7 +65,6 @@ public class AuthRepository {
 
         Object intentos = out.get("p_intentos");
         u.setIntentos(intentos == null ? 0 : ((Number) intentos).intValue());
-
         u.setBloqueadoHasta((Timestamp) out.get("p_bloqueado_hasta"));
 
         Object enabled = out.get("p_enabled");
@@ -81,17 +79,13 @@ public class AuthRepository {
     }
 
     public void loginSuccess(Long idCredencial) {
-        if (idCredencial == null) {
-            return;
-        }
+        if (idCredencial == null) return;
         loginSuccessCall.execute(new MapSqlParameterSource()
                 .addValue("p_id_credencial", idCredencial));
     }
 
     public void loginFail(Long idCredencial, int maxIntentos, int minutosBloqueo) {
-        if (idCredencial == null) {
-            return;
-        }
+        if (idCredencial == null) return;
         loginFailCall.execute(new MapSqlParameterSource()
                 .addValue("p_id_credencial", idCredencial)
                 .addValue("p_max_intentos", maxIntentos)

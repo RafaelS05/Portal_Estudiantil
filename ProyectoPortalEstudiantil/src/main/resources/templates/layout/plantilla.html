@@ -58,32 +58,32 @@
                             </a>
                         </div>
 
-                        <!-- Solo Administrador -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/usuarios/}">
                                 <i class="fa-solid fa-users"></i> Usuarios
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/gestionAcademica}">
                                 <i class="fa-solid fa-book"></i> Gestión Académica
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR')">
                             <a class="sidebar-link" th:href="@{/asistencias}">
                                 <i class="fa-solid fa-clipboard-check"></i> Asistencia
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <!-- CORREGIDO: sec:authorize en el div, th:href solo con la URL -->
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR')">
                             <a class="sidebar-link" th:href="@{/calificaciones}">
                                 <i class="fa-solid fa-chart-line"></i> Calificaciones
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR')">
                             <a class="sidebar-link" th:href="@{/evaluaciones}">
                                 <i class="fa-solid fa-graduation-cap"></i> Evaluaciones
                             </a>
@@ -95,14 +95,13 @@
                             </a>
                         </div>
 
-                        <!-- Solo Administrador -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/reportes}">
                                 <i class="fa-solid fa-file-lines"></i> Reportes
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/estadisticas}">
                                 <i class="fa-solid fa-chart-pie"></i> Estadísticas
                             </a>
