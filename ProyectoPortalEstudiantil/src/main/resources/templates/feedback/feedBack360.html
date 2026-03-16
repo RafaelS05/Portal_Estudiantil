@@ -19,9 +19,6 @@
                         <div class="col-6 col-xl-3">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e8f0fe;color:#1a73e8;">
-                                        <i class="bi bi-patch-check-fill"></i>
-                                    </div>
                                     <div>
                                         <div class="fb-kpi-label">Total Evaluaciones</div>
                                         <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
@@ -32,9 +29,6 @@
                         <div class="col-6 col-xl-3">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e6f4ea;color:#34a853;">
-                                        <i class="bi bi-star-fill"></i>
-                                    </div>
                                     <div>
                                         <div class="fb-kpi-label">Promedio General</div>
                                         <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
@@ -45,9 +39,6 @@
                         <div class="col-6 col-xl-3">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #ea4335!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#fce8e6;color:#ea4335;">
-                                        <i class="bi bi-exclamation-triangle-fill"></i>
-                                    </div>
                                     <div>
                                         <div class="fb-kpi-label">Alertas (≤ 2★)</div>
                                         <div class="fb-kpi-value" th:text="${totalAlertas ?: 0}">0</div>
@@ -58,9 +49,6 @@
                         <div class="col-6 col-xl-3">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #fa7b17!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#fef0e6;color:#fa7b17;">
-                                        <i class="bi bi-people-fill"></i>
-                                    </div>
                                     <div>
                                         <div class="fb-kpi-label">Secciones activas</div>
                                         <div class="fb-kpi-value" th:text="${promediosPorSeccion?.size() ?: 0}">0</div>
@@ -228,13 +216,20 @@
                                     <label class="form-label fw-bold small">Período 1</label>
                                     <select name="periodo1" class="form-select form-select-sm" required>
                                         <option value="">Seleccionar período...</option>
-                                        <!-- TODO: th:each="${periodos}" -->
+                                        <option th:each="p : ${periodos}"
+                                                th:value="${p.idPeriodo}"
+                                                th:text="${p.nombre}"
+                                                th:selected="${p.idPeriodo == periodo1}">Período</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-bold small">Período 2</label>
                                     <select name="periodo2" class="form-select form-select-sm" required>
                                         <option value="">Seleccionar período...</option>
+                                        <option th:each="p : ${periodos}"
+                                                th:value="${p.idPeriodo}"
+                                                th:text="${p.nombre}"
+                                                th:selected="${p.idPeriodo == periodo2}">Período</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -286,7 +281,7 @@
                         <div class="card-body">
                             <h6 class="fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1 text-primary"></i>Seleccionar Sección-Materia para Evaluar</h6>
                             <form th:action="@{/feedback/feedBack360}" method="get" class="row g-2 align-items-end">
-                                <div class="col-md-5 col-12">
+                                <div class="col-md-8 col-12">
                                     <label class="form-label fw-bold small">Sección-Materia</label>
                                     <select name="idSeccionmateria" class="form-select"
                                             onchange="this.form.submit()">
@@ -301,7 +296,7 @@
                                 <div class="col-md-3 col-12" th:if="${estudiantes != null and !#lists.isEmpty(estudiantes)}">
                                     <button type="button" class="btn btn-primary fw-bold w-100"
                                             data-bs-toggle="modal" data-bs-target="#modalEvaluar">
-                                        <i class="bi bi-pencil-square me-1"></i>Registrar Evaluaciones
+                                        <i class="bi bi-pencil-square me-10"></i>Registrar Evaluaciones
                                         <span class="badge bg-white text-primary ms-1" th:text="${estudiantes.size()}">0</span>
                                     </button>
                                 </div>
@@ -319,7 +314,6 @@
                             <div th:each="fb : ${historial}"
                                  class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
                                  th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
-                                <div class="fb-avatar"><i class="bi bi-person-fill"></i></div>
                                 <div class="flex-grow-1" style="min-width:0;">
                                     <div class="fw-bold text-truncate" th:text="${fb.nombreEstudiante}">Estudiante</div>
                                     <div class="text-muted small text-truncate" th:text="${fb.nombreMateria} + ' — Sección ' + ${fb.nombreSeccion}">Info</div>
@@ -334,7 +328,7 @@
                                         th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
                                         th:data-comentario="${fb.comentario}"
                                         onclick="verComentario(this)" title="Ver comentario">
-                                    <i class="bi bi-chat-text"></i>
+                                    <i class="bi bi-chat-text">Comentarios</i>
                                 </button>
                             </div>
                             <div th:if="${historial == null or #lists.isEmpty(historial)}" class="text-center text-muted py-5">
@@ -346,16 +340,13 @@
                 </div><!-- /PROFESOR -->
 
 
-                <!-- ══════════════════════════════════════ -->
                 <!-- ROL: ESTUDIANTE                       -->
-                <!-- ══════════════════════════════════════ -->
                 <div th:if="${rolActual == 'ESTUDIANTE'}">
 
                     <div class="row g-3 mb-4">
                         <div class="col-6 col-md-4">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e8f0fe;color:#1a73e8;"><i class="bi bi-star-fill"></i></div>
                                     <div>
                                         <div class="fb-kpi-label">Mi Promedio</div>
                                         <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
@@ -366,7 +357,6 @@
                         <div class="col-6 col-md-4">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e6f4ea;color:#34a853;"><i class="bi bi-patch-check-fill"></i></div>
                                     <div>
                                         <div class="fb-kpi-label">Evaluaciones Recibidas</div>
                                         <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
@@ -380,8 +370,13 @@
                         <form th:action="@{/feedback/feedBack360}" method="get" class="d-flex gap-2 align-items-end">
                             <div>
                                 <label class="form-label fw-bold small mb-1">Filtrar por materia</label>
-                                <select name="idMateria" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width:180px;">
+                                <select name="idMateria" class="form-select form-select-sm"
+                                        onchange="this.form.submit()" style="min-width:180px;">
                                     <option value="">Todas las materias</option>
+                                    <option th:each="m : ${materias}"
+                                            th:value="${m.idMateria}"
+                                            th:text="${m.nombre}"
+                                            th:selected="${m.idMateria == idMateriaFiltro}">Materia</option>
                                 </select>
                             </div>
                         </form>
@@ -399,7 +394,6 @@
                             <div th:each="fb : ${feedbacks}"
                                  class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
                                  th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
-                                <div class="fb-avatar" style="background:#e8f0fe;color:#1a73e8;"><i class="bi bi-person-badge-fill"></i></div>
                                 <div class="flex-grow-1" style="min-width:0;">
                                     <div class="fw-bold text-truncate" th:text="${fb.nombreDocente}">Docente</div>
                                     <div class="text-muted small text-truncate"
@@ -415,7 +409,7 @@
                                         th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
                                         th:data-comentario="${fb.comentario}"
                                         onclick="verComentario(this)" title="Ver comentario">
-                                    <i class="bi bi-chat-text"></i>
+                                    <i class="bi bi-chat-text">Comentarios</i>
                                 </button>
                             </div>
                             <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}" class="text-center text-muted py-5">
@@ -436,7 +430,6 @@
                         <div class="col-6 col-md-4">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e8f0fe;color:#1a73e8;"><i class="bi bi-star-fill"></i></div>
                                     <div>
                                         <div class="fb-kpi-label">Promedio de mi hijo/a</div>
                                         <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
@@ -447,7 +440,6 @@
                         <div class="col-6 col-md-4">
                             <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
                                 <div class="card-body d-flex align-items-center gap-3 py-3">
-                                    <div class="fb-kpi-icon" style="background:#e6f4ea;color:#34a853;"><i class="bi bi-patch-check-fill"></i></div>
                                     <div>
                                         <div class="fb-kpi-label">Total Evaluaciones</div>
                                         <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
@@ -461,8 +453,13 @@
                         <form th:action="@{/feedback/feedBack360}" method="get" class="d-flex gap-2 align-items-end">
                             <div>
                                 <label class="form-label fw-bold small mb-1">Filtrar por materia</label>
-                                <select name="idMateria" class="form-select form-select-sm" onchange="this.form.submit()" style="min-width:180px;">
+                                <select name="idMateria" class="form-select form-select-sm"
+                                        onchange="this.form.submit()" style="min-width:180px;">
                                     <option value="">Todas las materias</option>
+                                    <option th:each="m : ${materias}"
+                                            th:value="${m.idMateria}"
+                                            th:text="${m.nombre}"
+                                            th:selected="${m.idMateria == idMateriaFiltro}">Materia</option>
                                 </select>
                             </div>
                         </form>
@@ -480,7 +477,6 @@
                             <div th:each="fb : ${feedbacks}"
                                  class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
                                  th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
-                                <div class="fb-avatar" style="background:#e8f0fe;color:#1a73e8;"><i class="bi bi-person-badge-fill"></i></div>
                                 <div class="flex-grow-1" style="min-width:0;">
                                     <div class="fw-bold text-truncate" th:text="${fb.nombreDocente}">Docente</div>
                                     <div class="text-muted small text-truncate" th:text="${fb.nombreMateria} + ' — Sección ' + ${fb.nombreSeccion}">Info</div>
@@ -495,7 +491,7 @@
                                         th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
                                         th:data-comentario="${fb.comentario}"
                                         onclick="verComentario(this)" title="Ver comentario">
-                                    <i class="bi bi-chat-text"></i>
+                                    <i class="bi bi-chat-text">Comentarios</i>
                                 </button>
                             </div>
                             <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}" class="text-center text-muted py-5">
@@ -631,234 +627,6 @@
             </section><!-- /#contenido -->
 
         </div><!-- cierre th:replace wrapper -->
-
-
-        <!-- Estilos del módulo -->
-        <style>
-            .fb-th {
-                font-size:.73rem;
-                font-weight:700;
-                text-transform:uppercase;
-                letter-spacing:.4px;
-            }
-            .fb-kpi-icon {
-                width:44px;
-                height:44px;
-                border-radius:12px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:1.25rem;
-                flex-shrink:0;
-            }
-            .fb-kpi-label {
-                font-size:.72rem;
-                font-weight:700;
-                text-transform:uppercase;
-                letter-spacing:.4px;
-                color:#6b7280;
-            }
-            .fb-kpi-value {
-                font-size:1.6rem;
-                font-weight:800;
-                color:#111827;
-                line-height:1;
-            }
-            .fb-star-on  {
-                color:#1a73e8;
-                font-size:.9rem;
-            }
-            .fb-star-off {
-                color:#d1d5db;
-                font-size:.9rem;
-            }
-            .fb-nivel-1 {
-                background:#fce8e6;
-                color:#c5221f;
-            }
-            .fb-nivel-2 {
-                background:#fef0e6;
-                color:#c1550a;
-            }
-            .fb-nivel-3 {
-                background:#fef9e0;
-                color:#a07300;
-            }
-            .fb-nivel-4 {
-                background:#e6f4ea;
-                color:#1e7e34;
-            }
-            .fb-nivel-5 {
-                background:#e8f0fe;
-                color:#1557b0;
-            }
-            .fb-avatar    {
-                width:38px;
-                height:38px;
-                border-radius:50%;
-                background:#e8f0fe;
-                color:#1a73e8;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:1.1rem;
-                flex-shrink:0;
-            }
-            .fb-avatar-sm {
-                width:30px;
-                height:30px;
-                border-radius:50%;
-                background:#e8f0fe;
-                color:#1a73e8;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:.85rem;
-                flex-shrink:0;
-            }
-            .fb-historial-row {
-                transition:background .15s;
-            }
-            .fb-historial-row:hover {
-                background:#f8fafc;
-            }
-            .fb-alerta-row {
-                background:#fff5f5!important;
-                border-left:3px solid #ea4335;
-            }
-            .nav-tabs .nav-link {
-                color:#6b7280;
-                font-weight:600;
-                font-size:.875rem;
-            }
-            .nav-tabs .nav-link.active {
-                color:#1a73e8;
-            }
-        </style>
-
-        <script>
-            const NIVEL_TEXTO = {1: 'Deficiente', 2: 'Regular', 3: 'Bueno', 4: 'Muy Bueno', 5: 'Excelente'};
-            const NIVEL_CLASE = {1: 'fb-nivel-1', 2: 'fb-nivel-2', 3: 'fb-nivel-3', 4: 'fb-nivel-4', 5: 'fb-nivel-5'};
-
-            document.addEventListener('change', e => {
-                if (!e.target.classList.contains('cal-input'))
-                    return;
-                const badge = e.target.closest('tr')?.querySelector('.nivel-label');
-                if (!badge)
-                    return;
-                const v = parseInt(e.target.value);
-                badge.textContent = v ? NIVEL_TEXTO[v] : '—';
-                badge.className = 'badge nivel-label ' + (v ? NIVEL_CLASE[v] : 'fb-nivel-3');
-            });
-
-            document.getElementById('modalEvaluar')?.addEventListener('shown.bs.modal', () => {
-                document.querySelectorAll('#batchForm .cal-input').forEach(sel => {
-                    const v = parseInt(sel.value);
-                    const badge = sel.closest('tr')?.querySelector('.nivel-label');
-                    if (!badge)
-                        return;
-                    badge.textContent = v ? NIVEL_TEXTO[v] : '—';
-                    badge.className = 'badge nivel-label ' + (v ? NIVEL_CLASE[v] : 'fb-nivel-3');
-                });
-            });
-
-            function guardarBatch() {
-                const idSeccionmateria = parseInt(document.getElementById('idSeccionmateria')?.value);
-                if (!idSeccionmateria) {
-                    showToast('Seleccioná una sección-materia primero.', 'danger');
-                    return;
-                }
-                const filas = document.querySelectorAll('#batchForm tbody tr');
-                const evaluaciones = [];
-                let valido = true;
-                filas.forEach(fila => {
-                    const idMatricula = parseInt(fila.dataset.idmatricula);
-                    const idFeedback = fila.dataset.idfeedback ? parseInt(fila.dataset.idfeedback) : null;
-                    const calSelect = fila.querySelector('.cal-input');
-                    const calificacion = calSelect ? parseInt(calSelect.value) : null;
-                    const comentario = fila.querySelector('.comentario-input')?.value?.trim() || null;
-                    if (!calificacion || calificacion < 1 || calificacion > 5) {
-                        calSelect?.classList.add('is-invalid');
-                        valido = false;
-                        return;
-                    }
-                    calSelect?.classList.remove('is-invalid');
-                    evaluaciones.push({idMatricula, calificacion, comentario, idFeedbackExistente: idFeedback});
-                });
-                if (!valido) {
-                    showToast('Calificá a todos los estudiantes (1–5) antes de guardar.', 'danger');
-                    return;
-                }
-                const btn = document.querySelector('#modalEvaluar .btn-primary');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
-                fetch('/feedback/registrar', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken()},
-                    body: JSON.stringify({idSeccionmateria, evaluaciones})
-                })
-                        .then(r => r.json())
-                        .then(data => {
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="bi bi-save-fill me-1"></i>Guardar Evaluaciones';
-                            if (data.ok) {
-                                bootstrap.Modal.getInstance(document.getElementById('modalEvaluar'))?.hide();
-                                showToast(data.mensaje, 'success');
-                                setTimeout(() => location.reload(), 1800);
-                            } else {
-                                showToast(data.mensaje || 'Error al guardar.', 'danger');
-                            }
-                        })
-                        .catch(() => {
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="bi bi-save-fill me-1"></i>Guardar Evaluaciones';
-                            showToast('Error de conexión. Intentá de nuevo.', 'danger');
-                        });
-            }
-
-            function limpiarFormulario() {
-                document.querySelectorAll('#batchForm .cal-input').forEach(s => {
-                    s.value = '';
-                    s.classList.remove('is-invalid');
-                });
-                document.querySelectorAll('#batchForm .comentario-input').forEach(t => t.value = '');
-                document.querySelectorAll('#batchForm .nivel-label').forEach(b => {
-                    b.textContent = '—';
-                    b.className = 'badge nivel-label fb-nivel-3';
-                });
-            }
-
-            function getCsrfToken() {
-                return document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
-            }
-
-            function verComentario(btn) {
-                document.getElementById('modalComentarioTexto').textContent = btn.dataset.comentario || 'Sin comentario.';
-                new bootstrap.Modal(document.getElementById('modalComentario')).show();
-            }
-
-            function showToast(msg, tipo = 'success') {
-                const container = document.getElementById('toastContainer');
-                const id = 'toast-' + Date.now();
-                const icon = tipo === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
-                container.insertAdjacentHTML('beforeend',
-                        `<div id="${id}" class="toast align-items-center text-white bg-${tipo} border-0"
-                          role="alert" data-bs-autohide="true" data-bs-delay="3500">
-                        <div class="d-flex">
-                            <div class="toast-body fw-semibold"><i class="bi ${icon} me-2"></i>${msg}</div>
-                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    </div>`);
-                bootstrap.Toast.getOrCreateInstance(document.getElementById(id)).show();
-            }
-
-            const urlParams = new URLSearchParams(location.search);
-            if (urlParams.get('activeTab') === 'comparativa') {
-                const t = document.querySelector('[data-bs-target="#tab-comparativa"]');
-                if (t)
-                    bootstrap.Tab.getOrCreateInstance(t).show();
-            }
-        </script>
 
     </body>
 </html>

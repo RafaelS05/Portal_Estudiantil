@@ -3,8 +3,12 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.FeedBackRequest;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.FeedBackResumen;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.FeedBackPDFService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.FeedBackService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.MateriaService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.PeriodoService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.SeccionMateriaService;
+import com.lowagie.text.DocumentException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -32,7 +36,16 @@ public class FeedBackController {
     @Autowired
     private FeedBackService feedBackService;
     @Autowired
+    private FeedBackPDFService feedBackPDFService;
+    @Autowired
     private SeccionMateriaService seccionMateriaService;
+    @Autowired
+    private MateriaService materiaService;
+    @Autowired
+    private PeriodoService periodoService;
+
+    private static final DateTimeFormatter FMT_ARCHIVO
+            = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     @GetMapping("/feedBack360")
     public String vista(
@@ -85,9 +98,6 @@ public class FeedBackController {
             model.addAttribute("estudiantes",
                     feedBackService.listarEstudiantesConFeedback(idSeccionmateria));
         }
-        // TODO: agregar secciones-materia del docente cuando SeccionMateriaService esté listo
-        // model.addAttribute("seccionMaterias",
-        //         seccionMateriaService.listarPorDocente(idDocente));
     }
 
     //ESTUDIANTE
@@ -107,7 +117,7 @@ public class FeedBackController {
         model.addAttribute("promedioGeneral", String.format("%.1f", promedio));
         model.addAttribute("totalEvaluaciones", feedbacks.size());
 
-        // TODO: model.addAttribute("materias", materiaService.listarActivas());
+        model.addAttribute("materias", materiaService.listarActivas());
     }
 
     //ENCARGADO
@@ -127,7 +137,7 @@ public class FeedBackController {
         model.addAttribute("promedioGeneral", String.format("%.1f", promedio));
         model.addAttribute("totalEvaluaciones", feedbacks.size());
 
-        // TODO: model.addAttribute("materias", materiaService.listarActivas());
+        model.addAttribute("materias", materiaService.listarActivas());
     }
 
     private void cargarAdmin(Integer periodo1, Integer periodo2, Model model) {
@@ -155,7 +165,7 @@ public class FeedBackController {
             }
         }
 
-        // TODO: model.addAttribute("periodos", periodoService.listarActivos());
+        model.addAttribute("periodos", periodoService.listarResumen());
     }
 
     // POST /feedBack/registrar — solo PROFESOR
@@ -193,50 +203,66 @@ public class FeedBackController {
 
         String rol = userDetails.getRole();
         Long idUsuario = userDetails.getIdUsuario();
+        boolean esEncargado = "ENCARGADO".equals(rol);
 
-        List<FeedBackResumen> feedbacks = rol.equals("ESTUDIANTE")
-                ? feedBackService.listarPorEstudiante(idUsuario, idMateria)
-                : feedBackService.listarPorEncargado(idUsuario, idMateria);
+        List<FeedBackResumen> feedbacks = esEncargado
+                ? feedBackService.listarPorEncargado(idUsuario, idMateria)
+                : feedBackService.listarPorEstudiante(idUsuario, idMateria);
 
         String nombreEstudiante = feedbacks.isEmpty()
                 ? "Estudiante"
                 : feedbacks.get(0).getNombreEstudiante();
 
-        // TODO: descomentar cuando FeedBackPDFService esté listo
-        // byte[] pdf = pdfService.generarReporteEstudiante(
-        //         feedbacks, nombreEstudiante, userDetails.getDisplayName());
-        byte[] pdf = ("Reporte de " + nombreEstudiante).getBytes();
+        try {
+            byte[] pdf = feedBackPDFService.generarReporteEstudiante(
+                    feedbacks,
+                    nombreEstudiante,
+                    userDetails.getUsername(),
+                    esEncargado);
 
-        String archivo = String.format("Feedback360_%s_%s.pdf",
-                nombreEstudiante.replace(" ", "_"),
-                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+            String archivo = String.format("Feedback360_%s_%s.pdf",
+                    nombreEstudiante.replace(" ", "_"),
+                    LocalDate.now().format(FMT_ARCHIVO));
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + archivo + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdf);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + archivo + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+
+        } catch (DocumentException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/pdf-admin")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<byte[]> descargarPdfAdmin() {
+    public ResponseEntity<byte[]> descargarPdfAdmin(
+            @AuthenticationPrincipal PortalUserDetails userDetails) {
 
         List<FeedBackResumen> feedbacks = feedBackService.listarTodos();
+        List<FeedBackResumen> alertas = feedBackService.listarAlertas();
 
-        // TODO: descomentar cuando FeedBackPDFService esté listo
-        // byte[] pdf = pdfService.generarReporteAdmin(feedbacks, null);
-        byte[] pdf = "Reporte Admin Feedback360".getBytes();
+        try {
+            byte[] pdf = feedBackPDFService.generarReporteAdmin(
+                    feedbacks,
+                    feedBackService.promediosPorSeccion(),
+                    feedBackService.promediosPorDocente(),
+                    alertas,
+                    userDetails.getUsername());
 
-        String archivo = "Feedback360_Admin_"
-                + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-                + ".pdf";
+            String archivo = "Feedback360_Admin_"
+                    + LocalDate.now().format(FMT_ARCHIVO) + ".pdf";
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + archivo + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdf);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + archivo + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+
+        } catch (DocumentException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/alertas")
