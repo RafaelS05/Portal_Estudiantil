@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+    <div th:fragment="content">
+
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1"
+                    th:text="${evento.idEvento != null ? 'Editar Evento' : 'Nuevo Evento'}">
+                </h2>
+                <p class="text-muted mb-0 small">
+                    Complete los campos. El evento aparecerá en el calendario al guardarse.
+                </p>
+            </div>
+            <a th:href="@{/eventos}" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-left me-1"></i> Volver
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <form th:action="@{/eventos/guardar}"
+                      th:object="${evento}"
+                      method="post">
+
+                    <input type="hidden" th:field="*{idEvento}">
+
+                    <div class="row g-3">
+
+                        <!-- Tipo de evento -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Tipo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" th:field="*{tipoEvento}" required>
+                                <option value="">Seleccione un tipo</option>
+                                <option value="REUNION">Reunión</option>
+                                <option value="ACTIVIDAD">Actividad</option>
+                                <option value="FERIADO">Feriado</option>
+                                <option value="EXAMEN">Examen</option>
+                                <option value="OTRO">Otro</option>
+                            </select>
+                        </div>
+
+                        <!-- Fecha de inicio -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Fecha de inicio <span class="text-danger">*</span>
+                            </label>
+                            <input type="date"
+                                   class="form-control"
+                                   th:field="*{fechaInicio}"
+                                   required>
+                        </div>
+
+                        <!-- Fecha de fin (opcional) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Fecha de fin
+                                <span class="text-muted fw-normal">(opcional)</span>
+                            </label>
+                            <input type="date"
+                                   class="form-control"
+                                   th:field="*{fechaFin}">
+                            <div class="form-text">
+                                Para eventos de un solo día, deje este campo vacío.
+                            </div>
+                        </div>
+
+                        <!-- Título -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Título <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:field="*{titulo}"
+                                   placeholder="Ej: Reunión de padres de familia"
+                                   maxlength="120"
+                                   required>
+                            <div class="form-text">Máximo 120 caracteres.</div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Descripción
+                                <span class="text-muted fw-normal">(opcional)</span>
+                            </label>
+                            <textarea class="form-control"
+                                      th:field="*{descripcion}"
+                                      rows="3"
+                                      placeholder="Detalles adicionales del evento..."
+                                      maxlength="400"></textarea>
+                            <div class="form-text">Máximo 400 caracteres.</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
+                            <span th:text="${evento.idEvento != null ? 'Actualizar' : 'Guardar'}"></span>
+                        </button>
+                        <a th:href="@{/eventos}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>

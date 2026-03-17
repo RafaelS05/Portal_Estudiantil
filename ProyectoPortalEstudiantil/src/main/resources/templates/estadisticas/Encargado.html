@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- ENCABEZADO -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-0">Estadísticas de Asistencia</h2>
+                        <p class="text-muted mb-0">
+                            Período: <span class="fw-semibold" th:text="${periodo.nombre}">—</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- MENSAJE -->
+                <div th:if="${mensaje}" class="alert alert-dismissible fade show mb-4"
+                     th:classappend="${' alert-' + (tipoMensaje != null ? tipoMensaje : 'info')}"
+                     role="alert">
+                    [[${mensaje}]]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- SIN HIJOS VINCULADOS -->
+                <div th:if="${asistencias == null || asistencias.isEmpty()}"
+                     class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5 text-muted">
+                        <i class="fa-solid fa-child fa-3x mb-3 d-block"></i>
+                        <h5>Sin datos de asistencia</h5>
+                        <p class="mb-0 small">
+                            No hay registros de asistencia para sus hijos en este período,
+                            o aún no tiene estudiantes vinculados.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CONTENIDO CON DATOS -->
+                <div th:unless="${asistencias == null || asistencias.isEmpty()}">
+
+                    <!-- GRÁFICO DE BARRAS HORIZONTALES -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
+                            <h6 class="fw-semibold mb-0">
+                                <i class="fa-solid fa-chart-bar me-2 text-primary"></i>
+                                % Asistencia por Estudiante
+                                <small class="text-muted fw-normal ms-2">— línea roja = mínimo recomendado (80%)</small>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chartBarras" style="max-height:220px;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- TABLA RESUMEN -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white pt-3 pb-2">
+                            <h6 class="fw-semibold mb-0">
+                                <i class="fa-solid fa-table me-2 text-secondary"></i>
+                                Resumen Detallado
+                            </h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Estudiante</th>
+                                            <th>Sección</th>
+                                            <th>Total clases</th>
+                                            <th>Presentes</th>
+                                            <th>Ausentes</th>
+                                            <th>% Asistencia</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="est : ${asistencias}">
+                                            <td class="fw-semibold" th:text="${est.nombreEstudiante}">—</td>
+                                            <td th:text="${est.seccion}">—</td>
+                                            <td th:text="${est.totalClases}">0</td>
+                                            <td class="text-success fw-semibold" th:text="${est.totalPresente}">0</td>
+                                            <td class="text-danger fw-semibold" th:text="${est.totalAusente}">0</td>
+                                            <td class="fw-bold"
+                                                th:classappend="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80 ? ' text-success' :
+                                                                 est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 ? ' text-warning' : ' text-danger'}"
+                                                th:text="${est.porcentajeAsistencia != null ? #numbers.formatDecimal(est.porcentajeAsistencia,1,1) + '%' : '—'}">—</td>
+                                            <td>
+                                                <span th:if="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 80}"
+                                                      class="badge bg-success-subtle text-success">Buena</span>
+                                                <span th:if="${est.porcentajeAsistencia != null && est.porcentajeAsistencia >= 60 && est.porcentajeAsistencia < 80}"
+                                                      class="badge bg-warning-subtle text-warning">Regular</span>
+                                                <span th:if="${est.porcentajeAsistencia == null || est.porcentajeAsistencia < 60}"
+                                                      class="badge bg-danger-subtle text-danger">Crítica</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- fin th:unless -->
+
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+        <script th:inline="javascript">
+            /*<![CDATA[*/
+            const hijosLabels     = JSON.parse(/*[[${hijosLabels}]]*/     '[]');
+            const hijosAsistencia = JSON.parse(/*[[${hijosAsistencia}]]*/ '[]');
+
+            const ctxBarras = document.getElementById('chartBarras');
+            if (ctxBarras && hijosLabels.length > 0) {
+
+                const coloresBarra = hijosAsistencia.map(v =>
+                    v >= 80 ? 'rgba(56,142,60,0.8)' :
+                    v >= 60 ? 'rgba(245,124,0,0.8)' :
+                              'rgba(198,40,40,0.8)'
+                );
+
+                new Chart(ctxBarras, {
+                    type: 'bar',
+                    data: {
+                        labels: hijosLabels,
+                        datasets: [
+                            {
+                                label: '% Asistencia',
+                                data: hijosAsistencia,
+                                backgroundColor: coloresBarra,
+                                borderRadius: 6,
+                                borderSkipped: false
+                            },
+                            {
+                                label: 'Mínimo recomendado (80%)',
+                                data: hijosLabels.map(() => 80),
+                                type: 'line',
+                                borderColor: 'rgba(198,40,40,0.9)',
+                                borderWidth: 2,
+                                borderDash: [6, 4],
+                                pointRadius: 0,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        scales: {
+                            x: {
+                                min: 0,
+                                max: 100,
+                                ticks: { callback: v => v + '%' },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ` ${ctx.parsed.x.toFixed(1)}% asistencia`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            /*]]>*/
+        </script>
+    </body>
+</html>

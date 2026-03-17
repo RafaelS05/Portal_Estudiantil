@@ -25,17 +25,19 @@ public class EvaluacionController {
     private final SeccionMateriaRepository seccionMateriaRepository;
     private final PeriodoRepository periodoRepository;
 
-   public EvaluacionController(EvaluacionService evaluacionService,
-                            SeccionMateriaRepository seccionMateriaRepository,
-                            PeriodoRepository periodoRepository) {
-    this.evaluacionService = evaluacionService;
-    this.seccionMateriaRepository = seccionMateriaRepository;
-    this.periodoRepository = periodoRepository;
-}
+    public EvaluacionController(EvaluacionService evaluacionService,
+            SeccionMateriaRepository seccionMateriaRepository,
+            PeriodoRepository periodoRepository) {
+        this.evaluacionService = evaluacionService;
+        this.seccionMateriaRepository = seccionMateriaRepository;
+        this.periodoRepository = periodoRepository;
+    }
+
     @GetMapping("")
     public String listado(Model model) {
         var lista = evaluacionService.listarTodas();
         model.addAttribute("evaluaciones", lista);
+        model.addAttribute("pageTitle", "Evaluaciones");
         return "evaluaciones/listado";
     }
 
@@ -63,7 +65,7 @@ public class EvaluacionController {
 
         model.addAttribute("busquedaActual", busqueda);
         model.addAttribute("secciones", seccionMateriaRepository.findAll());
-
+        model.addAttribute("pageTitle", "Evaluaciones");
         return "evaluaciones/listado-paginado";
     }
 
@@ -72,6 +74,7 @@ public class EvaluacionController {
         model.addAttribute("evaluacion", new Evaluacion());
         model.addAttribute("secciones", seccionMateriaRepository.findAll());
         model.addAttribute("periodos", periodoRepository.findAll());
+        model.addAttribute("pageTitle", "Nueva Evaluación");
         return "evaluaciones/modificar";
     }
 
@@ -85,6 +88,7 @@ public class EvaluacionController {
     public String actualizar(@PathVariable("id") Long id,
             @ModelAttribute("evaluacion") Evaluacion evaluacion) {
         evaluacionService.actualizarEvaluacion(id, evaluacion);
+        
         return "redirect:/evaluaciones";
     }
 
@@ -94,6 +98,7 @@ public class EvaluacionController {
         model.addAttribute("evaluacion", evaluacion);
         model.addAttribute("secciones", seccionMateriaRepository.findAll());
         model.addAttribute("periodos", periodoRepository.findAll());
+        model.addAttribute("pageTitle", "Editar Evaluación");
         return "evaluaciones/modificar";
     }
 

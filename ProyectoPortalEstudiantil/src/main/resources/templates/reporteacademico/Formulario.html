@@ -15,13 +15,7 @@
                             <i class="fa-solid fa-file-circle-plus text-primary me-2"></i>
                             <span th:text="${titulo}">Nueva Boleta</span>
                         </h4>
-                        <nav aria-label="breadcrumb" class="mt-1">
-                            <ol class="breadcrumb mb-0 small">
-                                <li class="breadcrumb-item"><a th:href="@{/}">Inicio</a></li>
-                                <li class="breadcrumb-item"><a th:href="@{/reportes}">Reportes</a></li>
-                                <li class="breadcrumb-item active" th:text="${titulo}"></li>
-                            </ol>
-                        </nav>
+
                     </div>
                     <a th:href="@{/reportes}" class="btn btn-outline-secondary btn-sm">
                         <i class="fa-solid fa-arrow-left me-1"></i>Volver

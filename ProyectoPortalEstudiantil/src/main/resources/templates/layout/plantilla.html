@@ -154,18 +154,25 @@
                             <button class="sidebar-toggle" id="sidebarToggle">
                                 <i class="fa-solid fa-bars"></i>
                             </button>
-                            <h1 class="page-title"
-                                th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">
-                                Dashboard
+
+                            <h1 class="page-title fw-bold"
+                                th:text="${pageTitle != null ? pageTitle : 'Inicio'}">
+                                Inicio
                             </h1>
                         </div>
 
                         <div class="topbar-right d-flex align-items-center gap-2">
 
-                            <button type="button" class="btn-news">
+                            <!-- DESPUÉS: convertido a enlace con badge -->
+                            <a th:href="@{/}" class="btn-news text-decoration-none position-relative">
                                 <i class="fa-solid fa-bell d-md-none"></i>
                                 <span class="d-none d-md-inline">Noticias y Anuncios</span>
-                            </button>
+                                <span th:if="${noticiasNuevas != null && noticiasNuevas > 0}"
+                                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                      style="font-size:10px;"
+                                      th:text="${noticiasNuevas}">
+                                </span>
+                            </a>
 
                             <!-- Usuario autenticado -->
                             <div class="dropdown" sec:authorize="isAuthenticated()">

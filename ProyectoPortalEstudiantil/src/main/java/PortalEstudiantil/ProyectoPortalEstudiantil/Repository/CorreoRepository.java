@@ -55,4 +55,5 @@ public interface CorreoRepository extends JpaRepository<Correo, Long> {
             @Param("esLogin") String esLogin,
             @Param("idUsuario") Long idUsuario
     );
+    
 }
