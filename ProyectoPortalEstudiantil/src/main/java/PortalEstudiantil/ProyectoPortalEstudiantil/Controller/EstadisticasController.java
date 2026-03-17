@@ -6,6 +6,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.Estadisticas.Asist
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.Estadisticas.CalificacionPorMateriaRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.Estadisticas.CalificacionPorSeccionRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.Estadisticas.KpiGeneralRow;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EstadisticasRepository.SeccionRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.EstadisticasService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -44,24 +45,44 @@ public class EstadisticasController {
 
         Long idPeriodo = periodo.getIdPeriodo();
 
-        // KPI siempre global
+        // KPI siempre global (tarjetas superiores)
         KpiGeneralRow kpi = estadisticasService.obtenerKpiGeneral(idPeriodo);
 
         // Secciones para el dropdown
-        var secciones = estadisticasService.obtenerSecciones(idPeriodo);
+        List<SeccionRow> secciones = estadisticasService.obtenerSecciones(idPeriodo);
 
-        // Calificaciones por sección (siempre global — muestra panorama completo)
-        List<CalificacionPorSeccionRow> porSeccion
-                = estadisticasService.obtenerCalificacionesPorSeccion(idPeriodo);
+        // ── Gráfico izquierdo: por sección ──────────────────────────────────
+        // Si hay sección seleccionada → solo muestra esa sección en el gráfico.
+        // Si no hay filtro → muestra todas (panorama global).
+        List<CalificacionPorSeccionRow> porSeccion =
+                estadisticasService.obtenerCalificacionesPorSeccion(idPeriodo);
 
-        // Calificaciones por materia y alertas — filtradas si se seleccionó sección
-        List<CalificacionPorMateriaRow> porMateria
-                = estadisticasService.obtenerCalificacionesPorMateria(idPeriodo, idSeccion);
+        if (idSeccion != null) {
+            // Obtener el número de sección seleccionada para poder filtrar por texto
+            String numeroSeccionSeleccionada = secciones.stream()
+                    .filter(s -> s.getIdSeccion().equals(idSeccion))
+                    .map(SeccionRow::getNumero)
+                    .findFirst()
+                    .orElse(null);
 
-        List<AlertaEstadisticaRow> alertas
-                = estadisticasService.obtenerAlertas(idPeriodo, idSeccion);
+            // Filtrar la lista para mostrar solo la sección elegida en el gráfico
+            if (numeroSeccionSeleccionada != null) {
+                final String numeroFinal = numeroSeccionSeleccionada;
+                porSeccion = porSeccion.stream()
+                        .filter(r -> r.getSeccion().equals(numeroFinal))
+                        .toList();
+            }
+        }
 
-        // Serializar arrays para Chart.js
+        // ── Gráfico derecho: por materia — filtrado si hay sección ──────────
+        List<CalificacionPorMateriaRow> porMateria =
+                estadisticasService.obtenerCalificacionesPorMateria(idPeriodo, idSeccion);
+
+        // ── Alertas — filtradas si hay sección ──────────────────────────────
+        List<AlertaEstadisticaRow> alertas =
+                estadisticasService.obtenerAlertas(idPeriodo, idSeccion);
+
+        // Serializar para Chart.js
         String seccionLabels = toJsonStringArray(porSeccion.stream()
                 .map(r -> "Sección " + r.getSeccion()).toList());
         String seccionPromedios = toJsonDoubleArray(porSeccion.stream()
@@ -72,16 +93,16 @@ public class EstadisticasController {
         String materiaPromedios = toJsonDoubleArray(porMateria.stream()
                 .map(CalificacionPorMateriaRow::getPromedio).toList());
 
-        model.addAttribute("periodo", periodo);
-        model.addAttribute("kpi", kpi);
-        model.addAttribute("secciones", secciones);
+        model.addAttribute("periodo",         periodo);
+        model.addAttribute("kpi",             kpi);
+        model.addAttribute("secciones",       secciones);
         model.addAttribute("idSeccionActual", idSeccion);
-        model.addAttribute("alertas", alertas);
-        model.addAttribute("seccionLabels", seccionLabels);
-        model.addAttribute("seccionPromedios", seccionPromedios);
-        model.addAttribute("materiaLabels", materiaLabels);
-        model.addAttribute("materiaPromedios", materiaPromedios);
-        model.addAttribute("pageTitle", "Estadísticas");
+        model.addAttribute("alertas",         alertas);
+        model.addAttribute("seccionLabels",   seccionLabels);
+        model.addAttribute("seccionPromedios",seccionPromedios);
+        model.addAttribute("materiaLabels",   materiaLabels);
+        model.addAttribute("materiaPromedios",materiaPromedios);
+        model.addAttribute("pageTitle",       "Estadísticas");
 
         return "estadisticas/admin";
     }
@@ -98,19 +119,18 @@ public class EstadisticasController {
             Periodo periodo = estadisticasService.obtenerPeriodoActual();
             Long idPeriodo = periodo.getIdPeriodo();
 
-            List<AsistenciaEstudianteRow> asistencias
-                    = estadisticasService.obtenerAsistenciaHijos(authentication, idPeriodo);
+            List<AsistenciaEstudianteRow> asistencias =
+                    estadisticasService.obtenerAsistenciaHijos(authentication, idPeriodo);
 
-            // ← RESTAURADO: necesario para que la dona funcione
             String hijosLabels = toJsonStringArray(asistencias.stream()
                     .map(AsistenciaEstudianteRow::getNombreEstudiante).toList());
             String hijosAsistencia = toJsonDoubleArray(asistencias.stream()
                     .map(r -> r.getPorcentajeAsistencia() != null ? r.getPorcentajeAsistencia() : 0.0).toList());
 
-            model.addAttribute("periodo", periodo);
-            model.addAttribute("asistencias", asistencias);
-            model.addAttribute("hijosLabels", hijosLabels);       // ← RESTAURADO
-            model.addAttribute("hijosAsistencia", hijosAsistencia); // ← RESTAURADO
+            model.addAttribute("periodo",        periodo);
+            model.addAttribute("asistencias",    asistencias);
+            model.addAttribute("hijosLabels",    hijosLabels);
+            model.addAttribute("hijosAsistencia",hijosAsistencia);
 
             return "estadisticas/encargado";
 
@@ -137,34 +157,24 @@ public class EstadisticasController {
     // UTILIDADES
     // =========================================================
     private String toJsonStringArray(List<String> list) {
-        if (list == null || list.isEmpty()) {
-            return "[]";
-        }
+        if (list == null || list.isEmpty()) return "[]";
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
             sb.append("\"").append(
                     list.get(i) == null ? "" : list.get(i).replace("\"", "'")
             ).append("\"");
-            if (i < list.size() - 1) {
-                sb.append(",");
-            }
+            if (i < list.size() - 1) sb.append(",");
         }
-        sb.append("]");
-        return sb.toString();
+        return sb.append("]").toString();
     }
 
     private String toJsonDoubleArray(List<Double> list) {
-        if (list == null || list.isEmpty()) {
-            return "[]";
-        }
+        if (list == null || list.isEmpty()) return "[]";
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
             sb.append(list.get(i));
-            if (i < list.size() - 1) {
-                sb.append(",");
-            }
+            if (i < list.size() - 1) sb.append(",");
         }
-        sb.append("]");
-        return sb.toString();
+        return sb.append("]").toString();
     }
 }
