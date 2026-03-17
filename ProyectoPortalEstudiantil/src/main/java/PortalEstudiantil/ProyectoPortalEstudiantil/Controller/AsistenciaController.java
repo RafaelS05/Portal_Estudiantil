@@ -60,6 +60,7 @@ public class AsistenciaController {
         model.addAttribute("totalJustificados", totalJustificados);
         model.addAttribute("idSeccionMateria", idSeccionMateria);
         model.addAttribute("fecha", fechaStr);
+        model.addAttribute("pageTitle", "Asistencias");
 
         return "asistencias/listado";
     }

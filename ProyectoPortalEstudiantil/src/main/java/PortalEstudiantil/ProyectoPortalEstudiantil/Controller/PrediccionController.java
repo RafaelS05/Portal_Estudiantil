@@ -150,7 +150,7 @@ public class PrediccionController {
         model.addAttribute("totalMedio",    totalMedio);
         model.addAttribute("totalBajo",     totalBajo);
         model.addAttribute("totalSinDatos", totalSD);
-        model.addAttribute("pageTitle",     "Estadísticas de Rendimiento");
+        model.addAttribute("pageTitle",     "Análisis Predictivo");
         return "prediccion/VistaAdmin";
     }
 

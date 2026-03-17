@@ -43,6 +43,7 @@ public class CalificacionesController {
     public String listado(Model model) {
         var lista = calificacionesService.listarCalificacionesParaVista();
         model.addAttribute("calificaciones", lista);
+        model.addAttribute("pageTitle", "Calificaciones");
         return "calificaciones/listado";
     }
     
@@ -67,6 +68,7 @@ public class CalificacionesController {
         model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("busquedaActual", busqueda);
         model.addAttribute("seccionActual", seccion);
+        model.addAttribute("pageTitle", "Calificaciones");
         
         return "calificaciones/listado-paginado"; 
     }
@@ -76,6 +78,7 @@ public class CalificacionesController {
         model.addAttribute("calificacion", new Calificaciones());
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("evaluaciones", evaluacionRepository.findAll());
+        model.addAttribute("pageTitle", "Nueva Calificación");
 
         return "calificaciones/modificar";
     }
