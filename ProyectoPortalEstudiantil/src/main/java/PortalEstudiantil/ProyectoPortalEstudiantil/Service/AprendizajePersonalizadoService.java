@@ -52,7 +52,6 @@ public class AprendizajePersonalizadoService {
     private Map<String, Object> transformarConEstrategia(Calificaciones calificacion) {
         Map<String, Object> resultado = new HashMap<>();
         
-        // ===== DATOS DEL ESTUDIANTE =====
         Usuario estudiante = calificacion.getMatricula().getEstudiante();
         resultado.put("idEstudiante", estudiante.getIdUsuario());
         
@@ -63,27 +62,22 @@ public class AprendizajePersonalizadoService {
         }
         resultado.put("nombreCompleto", nombreCompleto);
         
-        // ===== DATOS DE SECCIÓN Y GRADO =====
         Seccion seccion = calificacion.getMatricula().getSeccion();
         resultado.put("seccion", seccion.getNumero());
         resultado.put("grado", seccion.getGrado());
         resultado.put("letraSeccion", seccion.getLetra());
         
-        // ===== DATOS DE MATERIA (OPCIÓN 3: usando getNombreCompleto()) =====
         String infoMateria = calificacion.getEvaluacion()
                                         .getSeccionMateria()
-                                        .getNombreCompleto(); // "Sección X - Materia Y"
+                                        .getNombreCompleto();
         resultado.put("materia", infoMateria);
         
-        // ===== CALIFICACIÓN =====
         resultado.put("calificacion", calificacion.getCalificacion());
-        
-        // ===== ESTRATEGIA =====
+
         String estrategia = calcularEstrategia(calificacion.getCalificacion());
         resultado.put("estrategia", estrategia);
         resultado.put("colorEstrategia", getColorEstrategia(estrategia));
         
-        // ===== RECURSOS =====
         List<RecursoAprendizaje> recursos = recursoRepository.findActivos();
         resultado.put("recursos", recursos);
         resultado.put("tieneRecursos", !recursos.isEmpty());
