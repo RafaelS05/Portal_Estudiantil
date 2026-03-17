@@ -92,7 +92,7 @@ public class GestionAcademicaController {
         //Comunes y js
         model.addAttribute("tabActivo", tab);
         model.addAttribute("paginaActual", "gestion-academica");
-        model.addAttribute("tituloPagina", "Gestión Académica");
+        model.addAttribute("pageTitle", "Gestión Académica");
 
         return "gestionAcademica/gestionAcademica";
     }

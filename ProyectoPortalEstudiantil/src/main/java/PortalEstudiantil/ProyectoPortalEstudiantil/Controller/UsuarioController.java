@@ -92,6 +92,8 @@ public class UsuarioController {
         model.addAttribute("tipoUsuario", tipoUsuario);
         model.addAttribute("tiposUsuario", tiposUsuario);
         model.addAttribute("estado", estado);
+        model.addAttribute("pageTitle", "Usuarios");
+        
 
         return "usuarios/listado";
     }

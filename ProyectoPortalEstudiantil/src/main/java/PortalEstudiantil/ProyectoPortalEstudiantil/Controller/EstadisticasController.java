@@ -81,6 +81,7 @@ public class EstadisticasController {
         model.addAttribute("seccionPromedios", seccionPromedios);
         model.addAttribute("materiaLabels", materiaLabels);
         model.addAttribute("materiaPromedios", materiaPromedios);
+        model.addAttribute("pageTitle", "Estadísticas");
 
         return "estadisticas/admin";
     }
