@@ -13,9 +13,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     // ══════════════════════════════════════════════════════════════════
     // PROYECCIONES
     // ══════════════════════════════════════════════════════════════════
-    /**
-     * Fila del listado principal de asistencias.
-     */
     interface AsistenciaListadoRow {
 
         Long getIdAsistencia();
@@ -39,9 +36,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
         String getEstadoDescripcion();
     }
 
-    /**
-     * Fila del pase de lista (un alumno por matrícula/sección-materia).
-     */
     interface PaseListaRow {
 
         Long getIdMatriculaFk();
@@ -52,17 +46,24 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
 
         String getNumeroSeccion();
 
-        Long getIdAsistencia();   // null si todavía no existe el registro
+        Long getIdAsistencia();
 
-        Long getIdEstadoFk();     // null si todavía no existe el registro
+        Long getIdEstadoFk();
+    }
+
+    // ← NUEVA PROYECCIÓN: para el dropdown del modal de pase de lista
+    interface SeccionMateriaDropdownRow {
+
+        Long getIdSeccionMateria();
+
+        String getNombreMateria();
+
+        String getNumeroSeccion();
     }
 
     // ══════════════════════════════════════════════════════════════════
     // CONSULTAS – LISTADO
     // ══════════════════════════════════════════════════════════════════
-    /**
-     * Todos los registros de asistencia (join completo).
-     */
     @Query(value = """
         SELECT
             a.ID_ASISTENCIA          AS idAsistencia,
@@ -93,9 +94,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     """, nativeQuery = true)
     List<AsistenciaListadoRow> listarTodas();
 
-    /**
-     * Filtro por sección-materia.
-     */
     @Query(value = """
         SELECT
             a.ID_ASISTENCIA          AS idAsistencia,
@@ -128,9 +126,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<AsistenciaListadoRow> listarPorSeccionMateria(
             @Param("idSeccionMateria") Long idSeccionMateria);
 
-    /**
-     * Filtro por fecha.
-     */
     @Query(value = """
         SELECT
             a.ID_ASISTENCIA          AS idAsistencia,
@@ -163,9 +158,6 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
     List<AsistenciaListadoRow> listarPorFecha(
             @Param("fecha") LocalDate fecha);
 
-    /**
-     * Filtro por sección-materia Y fecha.
-     */
     @Query(value = """
         SELECT
             a.ID_ASISTENCIA          AS idAsistencia,
@@ -200,14 +192,70 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
             @Param("idSeccionMateria") Long idSeccionMateria,
             @Param("fecha") LocalDate fecha);
 
+    // ← NUEVA QUERY: listado filtrado por docente
+    @Query(value = """
+        SELECT
+            a.ID_ASISTENCIA          AS idAsistencia,
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            a.ID_MATRICULA_FK        AS idMatriculaFk,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante,
+            a.ID_SECCIONMATERIA_FK   AS idSeccionMateriaFk,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            CONCAT(d.NOMBRE, ' ', d.PRIMER_APELLIDO,
+                   CASE WHEN d.SEGUNDO_APELLIDO IS NULL OR d.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', d.SEGUNDO_APELLIDO) END
+            )                        AS nombreDocente,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN USUARIOS_TB        d  ON d.ID_USUARIO          = sm.ID_USUARIO_DOCENTE_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        WHERE d.ID_USUARIO = :idDocente
+        ORDER BY a.FECHA_ASISTENCIA DESC, a.ID_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<AsistenciaListadoRow> listarPorDocente(@Param("idDocente") Long idDocente);
+
+    // ← NUEVA QUERY: secciones-materia de un docente (para el dropdown del modal)
+    @Query(value = """
+        SELECT
+            sm.ID_SECCIONMATERIA AS idSeccionMateria,
+            m.NOMBRE             AS nombreMateria,
+            s.NUMERO             AS numeroSeccion
+        FROM SECCIONMATERIA_TB sm
+        JOIN MATERIA_TB m ON m.ID_MATERIA = sm.ID_MATERIA_FK
+        JOIN SECCION_TB s ON s.ID_SECCION = sm.ID_SECCION_FK
+        WHERE sm.ID_USUARIO_DOCENTE_FK = :idDocente
+          AND sm.ID_ESTADO_FK = 1
+        ORDER BY m.NOMBRE, s.NUMERO
+    """, nativeQuery = true)
+    List<SeccionMateriaDropdownRow> listarSeccionesMateriaPorDocente(@Param("idDocente") Long idDocente);
+
+    // ← NUEVA QUERY: todas las secciones-materia (para admins)
+    @Query(value = """
+        SELECT
+            sm.ID_SECCIONMATERIA AS idSeccionMateria,
+            m.NOMBRE             AS nombreMateria,
+            s.NUMERO             AS numeroSeccion
+        FROM SECCIONMATERIA_TB sm
+        JOIN MATERIA_TB m ON m.ID_MATERIA = sm.ID_MATERIA_FK
+        JOIN SECCION_TB s ON s.ID_SECCION = sm.ID_SECCION_FK
+        WHERE sm.ID_ESTADO_FK = 1
+        ORDER BY m.NOMBRE, s.NUMERO
+    """, nativeQuery = true)
+    List<SeccionMateriaDropdownRow> listarTodasSeccionesMateria();
+
     // ══════════════════════════════════════════════════════════════════
     // CONSULTAS – PASE DE LISTA
     // ══════════════════════════════════════════════════════════════════
-    /**
-     * Devuelve todos los alumnos matriculados en la sección a la que pertenece
-     * la sección-materia, con el estado de asistencia existente para la fecha
-     * indicada (null si aún no hay registro).
-     */
     @Query(value = """
         SELECT
             mt.ID_MATRICULA         AS idMatriculaFk,
@@ -237,7 +285,7 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
             @Param("fecha") LocalDate fecha);
 
     // ══════════════════════════════════════════════════════════════════
-    // CONTADORES (para tarjetas de estadísticas)
+    // CONTADORES
     // ══════════════════════════════════════════════════════════════════
     long countByIdEstadoFk(Long idEstadoFk);
 

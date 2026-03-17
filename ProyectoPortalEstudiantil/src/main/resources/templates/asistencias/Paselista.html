@@ -97,11 +97,11 @@
                         <!-- Botones de selección masiva -->
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-success"
-                                    onclick="marcarTodos(1)">
+                                    onclick="marcarTodos(7)">
                                 <i class="fa-solid fa-check me-1"></i>Todos Presentes
                             </button>
                             <button type="button" class="btn btn-sm btn-danger"
-                                    onclick="marcarTodos(2)">
+                                    onclick="marcarTodos(8)">
                                 <i class="fa-solid fa-xmark me-1"></i>Todos Ausentes
                             </button>
                         </div>
@@ -144,7 +144,7 @@
                                                    th:name="'estado_' + ${r.idMatriculaFk}"
                                                    th:id="'pres_' + ${r.idMatriculaFk}"
                                                    value="1"
-                                                   th:checked="${r.idEstadoFk == 1 or r.idEstadoFk == null}">
+                                                   th:checked="${r.idEstadoFk == 7 or r.idEstadoFk == null}">
                                             <label class="btn btn-sm btn-outline-success"
                                                    th:for="'pres_' + ${r.idMatriculaFk}">
                                                 <i class="fa-solid fa-check me-1"></i>Presente
@@ -155,7 +155,7 @@
                                                    th:name="'estado_' + ${r.idMatriculaFk}"
                                                    th:id="'aus_' + ${r.idMatriculaFk}"
                                                    value="2"
-                                                   th:checked="${r.idEstadoFk == 2}">
+                                                   th:checked="${r.idEstadoFk == 8}">
                                             <label class="btn btn-sm btn-outline-danger"
                                                    th:for="'aus_' + ${r.idMatriculaFk}">
                                                 <i class="fa-solid fa-xmark me-1"></i>Ausente
@@ -166,7 +166,7 @@
                                                    th:name="'estado_' + ${r.idMatriculaFk}"
                                                    th:id="'just_' + ${r.idMatriculaFk}"
                                                    value="3"
-                                                   th:checked="${r.idEstadoFk == 3}">
+                                                   th:checked="${r.idEstadoFk == 10}">
                                             <label class="btn btn-sm btn-outline-warning"
                                                    th:for="'just_' + ${r.idMatriculaFk}">
                                                 <i class="fa-solid fa-file-circle-check me-1"></i>Justificado

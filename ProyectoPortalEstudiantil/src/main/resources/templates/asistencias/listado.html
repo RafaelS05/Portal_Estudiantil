@@ -1,239 +1,572 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/plantilla :: head}"></head>
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
 
-<th:block th:fragment="head">
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Portal Estudiantil – Asistencias</title>
 
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" th:href="@{/css/gestionAcademica.css}">
-</th:block>
-
-<th:block th:fragment="contenido">
-    <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
-        <section id="contenido">
-
-            <!-- ── Alertas flash ──────────────────────────────────────── -->
-            <div th:if="${mensajeExito}"
-                 class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fa-solid fa-circle-check me-2"></i>
-                <span th:text="${mensajeExito}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            <div th:if="${mensajeError}"
-                 class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fa-solid fa-circle-xmark me-2"></i>
-                <span th:text="${mensajeError}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <!-- ── Cabecera ───────────────────────────────────────────── -->
-            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-                <div>
-                    <h2 class="fw-bold mb-1">
-                        <i class="fa-solid fa-clipboard-check text-primary me-2"></i>Asistencias
-                    </h2>
-                    <p class="text-muted mb-0 small">Consulta y gestiona el registro de asistencia</p>
+                <!-- ── Alertas flash ──────────────────────────────────────────── -->
+                <div th:if="${mensajeExito}"
+                     class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    <span th:text="${mensajeExito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <a th:href="@{/asistencias/paseLista}" class="btn btn-primary">
-                    <i class="fa-solid fa-list-check me-1"></i>Tomar Pase de Lista
-                </a>
-            </div>
+                <div th:if="${mensajeError}"
+                     class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-xmark me-2"></i>
+                    <span th:text="${mensajeError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
 
-            <!-- ── Tarjetas de estadísticas ───────────────────────────── -->
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-md-3">
-                    <div class="card stat-card p-3">
-                        <div class="text-muted small fw-semibold text-uppercase mb-1">Total registros</div>
-                        <div class="stat-val text-primary" th:text="${total}">0</div>
+                <!-- ── Cabecera ───────────────────────────────────────────────── -->
+                <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">
+                            <i class="fa-solid fa-clipboard-check text-primary me-2"></i>Asistencias
+                        </h2>
+                        <p class="text-muted mb-0">Consulta y gestiona el registro de asistencia</p>
                     </div>
+                    <!-- Abre el modal en lugar de navegar a otra página -->
+                    <button type="button" class="btn btn-primary"
+                            data-bs-toggle="modal" data-bs-target="#modalPaseLista">
+                        <i class="fa-solid fa-list-check me-1"></i> Tomar Pase de Lista
+                    </button>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="card stat-card p-3">
-                        <div class="text-muted small fw-semibold text-uppercase mb-1">Presentes</div>
-                        <div class="stat-val text-success" th:text="${totalPresentes}">0</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card stat-card p-3">
-                        <div class="text-muted small fw-semibold text-uppercase mb-1">Ausentes</div>
-                        <div class="stat-val text-danger" th:text="${totalAusentes}">0</div>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="card stat-card p-3">
-                        <div class="text-muted small fw-semibold text-uppercase mb-1">Justificados</div>
-                        <div class="stat-val text-warning" th:text="${totalJustificados}">0</div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- ── Filtros ────────────────────────────────────────────── -->
-            <div class="card tbl-card mb-3">
-                <div class="card-body">
-                    <form th:action="@{/asistencias}" method="get"
-                          class="row g-2 align-items-end">
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Sección-Materia (ID)</label>
-                            <input type="number" name="idSeccionMateria" class="form-control form-control-sm"
-                                   placeholder="ID de sección-materia"
-                                   th:value="${idSeccionMateria}">
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label class="form-label small fw-semibold">Fecha</label>
-                            <input type="date" name="fecha" class="form-control form-control-sm"
-                                   th:value="${fecha}">
-                        </div>
-                        <div class="col-12 col-md-4 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
-                                <i class="fa-solid fa-magnifying-glass me-1"></i>Filtrar
-                            </button>
-                            <a th:href="@{/asistencias}" class="btn btn-outline-secondary btn-sm">
-                                <i class="fa-solid fa-xmark"></i>
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- ── Tabla ──────────────────────────────────────────────── -->
-            <div class="card tbl-card">
-                <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar en tabla…"
-                           oninput="filterTable('tbl-asistencias', this.value)">
-                </div>
-                <div class="table-responsive">
-                    <table id="tbl-asistencias" class="table mb-0">
-                        <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Estudiante</th>
-                            <th>Materia</th>
-                            <th>Sección</th>
-                            <th>Docente</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="a : ${asistencias}">
-                            <td class="fw-semibold" th:text="${a.fechaAsistencia}"></td>
-                            <td th:text="${a.nombreEstudiante}"></td>
-                            <td th:text="${a.nombreMateria}"></td>
-                            <td><span class="chip-sec" th:text="${a.numeroSeccion}"></span></td>
-                            <td th:text="${a.nombreDocente}"></td>
-                            <td>
-                                <span th:switch="${a.idEstadoFk}">
-                                    <span th:case="1" class="badge bg-success-subtle text-success">Presente</span>
-                                    <span th:case="2" class="badge bg-danger-subtle text-danger">Ausente</span>
-                                    <span th:case="3" class="badge bg-warning-subtle text-warning">Justificado</span>
-                                    <span th:case="*"  class="badge bg-secondary-subtle text-secondary"
-                                          th:text="${a.estadoDescripcion}"></span>
-                                </span>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <!-- Justificar ausencia (solo visible si está Ausente) -->
-                                    <form th:if="${a.idEstadoFk == 2}"
-                                          th:action="@{/asistencias/justificar/{id}(id=${a.idAsistencia})}"
-                                          method="post" class="m-0">
-                                        <input type="hidden" name="idSeccionMateria"
-                                               th:value="${idSeccionMateria}">
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-warning"
-                                                title="Justificar ausencia">
-                                            <i class="fa-solid fa-file-circle-check"></i>
-                                        </button>
-                                    </form>
-
-                                    <!-- Cambiar estado (modal) -->
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            th:attr="data-id=${a.idAsistencia},
-                                                     data-estado=${a.idEstadoFk},
-                                                     data-sm=${idSeccionMateria}"
-                                            onclick="llenarModalEstado(this)"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modal-cambiar-estado"
-                                            title="Cambiar estado">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(asistencias)}">
-                            <td colspan="7" class="text-center text-muted py-4">
-                                No hay registros de asistencia para los filtros aplicados.
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer">
-                    Mostrando <strong th:text="${total}">0</strong> registros
-                </div>
-            </div>
-
-            <!-- ══════════════════════════════════════════════════════════
-                 MODAL – Cambiar Estado
-                 ══════════════════════════════════════════════════════════ -->
-            <div class="modal fade" id="modal-cambiar-estado" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">
-                                <i class="fa-solid fa-pen me-2 text-primary"></i>Cambiar Estado
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form id="form-cambiar-estado" method="post">
-                            <div class="modal-body">
-                                <input type="hidden" name="idSeccionMateria" id="ce-sm">
-                                <div class="mb-3">
-                                    <label class="lbl">Nuevo estado</label>
-                                    <select name="idEstado" id="ce-estado" class="form-select" required>
-                                        <option value="1">Presente</option>
-                                        <option value="2">Ausente</option>
-                                        <option value="3">Justificado</option>
-                                    </select>
-                                </div>
+                <!-- ── Tarjetas de estadísticas ──────────────────────────────── -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-muted small text-uppercase fw-semibold">Total Registros</div>
+                                <div class="fw-bold fs-2 text-primary mt-1" th:text="${total}">0</div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-light"
-                                        data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-muted small text-uppercase fw-semibold">Presentes</div>
+                                <div class="fw-bold fs-2 text-success mt-1" th:text="${totalPresentes}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-muted small text-uppercase fw-semibold">Ausentes</div>
+                                <div class="fw-bold fs-2 text-danger mt-1" th:text="${totalAusentes}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="text-muted small text-uppercase fw-semibold">Justificados</div>
+                                <div class="fw-bold fs-2 text-warning mt-1" th:text="${totalJustificados}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Filtros ────────────────────────────────────────────────── -->
+                <div class="card mb-4">
+                    <div class="card-body py-3">
+                        <form th:action="@{/asistencias}" method="get" class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Sección-Materia (ID)</label>
+                                <input type="number" name="idSeccionMateria" class="form-control"
+                                       placeholder="ID de la sección-materia"
+                                       th:value="${idSeccionMateria}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Fecha</label>
+                                <input type="date" name="fecha" class="form-control"
+                                       th:value="${fecha}">
+                            </div>
+                            <div class="col-md-4 d-flex gap-2 align-items-end">
+                                <button type="submit" class="btn btn-primary flex-fill">
+                                    <i class="fa-solid fa-magnifying-glass me-1"></i>Filtrar
+                                </button>
+                                <a th:href="@{/asistencias}" class="btn btn-outline-secondary"
+                                   th:if="${idSeccionMateria != null || fecha != null}">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </a>
                             </div>
                         </form>
                     </div>
                 </div>
-            </div>
 
-        </section>
-    </div>
-</th:block>
+                <!-- ── Tabla de asistencias ───────────────────────────────────── -->
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Estudiante</th>
+                                        <th>Materia</th>
+                                        <th>Sección</th>
+                                        <th>Docente</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="a, stat : ${asistencias}">
+                                        <td class="small text-muted" th:text="${a.fechaAsistencia}"></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <!-- Avatar con iniciales y color rotativo -->
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-semibold"
+                                                     style="width:36px; height:36px; font-size:13px; flex-shrink:0;"
+                                                     th:with="ci=${stat.index % 6}"
+                                                     th:style="${ci==0 ? 'background:#e3f2fd;color:#1976d2' :
+                                                     ci==1 ? 'background:#f3e5f5;color:#7b1fa2' :
+                                                     ci==2 ? 'background:#e8f5e9;color:#388e3c' :
+                                                     ci==3 ? 'background:#fff3e0;color:#f57c00' :
+                                                     ci==4 ? 'background:#fce4ec;color:#c2185b' :
+                                                     'background:#e0f2f1;color:#00796b'}">
+                                                    <span th:text="${#strings.toUpperCase(#strings.substring(a.nombreEstudiante,0,2))}">AB</span>
+                                                </div>
+                                                <span class="fw-semibold" th:text="${a.nombreEstudiante}"></span>
+                                            </div>
+                                        </td>
+                                        <td th:text="${a.nombreMateria}"></td>
+                                        <td>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold"
+                                                  th:text="${a.numeroSeccion}"></span>
+                                        </td>
+                                        <td class="small text-muted" th:text="${a.nombreDocente}"></td>
+                                        <td>
+                                            <span th:if="${a.idEstadoFk == 7}"
+                                                  class="badge bg-success-subtle text-success">
+                                                <i class="fa-solid fa-check me-1"></i>Presente
+                                            </span>
+                                            <span th:if="${a.idEstadoFk == 8}"
+                                                  class="badge bg-danger-subtle text-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Ausente
+                                            </span>
+                                            <span th:if="${a.idEstadoFk == 9}"
+                                                  class="badge bg-warning-subtle text-warning">
+                                                <i class="fa-solid fa-clock me-1"></i>Tarde
+                                            </span>
+                                            <span th:if="${a.idEstadoFk == 10}"
+                                                  class="badge bg-info-subtle text-info">
+                                                <i class="fa-solid fa-file-circle-check me-1"></i>Justificado
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex gap-1 justify-content-center">
+                                                <!-- Justificar (solo ausentes) -->
+                                                <form th:if="${a.idEstadoFk == 8}"
+                                                      th:action="@{/asistencias/justificar/{id}(id=${a.idAsistencia})}"
+                                                      method="post" class="d-inline">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-warning"
+                                                            title="Justificar ausencia"
+                                                            onclick="return confirm('¿Justificar esta ausencia?')">
+                                                        <i class="fa-solid fa-file-circle-check"></i>
+                                                    </button>
+                                                </form>
+                                                <!-- Cambiar estado -->
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        title="Cambiar estado"
+                                                        th:onclick="'abrirModalEditar(' + ${a.idAsistencia} + ',' + ${a.idEstadoFk} + ')'">
+                                                    <i class="fa-regular fa-pen-to-square"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(asistencias)}">
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-clipboard-list fa-3x mb-3 d-block"></i>
+                                            <h5>No hay registros de asistencia</h5>
+                                            <p class="mb-0 small">Tome el pase de lista usando el botón superior derecho</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
-<script th:inline="javascript">
-    function filterTable(tableId, query) {
-        const q = query.toLowerCase();
-        document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
-    }
+                <!-- ══════════════════════════════════════════════════════════════
+                     MODAL – Tomar Pase de Lista
+                ══════════════════════════════════════════════════════════════ -->
+                <div class="modal fade" id="modalPaseLista" tabindex="-1"
+                     aria-labelledby="tituloModalPaseLista" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                        <div class="modal-content">
 
-    function llenarModalEstado(btn) {
-        const id     = btn.getAttribute('data-id');
-        const estado = btn.getAttribute('data-estado');
-        const sm     = btn.getAttribute('data-sm');
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="tituloModalPaseLista">
+                                    <i class="fa-solid fa-list-check text-primary me-2"></i>Pase de Lista
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
 
-        document.getElementById('form-cambiar-estado').action =
-            '/asistencias/cambiarEstado/' + id;
-        document.getElementById('ce-estado').value = estado || '1';
-        document.getElementById('ce-sm').value = sm || '';
-    }
-</script>
+                            <div class="modal-body">
+
+                                <!-- Paso 1: Selector de sección y fecha -->
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row g-3 align-items-end">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">
+                                                    <i class="fa-solid fa-chalkboard me-1 text-muted"></i>
+                                                    Sección-Materia
+                                                </label>
+                                                <select id="modalSeccionMateria" class="form-select">
+                                                    <option value="">Cargando secciones...</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-semibold">
+                                                    <i class="fa-regular fa-calendar me-1 text-muted"></i>
+                                                    Fecha
+                                                </label>
+                                                <input type="date" id="modalFecha" class="form-control">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-primary w-100"
+                                                        onclick="cargarEstudiantesModal()">
+                                                    <i class="fa-solid fa-users me-1"></i>Cargar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Spinner de carga -->
+                                <div id="spinnerEstudiantes" class="text-center py-4 d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                    <p class="text-muted mt-2 small">Cargando estudiantes...</p>
+                                </div>
+
+                                <!-- Paso 2: Tabla de estudiantes -->
+                                <div id="areaEstudiantes" class="d-none">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                        <span id="lblTotalEstudiantes" class="fw-semibold text-muted small"></span>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    onclick="marcarTodosModal(7)">
+                                                <i class="fa-solid fa-check me-1"></i>Todos Presentes
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                    onclick="marcarTodosModal(8)">
+                                                <i class="fa-solid fa-xmark me-1"></i>Todos Ausentes
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width:40px">#</th>
+                                                    <th>Estudiante</th>
+                                                    <th class="text-center" style="width:260px">Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyEstudiantes"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Alertas dentro del modal -->
+                                <div id="alertaModalError" class="alert alert-danger d-none mt-3" role="alert">
+                                    <i class="fa-solid fa-circle-xmark me-2"></i>
+                                    <span id="textoAlertaModalError"></span>
+                                </div>
+                                <div id="alertaModalExito" class="alert alert-success d-none mt-3" role="alert">
+                                    <i class="fa-solid fa-circle-check me-2"></i>
+                                    <span id="textoAlertaModalExito"></span>
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer d-none" id="footerModalPaseLista">
+                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="btnGuardarPaseLista"
+                                        onclick="guardarPaseListaModal()">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i>Guardar Pase de Lista
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════════
+                     MODAL – Cambiar Estado (mini-modal de edición)
+                ══════════════════════════════════════════════════════════════ -->
+                <div class="modal fade" id="modalCambiarEstado" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-sm">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title">
+                                    <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Cambiar Estado
+                                </h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form id="formCambiarEstado" method="post">
+                                <div class="modal-body">
+                                    <div class="d-flex flex-column gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="idEstado" id="radioPresente" value="7">
+                                            <label class="form-check-label" for="radioPresente">
+                                                <span class="badge bg-success-subtle text-success px-2 py-1">
+                                                    <i class="fa-solid fa-check me-1"></i>Presente
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="idEstado" id="radioAusente" value="8">
+                                            <label class="form-check-label" for="radioAusente">
+                                                <span class="badge bg-danger-subtle text-danger px-2 py-1">
+                                                    <i class="fa-solid fa-xmark me-1"></i>Ausente
+                                                </span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio"
+                                                   name="idEstado" id="radioJustificado" value="10">
+                                            <label class="form-check-label" for="radioJustificado">
+                                                <span class="badge bg-info-subtle text-info px-2 py-1">
+                                                    <i class="fa-solid fa-file-circle-check me-1"></i>Justificado
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer py-2">
+                                    <button type="button" class="btn btn-light btn-sm"
+                                            data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /th:fragment="content" -->
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+        <!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+        <script>
+
+            // CSRF deshabilitado en SecurityConfig — no se necesita token
+
+            // ── Modal Pase de Lista ──────────────────────────────────────────
+
+            // Al abrir el modal: cargar secciones, poner fecha de hoy, limpiar estado previo
+            document.getElementById('modalPaseLista').addEventListener('show.bs.modal', function () {
+                cargarSeccionesMateria();
+                document.getElementById('modalFecha').value = new Date().toISOString().split('T')[0];
+                document.getElementById('areaEstudiantes').classList.add('d-none');
+                document.getElementById('footerModalPaseLista').classList.add('d-none');
+                document.getElementById('alertaModalError').classList.add('d-none');
+                document.getElementById('alertaModalExito').classList.add('d-none');
+                document.getElementById('tbodyEstudiantes').innerHTML = '';
+            });
+
+            function cargarSeccionesMateria() {
+                fetch('/asistencias/seccionesMateria')
+                        .then(r => r.json())
+                        .then(data => {
+                            const sel = document.getElementById('modalSeccionMateria');
+                            sel.innerHTML = '<option value="">Seleccione una sección-materia</option>';
+                            if (data.length === 0) {
+                                sel.innerHTML += '<option disabled>No hay secciones disponibles</option>';
+                            } else {
+                                data.forEach(sm => {
+                                    const opt = document.createElement('option');
+                                    opt.value = sm.id;
+                                    opt.textContent = sm.nombre;
+                                    sel.appendChild(opt);
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('modalSeccionMateria').innerHTML =
+                                    '<option value="">Error al cargar – intente reabrir</option>';
+                        });
+            }
+
+            function cargarEstudiantesModal() {
+                const idSM = document.getElementById('modalSeccionMateria').value;
+                const fecha = document.getElementById('modalFecha').value;
+
+                if (!idSM) {
+                    mostrarAlertaModal('error', 'Seleccione una sección-materia.');
+                    return;
+                }
+                if (!fecha) {
+                    mostrarAlertaModal('error', 'Seleccione una fecha.');
+                    return;
+                }
+
+                document.getElementById('areaEstudiantes').classList.add('d-none');
+                document.getElementById('footerModalPaseLista').classList.add('d-none');
+                document.getElementById('spinnerEstudiantes').classList.remove('d-none');
+                document.getElementById('alertaModalError').classList.add('d-none');
+
+                fetch(`/asistencias/paseLista/estudiantes?idSeccionMateria=${idSM}&fecha=${fecha}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            document.getElementById('spinnerEstudiantes').classList.add('d-none');
+
+                            if (data.error) {
+                                mostrarAlertaModal('error', data.error);
+                                return;
+                            }
+
+                            const tbody = document.getElementById('tbodyEstudiantes');
+                            tbody.innerHTML = '';
+
+                            if (data.length === 0) {
+                                tbody.innerHTML = `
+                                <tr>
+                                  <td colspan="3" class="text-center text-muted py-4">
+                                    <i class="fa-solid fa-users-slash fa-2x mb-2 d-block"></i>
+                                    No hay estudiantes matriculados en esta sección.
+                                  </td>
+                                </tr>`;
+                            } else {
+                                data.forEach((est, i) => {
+                                    // idEstado null → defecto Presente (7)
+                                    const estado = est.idEstado ?? 7;
+                                    tbody.innerHTML += `
+                                    <tr>
+                                        <td class="text-muted small">${i + 1}</td>
+                                        <td class="fw-semibold">${est.nombre}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <input type="radio" class="btn-check"
+                                                       name="estado_${est.idMatricula}"
+                                                       id="p_${est.idMatricula}" value="7"
+                                                       ${estado == 7 ? 'checked' : ''}>
+                                                <label class="btn btn-sm btn-outline-success"
+                                                       for="p_${est.idMatricula}"
+                                                       title="Presente">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </label>
+
+                                                <input type="radio" class="btn-check"
+                                                       name="estado_${est.idMatricula}"
+                                                       id="a_${est.idMatricula}" value="8"
+                                                       ${estado == 8 ? 'checked' : ''}>
+                                                <label class="btn btn-sm btn-outline-danger"
+                                                       for="a_${est.idMatricula}"
+                                                       title="Ausente">
+                                                    <i class="fa-solid fa-xmark"></i>
+                                                </label>
+
+                                                <input type="radio" class="btn-check"
+                                                       name="estado_${est.idMatricula}"
+                                                       id="j_${est.idMatricula}" value="10"
+                                                       ${estado == 10 ? 'checked' : ''}>
+                                                <label class="btn btn-sm btn-outline-warning"
+                                                       for="j_${est.idMatricula}"
+                                                       title="Justificado">
+                                                    <i class="fa-solid fa-file-circle-check"></i>
+                                                </label>
+                                            </div>
+                                        </td>
+                                    </tr>`;
+                                });
+
+                                document.getElementById('lblTotalEstudiantes').textContent =
+                                        `${data.length} estudiante(s) cargado(s)`;
+                                document.getElementById('areaEstudiantes').classList.remove('d-none');
+                                document.getElementById('footerModalPaseLista').classList.remove('d-none');
+                            }
+                        })
+                        .catch(() => {
+                            document.getElementById('spinnerEstudiantes').classList.add('d-none');
+                            mostrarAlertaModal('error', 'Error al conectar con el servidor. Intente nuevamente.');
+                        });
+            }
+
+            function marcarTodosModal(idEstado) {
+                document.querySelectorAll(`#tbodyEstudiantes input[type="radio"][value="${idEstado}"]`)
+                        .forEach(r => {
+                            r.checked = true;
+                        });
+            }
+
+            function guardarPaseListaModal() {
+                const idSM = document.getElementById('modalSeccionMateria').value;
+                const fecha = document.getElementById('modalFecha').value;
+                const btn = document.getElementById('btnGuardarPaseLista');
+
+                const formData = new FormData();
+                formData.append('idSeccionMateria', idSM);
+                formData.append('fecha', fecha);
+
+                document.querySelectorAll('#tbodyEstudiantes input[type="radio"]:checked')
+                        .forEach(r => formData.append(r.name, r.value));
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+
+                fetch('/asistencias/paseLista/guardar', {
+                    method: 'POST',
+                    body: formData
+                })
+                        .then(r => r.json())
+                        .then(data => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar Pase de Lista';
+
+                            if (data.success) {
+                                // Cerrar modal y recargar para ver los cambios en la tabla
+                                bootstrap.Modal.getInstance(document.getElementById('modalPaseLista')).hide();
+                                window.location.reload();
+                            } else {
+                                mostrarAlertaModal('error', data.mensaje || 'Error al guardar el pase de lista.');
+                            }
+                        })
+                        .catch(() => {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i>Guardar Pase de Lista';
+                            mostrarAlertaModal('error', 'Error de conexión. Intente nuevamente.');
+                        });
+            }
+
+            function mostrarAlertaModal(tipo, mensaje) {
+                const esError = tipo === 'error';
+                const el = document.getElementById(esError ? 'alertaModalError' : 'alertaModalExito');
+                const txt = document.getElementById(esError ? 'textoAlertaModalError' : 'textoAlertaModalExito');
+                txt.textContent = mensaje;
+                el.classList.remove('d-none');
+                setTimeout(() => el.classList.add('d-none'), 6000);
+            }
+
+            // ── Modal Cambiar Estado ─────────────────────────────────────────
+
+            function abrirModalEditar(idAsistencia, idEstadoActual) {
+                document.getElementById('formCambiarEstado').action =
+                        '/asistencias/cambiarEstado/' + idAsistencia;
+                document.querySelectorAll('#formCambiarEstado input[name="idEstado"]')
+                        .forEach(r => {
+                            r.checked = (parseInt(r.value) === parseInt(idEstadoActual));
+                        });
+                new bootstrap.Modal(document.getElementById('modalCambiarEstado')).show();
+            }
+
+        </script>
+
+    </body>
+</html>
