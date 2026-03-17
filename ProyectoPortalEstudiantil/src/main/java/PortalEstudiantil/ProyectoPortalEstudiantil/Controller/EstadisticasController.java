@@ -100,6 +100,7 @@ public class EstadisticasController {
             List<AsistenciaEstudianteRow> asistencias
                     = estadisticasService.obtenerAsistenciaHijos(authentication, idPeriodo);
 
+            // ← RESTAURADO: necesario para que la dona funcione
             String hijosLabels = toJsonStringArray(asistencias.stream()
                     .map(AsistenciaEstudianteRow::getNombreEstudiante).toList());
             String hijosAsistencia = toJsonDoubleArray(asistencias.stream()
@@ -107,8 +108,8 @@ public class EstadisticasController {
 
             model.addAttribute("periodo", periodo);
             model.addAttribute("asistencias", asistencias);
-            model.addAttribute("hijosLabels", hijosLabels);
-            model.addAttribute("hijosAsistencia", hijosAsistencia);
+            model.addAttribute("hijosLabels", hijosLabels);       // ← RESTAURADO
+            model.addAttribute("hijosAsistencia", hijosAsistencia); // ← RESTAURADO
 
             return "estadisticas/encargado";
 
