@@ -1,0 +1,202 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 17 mar 2026, 5:27:44 p. m.
+    Author     : marjo
+*/
+/* BUSCADOR */
+.search-input-group {
+    position: relative;
+    max-width: 350px;
+}
+.search-input-group input {
+    padding-left: 35px;
+    border-radius: 20px;
+}
+.search-input-group i {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    color: gray;
+}
+
+/* BOTÓN */
+.btn-ver {
+    background-color: #ff7a00;
+    color: white;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    border: none;
+}
+.btn-ver:hover {
+    background-color: #e96b00;
+}
+
+/* DETALLE */
+.detalle-container {
+    background: #f8f9fa;
+    padding: 20px;
+}
+
+/* TARJETA */
+.student-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+}
+.user-icon {
+    font-size: 60px;
+    color: gray;
+}
+.student-name {
+    color: #6fbf00;
+    font-weight: bold;
+}
+
+/* ESTRATEGIA */
+.strategy-box {
+    margin-top: 15px;
+    background: #ff7a00;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* RECURSOS */
+.resources-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+}
+.resource-item {
+    background: #fdf3d7;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+/* ===== TABLA BASE ===== */
+.custom-table {
+    font-size: 0.95rem;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* ===== HEADER ===== */
+.custom-table thead th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #6c757d;
+    border-bottom: 1px solid #e9ecef;
+    padding: 14px 16px;
+    text-align: center;
+    font-weight: 600;
+    background: #fafbfc;
+}
+
+/* ===== CELDAS ===== */
+.custom-table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    font-weight: 500;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+/* ===== HOVER ===== */
+.custom-table tbody tr {
+    transition: all 0.15s ease;
+}
+
+.custom-table tbody tr:hover {
+    background: #f8fafc;
+    transform: scale(1.002);
+}
+
+/* ===== NOMBRE ESTUDIANTE ===== */
+.custom-table tbody td:first-child div {
+    font-weight: 600;
+    color: #343a40;
+}
+
+/* ===== BADGE CALIFICACIÓN ===== */
+.custom-table .badge {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ===== BADGE ESTRATEGIA ===== */
+.custom-table td .badge[class*="bg-"] {
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ===== BOTÓN VER ===== */
+.btn-ver {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e9ecef;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    transition: all 0.15s ease;
+}
+
+.btn-ver:hover {
+    background: #f1f3f5;
+    transform: translateY(-1px);
+}
+
+/* ===== FILAS POR ESTRATEGIA (SUAVE) ===== */
+.table-danger {
+    background-color: #fff5f5 !important;
+}
+
+.table-warning {
+    background-color: #fff9e6 !important;
+}
+
+.table-success {
+    background-color: #f1fff3 !important;
+}
+
+/* ===== CONTENEDOR ===== */
+.tbl-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .custom-table thead {
+        display: none;
+    }
+
+    .custom-table tbody td {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .custom-table tbody tr {
+        display: block;
+        margin-bottom: 10px;
+        background: white;
+        border-radius: 10px;
+        padding: 10px;
+    }
+}

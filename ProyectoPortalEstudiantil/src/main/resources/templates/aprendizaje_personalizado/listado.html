@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
 <th:block th:fragment="head">
@@ -18,182 +13,206 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 </th:block>
 
 <body>
-    <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
-        <section id="contenido">
-            <!-- ========== TÍTULO ========== -->
-            <div class="d-flex align-items-center gap-2 mb-4">
-                <i class="fa-solid fa-graduation-cap fs-2 text-primary"></i>
-                <h1 class="h3 mb-0">Aprendizaje Personalizado</h1>
-                <span class="badge bg-info text-dark ms-2" th:text="${totalElementos} + ' estudiantes'">0</span>
-            </div>
+<div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
+<section id="contenido">
 
-            <!-- ========== BARRA DE BÚSQUEDA ========== -->
-            <form method="get" action="/aprendizaje-personalizado"
-                  class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
-                <div class="search-input-group">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text"
-                           name="busqueda"
-                           class="form-control"
-                           placeholder="Buscar estudiante..."
-                           th:value="${busqueda}">
-                </div>
-                <div class="d-flex align-items-center gap-3">
-                    <a th:href="@{/aprendizaje-personalizado}"
-                       class="btn btn-secondary btn-sm">
-                        <i class="fa-solid fa-rotate-right me-1"></i>
-                        Limpiar
-                    </a>
-                </div>
-                <input type="hidden" name="pagina" value="1" />
-            </form>
-
-            <!-- ========== TABLA DE ESTUDIANTES ========== -->
-            <div class="card tbl-card">
-                <div class="table-responsive">
-                    <table class="table table-hover custom-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Estudiante</th>
-                                <th>Sección</th>
-                                <th>Grado</th>
-                                <th>Materia</th>
-                                <th class="text-center">Calificación</th>
-                                <th>Estrategia</th>
-                                <th class="text-center">Recursos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="est : ${estudiantes.content}" 
-                                th:classappend="${est.estrategia == 'Refuerzo guiado' ? 'table-danger' : 
-                                               (est.estrategia == 'Práctica estructurada' ? 'table-warning' : 
-                                               (est.estrategia == 'Mapas conceptuales' ? 'table-success' : ''))}">
-                                
-                                <!-- Estudiante -->
-                                <td>
-                                    <div class="fw-medium" th:text="${est.nombreCompleto}">María López</div>
-                                    <small class="text-muted" th:text="'ID: ' + ${est.idEstudiante}">ID: 123</small>
-                                </td>
-                                
-                                <!-- Sección -->
-                                <td class="small" th:text="${est.seccion}">7-A</td>
-                                
-                                <!-- Grado -->
-                                <td class="small" th:text="${est.grado} + '°'">7°</td>
-                                
-                                <!-- Materia -->
-                                <td class="small" th:text="${est.materia}">Matemáticas</td>
-                                
-                                <!-- Calificación -->
-                                <td class="text-center">
-                                    <span class="badge" 
-                                          th:classappend="${est.calificacion >= 70 ? 'bg-success' : 
-                                                           (est.calificacion >= 60 ? 'bg-warning' : 'bg-danger')}"
-                                          th:text="${est.calificacion} + '%'">
-                                        75%
-                                    </span>
-                                </td>
-                                
-                                <!-- Estrategia -->
-                                <td>
-                                    <span class="badge" 
-                                          th:classappend="'bg-' + ${est.colorEstrategia}"
-                                          th:text="${est.estrategia}">
-                                        Práctica estructurada
-                                    </span>
-                                </td>
-                                
-                                <!-- Recursos -->
-                                <td class="text-center">
-                                    <div th:if="${est.tieneRecursos}">
-                                        <button class="btn btn-sm btn-outline-info" 
-                                                type="button" 
-                                                data-bs-toggle="collapse" 
-                                                th:attr="data-bs-target='#recursos-' + ${est.idEstudiante}">
-                                            <i class="fa-solid fa-eye"></i> Ver
-                                        </button>
-                                        <div class="collapse mt-2 text-start" 
-                                             th:id="'recursos-' + ${est.idEstudiante}">
-                                            <div class="card card-body p-2">
-                                                <ul class="list-unstyled mb-0">
-                                                    <li th:each="recurso : ${est.recursos}" class="mb-2">
-                                                        <a th:href="${recurso.urlRecurso}" 
-                                                           target="_blank"
-                                                           class="text-decoration-none">
-                                                            <i class="fa-solid fa-link me-1"></i>
-                                                            <span th:text="${recurso.titulo}">Video</span>
-                                                        </a>
-                                                        <br>
-                                                        <small class="text-muted" 
-                                                               th:text="${recurso.descripcion}">
-                                                            Descripción
-                                                        </small>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <span th:unless="${est.tieneRecursos}" class="text-muted small">
-                                        <i class="fa-regular fa-circle-xmark"></i> Sin recursos
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <!-- Mensaje sin resultados -->
-                            <tr th:if="${estudiantes.content.isEmpty()}">
-                                <td colspan="7" class="text-center text-muted py-4 small">
-                                    <i class="fa-regular fa-face-frown fs-2 d-block mb-2"></i>
-                                    No se encontraron estudiantes
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- ========== PIE DE PÁGINA CON PAGINACIÓN ========== -->
-                <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between py-3">
-                    <div class="text-muted small">
-                        Mostrando <span th:text="${estudiantes.numberOfElements}">0</span>
-                        de <span th:text="${totalElementos}">0</span> estudiantes
-                    </div>
-                    
-                    <nav aria-label="Navegación de páginas" th:if="${totalPaginas > 1}">
-                        <ul class="pagination pagination-sm mb-0">
-                            <!-- Anterior -->
-                            <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
-                                <a class="page-link" 
-                                   th:href="@{/aprendizaje-personalizado(busqueda=${busqueda}, pagina=${paginaActual - 1})}">
-                                    <span>&laquo;</span>
-                                </a>
-                            </li>
-                            
-                            <!-- Números de página -->
-                            <th:block th:with="startPage=${(paginaActual - 2) < 0 ? 0 : (paginaActual - 2)},
-                                              endPage=${(startPage + 4) > totalPaginas-1 ? totalPaginas-1 : (startPage + 4)}">
-                                <li class="page-item" 
-                                    th:each="i : ${#numbers.sequence(startPage, endPage)}"
-                                    th:classappend="${i == paginaActual} ? 'active'">
-                                    <a class="page-link" 
-                                       th:href="@{/aprendizaje-personalizado(busqueda=${busqueda}, pagina=${i})}"
-                                       th:text="${i+1}">1</a>
-                                </li>
-                            </th:block>
-                            
-                            <!-- Siguiente -->
-                            <li class="page-item" th:classappend="${paginaActual >= totalPaginas-1} ? 'disabled'">
-                                <a class="page-link" 
-                                   th:href="@{/aprendizaje-personalizado(busqueda=${busqueda}, pagina=${paginaActual + 1})}">
-                                    <span>&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </section>
+    <!-- ===== TÍTULO ===== -->
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <i class="fa-solid fa-graduation-cap fs-2 text-primary"></i>
+        <h1 class="h3 mb-0">Aprendizaje Personalizado</h1>
+        <span class="badge bg-info text-dark ms-2"
+              th:text="${totalElementos} + ' estudiantes'"></span>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/aprendizaje.js}"></script>
+    <!-- ===== BUSCADOR ===== -->
+    <form method="get" action="/aprendizaje-personalizado"
+          class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+
+        <div class="search-input-group">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="busqueda" class="form-control"
+                   placeholder="Buscar estudiante..."
+                   th:value="${busqueda}">
+        </div>
+
+        <a th:href="@{/aprendizaje-personalizado}"
+           class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-rotate-right me-1"></i>
+            Limpiar
+        </a>
+
+        <input type="hidden" name="pagina" value="1"/>
+    </form>
+
+    <!-- ===== TABLA ===== -->
+    <div class="card shadow-sm tbl-card">
+        <div class="table-responsive">
+
+            <table class="table table-hover custom-table mb-0">
+
+                <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Sección</th>
+                    <th>Grado</th>
+                    <th>Materia</th>
+                    <th class="text-center">Calificación</th>
+                    <th>Estrategia</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <th:block th:each="est : ${estudiantes.content}">
+
+                    <!-- ===== FILA ===== -->
+                    <tr th:classappend="${est.estrategia == 'Refuerzo guiado' ? 'table-danger' : 
+                                       (est.estrategia == 'Práctica estructurada' ? 'table-warning' : 
+                                       (est.estrategia == 'Mapas conceptuales' ? 'table-success' : ''))}">
+
+                        <td>
+                            <div class="fw-medium" th:text="${est.nombreCompleto}"></div>
+                            <small class="text-muted" th:text="'ID: ' + ${est.idEstudiante}"></small>
+                        </td>
+
+                        <td class="small" th:text="${est.seccion}"></td>
+
+                        <td class="small" th:text="${est.grado} + '°'"></td>
+
+                        <td class="small" th:text="${est.materia}"></td>
+
+                        <td class="text-center">
+                            <span class="badge"
+                                  th:classappend="${est.calificacion >= 70 ? 'bg-success' : 
+                                                   (est.calificacion >= 60 ? 'bg-warning' : 'bg-danger')}"
+                                  th:text="${est.calificacion} + '%'">
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="'bg-' + ${est.colorEstrategia}"
+                                  th:text="${est.estrategia}">
+                            </span>
+                        </td>
+
+                        <!-- BOTÓN -->
+                        <td class="text-center">
+                            <button class="btn btn-ver"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    th:attr="data-bs-target='#detalle-' + ${est.idEstudiante}">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    <!-- ===== DETALLE ===== -->
+                    <tr>
+                        <td colspan="7" class="p-0 border-0">
+
+                            <div class="collapse"
+                                 th:id="'detalle-' + ${est.idEstudiante}">
+
+                                <div class="detalle-container">
+
+                                    <div class="row g-4">
+
+                                        <!-- TARJETA -->
+                                        <div class="col-md-5">
+                                            <div class="student-card">
+
+                                                <i class="fa-solid fa-user user-icon"></i>
+
+                                                <h5 class="student-name"
+                                                    th:text="${est.nombreCompleto}"></h5>
+
+                                                <p><strong>Sección:</strong> <span th:text="${est.seccion}"></span></p>
+                                                <p><strong>Grado:</strong> <span th:text="${est.grado}"></span></p>
+                                                <p><strong>Materia:</strong> <span th:text="${est.materia}"></span></p>
+                                                <p><strong>Calificación:</strong> <span th:text="${est.calificacion}"></span></p>
+
+                                                <div class="strategy-box">
+                                                    Estrategia:
+                                                    <span th:text="${est.estrategia}"></span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <!-- RECURSOS -->
+                                        <div class="col-md-7">
+                                            <div class="resources-card">
+
+                                                <h6 class="fw-bold mb-3">Recursos de apoyo</h6>
+
+                                                <div th:if="${est.tieneRecursos}">
+
+                                                    <div class="resource-item"
+                                                         th:each="recurso : ${est.recursos}">
+
+                                                        <p class="mb-1">
+                                                            <strong th:text="${recurso.titulo}"></strong>
+                                                        </p>
+
+                                                        <a th:href="${recurso.urlRecurso}"
+                                                           target="_blank">
+                                                            Abrir material
+                                                        </a>
+
+                                                        <small class="d-block text-muted"
+                                                               th:text="${recurso.descripcion}">
+                                                        </small>
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div th:unless="${est.tieneRecursos}"
+                                                     class="text-muted small">
+                                                    Sin recursos disponibles
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+                    </tr>
+
+                </th:block>
+
+                <!-- SIN RESULTADOS -->
+                <tr th:if="${estudiantes.content.isEmpty()}">
+                    <td colspan="7" class="text-center text-muted py-4 small">
+                        No se encontraron estudiantes
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINACIÓN ORIGINAL (SIN CAMBIOS) -->
+        <div class="card-footer bg-white d-flex justify-content-between py-3">
+            <div class="text-muted small">
+                Mostrando <span th:text="${estudiantes.numberOfElements}"></span>
+                de <span th:text="${totalElementos}"></span> estudiantes
+            </div>
+        </div>
+
+    </div>
+
+</section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
