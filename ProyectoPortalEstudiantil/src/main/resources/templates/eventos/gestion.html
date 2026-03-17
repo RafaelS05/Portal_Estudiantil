@@ -23,15 +23,20 @@
         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
             <div>
                 <h2 class="fw-bold mb-1">
-                    <i class="fa-solid fa-newspaper text-primary me-2"></i>Gestión de Noticias
+                    <i class="fa-solid fa-calendar-plus text-primary me-2"></i>Gestión de Eventos
                 </h2>
                 <p class="text-muted mb-0 small">
-                    Total: <span th:text="${#lists.size(noticias)}">0</span> publicaciones
+                    Total: <span th:text="${#lists.size(eventos)}">0</span> eventos
                 </p>
             </div>
-            <a th:href="@{/noticias/nuevo}" class="btn btn-primary">
-                <i class="fa-solid fa-plus me-1"></i> Nueva Publicación
-            </a>
+            <div class="d-flex gap-2">
+                <a th:href="@{/calendario}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-calendar-days me-1"></i> Ver Calendario
+                </a>
+                <a th:href="@{/eventos/nuevo}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus me-1"></i> Nuevo Evento
+                </a>
+            </div>
         </div>
 
         <!-- Tabla -->
@@ -43,73 +48,90 @@
                             <tr>
                                 <th>Tipo</th>
                                 <th>Título</th>
-                                <th>Publicación</th>
-                                <th>Vencimiento</th>
+                                <th>Descripción</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
                                 <th>Estado</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="noticia : ${noticias}">
+                            <tr th:each="evento : ${eventos}">
                                 <td>
-                                    <span th:if="${noticia.tipoEvento == 'NOTICIA'}"
-                                          class="badge bg-primary-subtle text-primary">
-                                        <i class="fa-solid fa-newspaper me-1"></i>Noticia
-                                    </span>
-                                    <span th:if="${noticia.tipoEvento == 'ANUNCIO'}"
-                                          class="badge bg-warning-subtle text-warning">
-                                        <i class="fa-solid fa-bullhorn me-1"></i>Anuncio
+                                    <span th:switch="${evento.tipoEvento}">
+                                        <span th:case="'REUNION'"
+                                              class="badge"
+                                              style="background:#e3f2fd;color:#1976d2;">
+                                            <i class="fa-solid fa-users me-1"></i>Reunión
+                                        </span>
+                                        <span th:case="'ACTIVIDAD'"
+                                              class="badge"
+                                              style="background:#e8f5e9;color:#388e3c;">
+                                            <i class="fa-solid fa-star me-1"></i>Actividad
+                                        </span>
+                                        <span th:case="'FERIADO'"
+                                              class="badge"
+                                              style="background:#ffebee;color:#d32f2f;">
+                                            <i class="fa-solid fa-umbrella-beach me-1"></i>Feriado
+                                        </span>
+                                        <span th:case="'EXAMEN'"
+                                              class="badge"
+                                              style="background:#f3e5f5;color:#7b1fa2;">
+                                            <i class="fa-solid fa-pen-ruler me-1"></i>Examen
+                                        </span>
+                                        <span th:case="*"
+                                              class="badge"
+                                              style="background:#fff3e0;color:#f57c00;">
+                                            <i class="fa-solid fa-calendar me-1"></i>Otro
+                                        </span>
                                     </span>
                                 </td>
-                                <td class="fw-semibold" th:text="${noticia.titulo}"></td>
+                                <td class="fw-semibold" th:text="${evento.titulo}"></td>
                                 <td class="small text-muted"
-                                    th:text="${#temporals.format(noticia.fechaInicio, 'dd/MM/yyyy')}"></td>
+                                    th:text="${evento.descripcion != null ? evento.descripcion : '—'}"></td>
+                                <td class="small"
+                                    th:text="${#temporals.format(evento.fechaInicio, 'dd/MM/yyyy')}"></td>
                                 <td class="small text-muted"
-                                    th:text="${noticia.fechaFin != null ? #temporals.format(noticia.fechaFin, 'dd/MM/yyyy') : '—'}"></td>
+                                    th:text="${evento.fechaFin != null ? #temporals.format(evento.fechaFin, 'dd/MM/yyyy') : '—'}"></td>
                                 <td>
-                                    <span th:if="${noticia.idEstadoFk == 1}"
+                                    <span th:if="${evento.idEstadoFk == 1}"
                                           class="badge bg-success-subtle text-success">
-                                        <i class="fa-solid fa-circle-check me-1"></i>Activa
+                                        <i class="fa-solid fa-circle-check me-1"></i>Activo
                                     </span>
-                                    <span th:unless="${noticia.idEstadoFk == 1}"
+                                    <span th:unless="${evento.idEstadoFk == 1}"
                                           class="badge bg-secondary-subtle text-secondary">
-                                        <i class="fa-solid fa-circle-xmark me-1"></i>Inactiva
+                                        <i class="fa-solid fa-circle-xmark me-1"></i>Inactivo
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex gap-1 justify-content-center">
-                                        <!-- Editar -->
-                                        <a th:href="@{/noticias/editar/{id}(id=${noticia.idEvento})}"
+                                        <a th:href="@{/eventos/editar/{id}(id=${evento.idEvento})}"
                                            class="btn btn-sm btn-outline-primary"
                                            title="Editar">
                                             <i class="fa-regular fa-pen-to-square"></i>
                                         </a>
-                                        <!-- Desactivar (solo si está activa) -->
-                                        <button th:if="${noticia.idEstadoFk == 1}"
+                                        <button th:if="${evento.idEstadoFk == 1}"
                                                 type="button"
                                                 class="btn btn-sm btn-outline-warning"
                                                 title="Desactivar"
-                                                th:onclick="'abrirModalEstado(' + ${noticia.idEvento} + ', false)'"
-                                        >
+                                                th:onclick="'abrirModalEstado(' + ${evento.idEvento} + ', false)'">
                                             <i class="fa-solid fa-eye-slash"></i>
                                         </button>
-                                        <!-- Activar (solo si está inactiva) -->
-                                        <button th:unless="${noticia.idEstadoFk == 1}"
+                                        <button th:unless="${evento.idEstadoFk == 1}"
                                                 type="button"
                                                 class="btn btn-sm btn-outline-success"
                                                 title="Activar"
-                                                th:onclick="'abrirModalEstado(' + ${noticia.idEvento} + ', true)'"
-                                        >
+                                                th:onclick="'abrirModalEstado(' + ${evento.idEvento} + ', true)'">
                                             <i class="fa-solid fa-eye"></i>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                            <tr th:if="${#lists.isEmpty(noticias)}">
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="fa-regular fa-newspaper fa-3x mb-3 d-block"></i>
-                                    <h5>No hay publicaciones aún</h5>
-                                    <p class="mb-0 small">Crea la primera usando el botón superior.</p>
+                            <tr th:if="${#lists.isEmpty(eventos)}">
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-calendar-xmark fa-3x mb-3 d-block"></i>
+                                    <h5>No hay eventos registrados</h5>
+                                    <p class="mb-0 small">Crea el primero usando el botón superior.</p>
                                 </td>
                             </tr>
                         </tbody>
@@ -118,35 +140,26 @@
             </div>
         </div>
 
-        <!-- ══════════════════════════════════════════════════════
-             MODAL — Confirmar cambio de estado
-        ══════════════════════════════════════════════════════ -->
+        <!-- Modal confirmar cambio de estado -->
         <div class="modal fade" id="modalEstado" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
                 <div class="modal-content">
                     <div class="modal-header py-2">
-                        <h6 class="modal-title" id="tituloModalEstado">
+                        <h6 class="modal-title">
                             <i class="fa-solid fa-circle-question text-warning me-2"></i>
                             Confirmar acción
                         </h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body text-center py-3">
-                        <p class="mb-0" id="textoModalEstado">
-                            ¿Está seguro que desea cambiar el estado de esta publicación?
-                        </p>
+                        <p class="mb-0" id="textoModalEstado"></p>
                     </div>
                     <div class="modal-footer py-2 d-flex justify-content-center gap-2">
-                        <button type="button"
-                                class="btn btn-light btn-sm"
-                                data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">
                             Cancelar
                         </button>
-                        <!-- Este form se actualiza dinámicamente con el ID correcto -->
                         <form id="formEstado" method="post">
-                            <button type="submit"
-                                    class="btn btn-sm"
-                                    id="btnConfirmarEstado">
+                            <button type="submit" class="btn btn-sm" id="btnConfirmarEstado">
                                 Confirmar
                             </button>
                         </form>
@@ -162,18 +175,18 @@
 
 <script>
     function abrirModalEstado(idEvento, activar) {
-        const form   = document.getElementById('formEstado');
-        const texto  = document.getElementById('textoModalEstado');
+        const form    = document.getElementById('formEstado');
+        const texto   = document.getElementById('textoModalEstado');
         const btnConf = document.getElementById('btnConfirmarEstado');
 
         if (activar) {
-            form.action = '/noticias/activar/' + idEvento;
-            texto.textContent = '¿Desea activar esta publicación? Será visible para todos los usuarios.';
+            form.action       = '/eventos/activar/' + idEvento;
+            texto.textContent = '¿Desea activar este evento? Aparecerá en el calendario para todos los usuarios.';
             btnConf.className = 'btn btn-sm btn-success';
             btnConf.textContent = 'Activar';
         } else {
-            form.action = '/noticias/desactivar/' + idEvento;
-            texto.textContent = '¿Desea desactivar esta publicación? Dejará de ser visible en el portal.';
+            form.action       = '/eventos/desactivar/' + idEvento;
+            texto.textContent = '¿Desea desactivar este evento? Dejará de aparecer en el calendario.';
             btnConf.className = 'btn btn-sm btn-warning';
             btnConf.textContent = 'Desactivar';
         }
