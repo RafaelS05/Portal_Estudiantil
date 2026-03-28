@@ -83,6 +83,19 @@ public class CalificacionesController {
         return "calificaciones/modificar";
     }
 
+    @GetMapping("/modificar/{id}")
+    public String modificar(@PathVariable("id") Long id, Model model) {
+
+        Calificaciones calificacion = calificacionesService.buscarPorId(id);
+
+        model.addAttribute("calificacion", calificacion);
+        model.addAttribute("matriculas", matriculaRepository.findAll());
+        model.addAttribute("evaluaciones", evaluacionRepository.findAll());
+        model.addAttribute("pageTitle", "Modificar Calificación");
+
+        return "calificaciones/modificar";
+    }
+
     @PostMapping("/guardar")
     public String guardar(@ModelAttribute("calificacion") Calificaciones calificacion) {
         calificacionesService.guardarCalificaciones(calificacion);

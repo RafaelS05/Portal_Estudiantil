@@ -211,4 +211,8 @@ public class CalificacionesService {
         }
         return listaSecciones;
     }
+
+    public Calificaciones buscarPorId(Long id) {
+        return calificacionesRepository.findById(id).orElse(null);
+    }
 }
