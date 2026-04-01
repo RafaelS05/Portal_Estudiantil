@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::section})}">
+            <section>
+
+                <!-- ── MENSAJES FLASH ─────────────────────────────────────── -->
+                <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    <span th:text="${mensajeExito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-xmark me-2"></i>
+                    <span th:text="${mensajeError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- ── KPI CARDS (solo admin) ─────────────────────────────── -->
+                <div th:if="${esAdmin}" class="row g-3 mb-4">
+
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-3 p-3" style="background:#e8f1fb">
+                                    <i class="fa-solid fa-ticket fa-lg" style="color:#1976d2"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-900 fs-4" th:text="${tickets.size()}">0</div>
+                                    <div class="text-muted small fw-semibold">Total tickets</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-3 p-3" style="background:#d0eaff">
+                                    <i class="fa-solid fa-plus-circle fa-lg" style="color:#155fa0"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold fs-4"
+                                         th:text="${#lists.size(tickets.?[idEstadoFk == 1])}">0</div>
+                                    <div class="text-muted small fw-semibold">Nuevos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-3 p-3" style="background:#fff3c4">
+                                    <i class="fa-solid fa-arrows-rotate fa-lg" style="color:#7a5c00"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold fs-4"
+                                         th:text="${#lists.size(tickets.?[idEstadoFk == 2 || idEstadoFk == 3])}">0</div>
+                                    <div class="text-muted small fw-semibold">En proceso</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <div class="rounded-3 p-3" style="background:#c8f5d0">
+                                    <i class="fa-solid fa-circle-check fa-lg" style="color:#1a6b30"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold fs-4"
+                                         th:text="${#lists.size(tickets.?[idEstadoFk == 4])}">0</div>
+                                    <div class="text-muted small fw-semibold">Resueltos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── BANNER INFO (usuario no admin) ─────────────────────── -->
+                <div th:unless="${esAdmin}"
+                     class="alert mb-3 d-flex align-items-center gap-2"
+                     style="background:#e3f2fd;border:1.5px solid #90caf9;border-radius:12px;color:#0d47a1">
+                    <i class="fa-solid fa-circle-info fa-lg"></i>
+                    <span>Estás viendo únicamente tus incidencias registradas.</span>
+                </div>
+
+                <!-- ── FILTROS + BOTÓN NUEVO ──────────────────────────────── -->
+                <form th:action="@{/soporte}" method="get"
+                      class="d-flex flex-wrap align-items-center gap-2 mb-3">
+
+                    <span class="text-muted fw-semibold small">Filtrar por estado:</span>
+                    <select name="idEstado" class="form-select form-select-sm w-auto"
+                            onchange="this.form.submit()">
+                        <option value="">Todos</option>
+                        <option value="1" th:selected="${idEstado == 1}">Nuevo</option>
+                        <option value="2" th:selected="${idEstado == 2}">En proceso</option>
+                        <option value="3" th:selected="${idEstado == 3}">En revisión</option>
+                        <option value="4" th:selected="${idEstado == 4}">Resuelto</option>
+                        <option value="5" th:selected="${idEstado == 5}">Cerrado</option>
+                    </select>
+
+                    <span class="text-muted fw-semibold small">Filtrar por categoría:</span>
+                    <select name="idCategoria" class="form-select form-select-sm w-auto"
+                            onchange="this.form.submit()">
+                        <option value="">Todas</option>
+                        <option th:each="cat : ${categorias}"
+                                th:value="${cat.idCategoriaTicket}"
+                                th:text="${cat.nombre}"
+                                th:selected="${idCategoria == cat.idCategoriaTicket}">
+                        </option>
+                    </select>
+
+                    <!-- Botón nuevo ticket (todos los roles) -->
+                    <button type="button" class="btn btn-primary ms-auto fw-bold"
+                            data-bs-toggle="modal" data-bs-target="#modalNuevoTicket">
+                        <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
+                    </button>
+
+                </form>
+
+                <!-- ── TABLA DE TICKETS ───────────────────────────────────── -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Asunto</th>
+                                <!-- columna usuario solo para admin -->
+                                <th th:if="${esAdmin}">Usuario</th>
+                                <th>Categoría</th>
+                                <th>Estado</th>
+                                <th>Prioridad</th>
+                                <th>Última actualización</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- empty state -->
+                            <tr th:if="${#lists.isEmpty(tickets)}">
+                                <td th:colspan="${esAdmin} ? 8 : 7" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-ticket fa-2x mb-2 d-block opacity-25"></i>
+                                    No se encontraron tickets.
+                                </td>
+                            </tr>
+
+                            <tr th:each="t : ${tickets}">
+                                <td class="fw-bold" th:text="'#' + ${t.idTicket}"></td>
+                                <td th:text="${t.titulo}"></td>
+
+                                <!-- usuario (solo admin) -->
+                                <td th:if="${esAdmin}" class="text-muted small"
+                                    th:text="${nombresUsuarios[t.idUsuarioReportaFk]}">
+                                </td>
+
+                                <!-- categoria -->
+                                <td class="text-muted small"
+                                    th:text="${nombresCategorias[t.idCategoriaFk]}">
+                                </td>
+
+                                <!-- badge estado -->
+                                <td>
+                                    <span th:switch="${t.idEstadoFk}">
+                                        <span th:case="1"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#d0eaff;color:#155fa0">Nuevo</span>
+                                        <span th:case="2"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#fff3c4;color:#7a5c00">En proceso</span>
+                                        <span th:case="3"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#fce4ec;color:#880e4f">En revisión</span>
+                                        <span th:case="4"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#c8f5d0;color:#1a6b30">Resuelto</span>
+                                        <span th:case="5"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#ede7f6;color:#4a148c">Cerrado</span>
+                                        <span th:case="*"  class="badge rounded-pill fw-bold px-3 py-2 bg-secondary">—</span>
+                                    </span>
+                                </td>
+                                <!-- badge prioridad -->
+                                <td>
+                                    <span th:switch="${t.prioridad}">
+                                        <span th:case="'Alta'"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#ffd6d6;color:#b00020">Alta</span>
+                                        <span th:case="'Media'" class="badge rounded-pill fw-bold px-3 py-2" style="background:#fff3c4;color:#7a5c00">Media</span>
+                                        <span th:case="'Baja'"  class="badge rounded-pill fw-bold px-3 py-2" style="background:#d8f5d0;color:#1a6b30">Baja</span>
+                                        <span th:case="*"       class="badge rounded-pill fw-bold px-3 py-2 bg-secondary" th:text="${t.prioridad}">—</span>
+                                    </span>
+                                </td>
+
+                                <td class="text-muted small"
+                                    th:text="${#temporals.format(t.fechaModificacion,'dd/MM/yyyy HH:mm')}">
+                                </td>
+
+                                <td>
+                                    <a th:href="@{/soporte/{id}(id=${t.idTicket})}"
+                                       class="btn btn-sm fw-bold"
+                                       style="background:#e8f1fb;color:#1976d2;border-radius:8px">
+                                        Ver ticket <i class="fa-solid fa-chevron-right ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p class="text-muted small mt-2 mb-0">
+                    Mostrando <span th:text="${tickets.size()}">0</span> ticket(s)
+                </p>
+
+                <!-- ════════════════════════════════════════════════════════
+                     MODAL HU.9.1 — Registrar nueva incidencia (3 pasos)
+                ═════════════════════════════════════════════════════════ -->
+                <div class="modal fade" id="modalNuevoTicket" tabindex="-1"
+                     data-bs-backdrop="static" data-bs-keyboard="false">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content border-0 rounded-4 shadow">
+
+                            <div class="modal-header border-0 pb-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-3 p-2" style="background:#e8f1fb">
+                                        <i class="fa-solid fa-ticket-simple" style="color:#1976d2"></i>
+                                    </div>
+                                    <h5 class="modal-title fw-bold mb-0">Reportar nueva incidencia</h5>
+                                </div>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+
+                            <div class="modal-body pt-2">
+
+                                <!-- Stepper visual (inline) -->
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div id="sc1" class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:30px;height:30px;background:#1976d2;color:#fff;font-size:.78rem">1</div>
+                                        <span id="si1" class="fw-semibold small" style="color:#1976d2">Información</span>
+                                    </div>
+                                    <div class="flex-grow-1 mx-2" style="height:2px;background:#dee2e6;border-radius:2px"></div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div id="sc2" class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:30px;height:30px;background:#dee2e6;color:#6b7a99;font-size:.78rem">2</div>
+                                        <span id="si2" class="fw-semibold small text-muted">Prioridad</span>
+                                    </div>
+                                    <div class="flex-grow-1 mx-2" style="height:2px;background:#dee2e6;border-radius:2px"></div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div id="sc3" class="rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                             style="width:30px;height:30px;background:#dee2e6;color:#6b7a99;font-size:.78rem">3</div>
+                                        <span id="si3" class="fw-semibold small text-muted">Confirmación</span>
+                                    </div>
+                                </div>
+
+                                <form th:action="@{/soporte/insertar}" method="post" id="formNuevoTicket">
+
+                                    <!-- PASO 1: Información básica -->
+                                    <div id="paso1">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Título <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" name="titulo" class="form-control" maxlength="120"
+                                                   placeholder="Ej: No puedo acceder al módulo de calificaciones"
+                                                   id="inputTitulo" required/>
+                                            <div class="form-text text-end" id="ccTitulo">0 / 120</div>
+                                            <div class="invalid-feedback">El título es obligatorio.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Descripción detallada <span class="text-danger">*</span>
+                                            </label>
+                                            <textarea name="comentario" class="form-control" rows="4" maxlength="800"
+                                                      placeholder="Describa el problema, módulo afectado y pasos para reproducirlo..."
+                                                      id="inputDesc" required></textarea>
+                                            <div class="form-text text-end" id="ccDesc">0 / 800</div>
+                                            <div class="invalid-feedback">La descripción es obligatoria.</div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Categoría <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="idCategoriaFk" class="form-select" id="selectCat" required>
+                                                <option value="">Seleccione el tipo de problema...</option>
+                                                <option th:each="cat : ${categorias}"
+                                                        th:value="${cat.idCategoriaTicket}"
+                                                        th:text="${cat.nombre}">
+                                                </option>
+                                            </select>
+                                            <div class="invalid-feedback">Seleccione una categoría.</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- PASO 2: Prioridad -->
+                                    <div id="paso2" style="display:none">
+                                        <p class="fw-bold mb-3">Nivel de urgencia <span class="text-danger">*</span></p>
+                                        <div class="row g-3 mb-3" id="prioGrid">
+
+                                            <div class="col-4">
+                                                <input type="radio" class="btn-check" name="prioridad"
+                                                       id="prioBaja" value="Baja" autocomplete="off"/>
+                                                <label class="btn btn-outline-secondary w-100 py-3 rounded-3" for="prioBaja">
+                                                    <span style="font-size:1.5rem">🟢</span><br/>
+                                                    <strong style="color:#2e7d32">Baja</strong><br/>
+                                                    <small class="text-muted">No interrumpe actividades</small>
+                                                </label>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <input type="radio" class="btn-check" name="prioridad"
+                                                       id="prioMedia" value="Media" autocomplete="off"/>
+                                                <label class="btn btn-outline-secondary w-100 py-3 rounded-3" for="prioMedia">
+                                                    <span style="font-size:1.5rem">🟡</span><br/>
+                                                    <strong style="color:#f57f17">Media</strong><br/>
+                                                    <small class="text-muted">Afecta parcialmente</small>
+                                                </label>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <input type="radio" class="btn-check" name="prioridad"
+                                                       id="prioAlta" value="Alta" autocomplete="off"/>
+                                                <label class="btn btn-outline-secondary w-100 py-3 rounded-3" for="prioAlta">
+                                                    <span style="font-size:1.5rem">🔴</span><br/>
+                                                    <strong style="color:#c62828">Alta</strong><br/>
+                                                    <small class="text-muted">Bloquea completamente</small>
+                                                </label>
+                                            </div>
+
+                                        </div>
+                                        <div id="errPrioridad" class="text-danger small" style="display:none">
+                                            <i class="fa-solid fa-circle-exclamation me-1"></i>Seleccione el nivel de urgencia.
+                                        </div>
+                                    </div>
+
+                                    <!-- PASO 3: Confirmación -->
+                                    <div id="paso3" style="display:none">
+                                        <div class="text-center p-4 rounded-3 mb-3"
+                                             style="background:linear-gradient(135deg,#f0f7ff,#e8f4fe);border:1.5px solid #90caf9">
+                                            <div class="text-muted small fw-semibold">Su incidencia será registrada con el número</div>
+                                            <div class="fw-bold text-primary" style="font-size:2rem">Nuevo ticket</div>
+                                            <div class="fw-bold mt-2">
+                                                <i class="fa-solid fa-circle-check text-success me-1"></i>
+                                                Verifique los datos antes de enviar
+                                            </div>
+                                        </div>
+
+                                        <div class="card border-0 bg-light rounded-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="text-muted fw-semibold small">Título</span>
+                                                    <span class="fw-bold small" id="cd-titulo">—</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                                    <span class="text-muted fw-semibold small">Categoría</span>
+                                                    <span class="fw-bold small" id="cd-cat">—</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between py-2">
+                                                    <span class="text-muted fw-semibold small">Urgencia</span>
+                                                    <span class="fw-bold small" id="cd-prio">—</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+
+                            <!-- Nav del modal -->
+                            <div class="modal-footer border-0 pt-0 d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary fw-semibold"
+                                        id="btnAnterior" style="visibility:hidden"
+                                        onclick="pasoAnterior()">
+                                    <i class="fa-solid fa-arrow-left me-1"></i> Anterior
+                                </button>
+                                <button type="button" class="btn btn-primary fw-bold"
+                                        id="btnSiguiente" onclick="pasoSiguiente()">
+                                    Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── JS del listado ─────────────────────────────────────── -->
+                <script th:inline="javascript">
+                    let pasoActual = 1;
+
+                    // Char counters
+                    document.getElementById('inputTitulo').addEventListener('input', function () {
+                        document.getElementById('ccTitulo').textContent = this.value.length + ' / 120';
+                    });
+                    document.getElementById('inputDesc').addEventListener('input', function () {
+                        document.getElementById('ccDesc').textContent = this.value.length + ' / 800';
+                    });
+
+                    // Reset modal al abrir
+                    document.getElementById('modalNuevoTicket').addEventListener('show.bs.modal', function () {
+                        pasoActual = 1;
+                        actualizarPasos();
+                        document.getElementById('formNuevoTicket').reset();
+                        document.getElementById('ccTitulo').textContent = '0 / 120';
+                        document.getElementById('ccDesc').textContent = '0 / 800';
+                    });
+
+                    function actualizarPasos() {
+                        ['paso1', 'paso2', 'paso3'].forEach((id, i) => {
+                            document.getElementById(id).style.display = (i + 1 === pasoActual) ? 'block' : 'none';
+                        });
+                        // Stepper indicators
+                        for (let i = 1; i <= 3; i++) {
+                            const sc = document.getElementById('sc' + i);
+                            const si = document.getElementById('si' + i);
+                            if (!sc)
+                                continue;
+                            sc.className = 'rounded-circle d-flex align-items-center justify-content-center fw-bold';
+                            if (i < pasoActual) {
+                                sc.style.cssText = 'width:30px;height:30px;background:#4caf50;color:#fff;font-size:.78rem';
+                                sc.innerHTML = '<i class="fa-solid fa-check"></i>';
+                                if (si)
+                                    si.style.background = '#4caf50';
+                            } else if (i === pasoActual) {
+                                sc.style.cssText = 'width:30px;height:30px;background:#1976d2;color:#fff;font-size:.78rem';
+                                sc.textContent = i;
+                                if (si)
+                                    si.style.background = '#1976d2';
+                            } else {
+                                sc.style.cssText = 'width:30px;height:30px;background:#dee2e6;color:#6b7a99;font-size:.78rem';
+                                sc.textContent = i;
+                            }
+                        }
+                        document.getElementById('btnAnterior').style.visibility = pasoActual === 1 ? 'hidden' : 'visible';
+                        const btn = document.getElementById('btnSiguiente');
+                        if (pasoActual === 3) {
+                            btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> Enviar incidencia';
+                            btn.classList.replace('btn-primary', 'btn-success');
+                        } else {
+                            btn.innerHTML = 'Siguiente <i class="fa-solid fa-arrow-right ms-1"></i>';
+                            btn.classList.replace('btn-success', 'btn-primary');
+                        }
+                    }
+
+                    function pasoSiguiente() {
+                        if (pasoActual === 1 && !validarPaso1())
+                            return;
+                        if (pasoActual === 2 && !validarPaso2())
+                            return;
+                        if (pasoActual === 3) {
+                            document.getElementById('formNuevoTicket').submit();
+                            return;
+                        }
+                        if (pasoActual === 2)
+                            rellenarResumen();
+                        pasoActual++;
+                        actualizarPasos();
+                    }
+
+                    function pasoAnterior() {
+                        if (pasoActual > 1) {
+                            pasoActual--;
+                            actualizarPasos();
+                        }
+                    }
+
+                    function validarPaso1() {
+                        let ok = true;
+                        const titulo = document.getElementById('inputTitulo');
+                        const desc = document.getElementById('inputDesc');
+                        const cat = document.getElementById('selectCat');
+                        [titulo, desc, cat].forEach(el => el.classList.remove('is-invalid'));
+                        if (!titulo.value.trim()) {
+                            titulo.classList.add('is-invalid');
+                            ok = false;
+                        }
+                        if (!desc.value.trim()) {
+                            desc.classList.add('is-invalid');
+                            ok = false;
+                        }
+                        if (!cat.value) {
+                            cat.classList.add('is-invalid');
+                            ok = false;
+                        }
+                        return ok;
+                    }
+
+                    function validarPaso2() {
+                        const sel = document.querySelector('input[name="prioridad"]:checked');
+                        const err = document.getElementById('errPrioridad');
+                        if (!sel) {
+                            err.style.display = 'block';
+                            return false;
+                        }
+                        err.style.display = 'none';
+                        return true;
+                    }
+
+                    function rellenarResumen() {
+                        document.getElementById('cd-titulo').textContent =
+                                document.getElementById('inputTitulo').value;
+                        const cat = document.getElementById('selectCat');
+                        document.getElementById('cd-cat').textContent =
+                                cat.options[cat.selectedIndex]?.text || '—';
+                        const prio = document.querySelector('input[name="prioridad"]:checked');
+                        document.getElementById('cd-prio').textContent = prio ? prio.value : '—';
+                    }
+
+                    // Init
+                    actualizarPasos();
+                </script>
+
+            </section>
+        </div>
+    </body>
+</html>

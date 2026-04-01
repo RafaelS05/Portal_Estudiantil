@@ -1,14 +1,15 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
 
-import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.AdjuntoTicket;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TicketAdjunto;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AdjuntoTicketRepository {
+public interface TicketAdjuntoRepository extends JpaRepository<TicketAdjunto, Long>{
     
     // SP: ADJUNTOTICKET_INSERTAR
     @Modifying
@@ -40,5 +41,5 @@ public interface AdjuntoTicketRepository {
                        @Param("idEstado") Long idEstado);
 
     // Buscar todos los adjuntos de un ticket
-    List<AdjuntoTicket> findByIdTicketFk(Long idTicketFk);
+    List<TicketAdjunto> findByIdTicketFk(Long idTicketFk);
 }

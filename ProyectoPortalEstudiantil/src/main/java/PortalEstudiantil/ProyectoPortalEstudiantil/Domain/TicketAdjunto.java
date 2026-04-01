@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "ADJUNTOTICKET_TB")
-public class AdjuntoTicket {
+public class TicketAdjunto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
