@@ -120,7 +120,8 @@
                         </option>
                     </select>
 
-                    <button type="button" class="btn btn-primary ms-auto fw-bold btn-nuevo"
+                    <button th:unless="${esAdmin}" 
+                            type="button" class="btn btn-primary ms-auto fw-bold btn-nuevo"
                             data-bs-toggle="modal" data-bs-target="#modalNuevoTicket"
                             onclick="resetModal()">
                         <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
