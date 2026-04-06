@@ -343,22 +343,6 @@
 
                     </div>
                 </div>
-
-                <!-- ── JS del detalle ─────────────────────────────────────── -->
-                <script>
-                    // Estrellas de evaluación
-                    function setStar(el) {
-                        const val = parseInt(el.getAttribute('data-val'));
-                        document.getElementById('inputPuntuacion').value = val;
-                        document.querySelectorAll('.star-btn').forEach(function (s, i) {
-                            s.className = (i < val)
-                                    ? 'fa-solid fa-star fa-2x star-btn'
-                                    : 'fa-regular fa-star fa-2x star-btn';
-                            s.style.color = (i < val) ? '#f9a825' : '#dee2e6';
-                        });
-                    }
-                </script>
-
             </section>
         </div>
     </body>

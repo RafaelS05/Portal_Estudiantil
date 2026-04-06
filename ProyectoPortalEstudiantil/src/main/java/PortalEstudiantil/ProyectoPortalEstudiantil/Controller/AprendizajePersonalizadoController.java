@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
@@ -19,11 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-
-/**
- *
- * @author marjo
- */
 @Controller
 @RequestMapping("/aprendizaje-personalizado")
 public class AprendizajePersonalizadoController {
