@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -17,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
     private final PortalUserDetailsService userDetailsService;
@@ -59,23 +57,23 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                        "/",
-                        "/index",
-                        "/login",
-                        "/error",
-                        "/img/**",
-                        "/resetContrasenna/**",
-                        "/gestionAcademica/**",
-                        "/feedback/**",
-                        "/uploads/**"
+                    "/",
+                    "/index",
+                    "/login",
+                    "/error",
+                    "/img/**",
+                    "/uploads/**",
+                    "/resetContrasenna/**",
+                    "/gestionAcademica/**",
+                    "/reportes/**"
                 ).permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email")
-                .passwordParameter("password")
+                .usernameParameter("email")      // tu input name="email"
+                .passwordParameter("password")   // tu input name="password"
                 .successHandler(loginSuccessHandler)
                 .failureHandler(loginFailureHandler)
                 .permitAll()

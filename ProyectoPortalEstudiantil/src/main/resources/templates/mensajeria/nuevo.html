@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a th:href="@{/mensajeria}" class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h4 class="fw-bold mb-0">
+                <i class="fa-solid fa-pen-to-square text-primary me-2"></i>Nuevo Mensaje
+            </h4>
+        </div>
+    </div>
+
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show py-2">
+        <i class="fa-solid fa-circle-xmark me-2"></i><span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form th:action="@{/mensajeria/nuevo}" method="post" enctype="multipart/form-data">
+
+                <!-- Destinatario -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">
+                        <i class="fa-solid fa-user me-1"></i>Para
+                    </label>
+                    <select name="idRemitente" class="form-select form-select-sm" required>
+                        <option value="">— Selecciona un destinatario —</option>
+                        <optgroup th:each="tipo : ${#sets.toSet(usuarios.![tipoUsuario])}"
+                                  th:label="${tipo}">
+                            <option th:each="u : ${usuarios}"
+                                    th:if="${u.tipoUsuario == tipo}"
+                                    th:value="${u.idUsuario}"
+                                    th:text="${u.nombreCompleto}">
+                            </option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Asunto -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">
+                        <i class="fa-solid fa-tag me-1"></i>Asunto
+                    </label>
+                    <input type="text" name="asunto" class="form-control form-control-sm"
+                           placeholder="Asunto del mensaje" maxlength="120">
+                </div>
+
+                <!-- Contenido -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">
+                        <i class="fa-solid fa-align-left me-1"></i>Mensaje
+                    </label>
+                    <textarea name="contenido" class="form-control form-control-sm"
+                              rows="6" placeholder="Escribe tu mensaje aquí..."
+                              maxlength="800" required></textarea>
+                    <div class="text-end text-muted mt-1" style="font-size:11px;">Máximo 800 caracteres</div>
+                </div>
+
+                <!-- Adjuntos -->
+                <div class="mb-4">
+                    <label class="form-label small fw-semibold">
+                        <i class="fa-solid fa-paperclip me-1"></i>Adjuntar archivos (opcional)
+                    </label>
+                    <input type="file" name="archivos" class="form-control form-control-sm"
+                           multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls">
+                    <div class="text-muted mt-1" style="font-size:11px;">
+                        Formatos permitidos: PDF, Word, Excel, JPG, PNG
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a th:href="@{/mensajeria}" class="btn btn-outline-secondary btn-sm">Cancelar</a>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-paper-plane me-1"></i>Enviar mensaje
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+</div>
+<footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>

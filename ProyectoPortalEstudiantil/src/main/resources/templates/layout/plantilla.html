@@ -137,14 +137,22 @@
                         </div>
 
                         <div class="nav-item">
-                            <a class="sidebar-link" th:href="@{/feedback/feedBack360}">
-                                <i class="fa-solid fa-comment-dots"></i> Feedback 360
+                            <a class="sidebar-link d-flex align-items-center justify-content-between"
+                               th:href="@{/mensajeria}">
+                                <span>
+                                    <i class="fa-solid fa-envelope"></i> Mensajería
+                                </span>
+                                <span th:if="${mensajesNoLeidos > 0}"
+                                      class="badge bg-danger rounded-pill"
+                                      style="font-size:10px;"
+                                      th:text="${mensajesNoLeidos}">
+                                </span>
                             </a>
                         </div>
 
                         <div class="nav-item">
-                            <a class="sidebar-link" th:href="@{/aprendizaje-personalizado}">
-                                <i class="fa-solid fa-chalkboard-user"></i> Aprendizaje Personalizado
+                            <a class="sidebar-link" th:href="@{/feedback}">
+                                <i class="fa-solid fa-comment-dots"></i> Feedback 360
                             </a>
                         </div>
                         
@@ -167,25 +175,18 @@
                             <button class="sidebar-toggle" id="sidebarToggle">
                                 <i class="fa-solid fa-bars"></i>
                             </button>
-
-                            <h1 class="page-title fw-bold"
-                                th:text="${pageTitle != null ? pageTitle : 'Inicio'}">
-                                Inicio
+                            <h1 class="page-title"
+                                th:text="${pageTitle != null ? pageTitle : 'Dashboard'}">
+                                Dashboard
                             </h1>
                         </div>
 
                         <div class="topbar-right d-flex align-items-center gap-2">
 
-                            <!-- DESPUÉS: convertido a enlace con badge -->
-                            <a th:href="@{/}" class="btn-news text-decoration-none position-relative">
+                            <button type="button" class="btn-news">
                                 <i class="fa-solid fa-bell d-md-none"></i>
                                 <span class="d-none d-md-inline">Noticias y Anuncios</span>
-                                <span th:if="${noticiasNuevas != null && noticiasNuevas > 0}"
-                                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                      style="font-size:10px;"
-                                      th:text="${noticiasNuevas}">
-                                </span>
-                            </a>
+                            </button>
 
                             <!-- Usuario autenticado -->
                             <div class="dropdown" sec:authorize="isAuthenticated()">
