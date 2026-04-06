@@ -78,7 +78,6 @@ public class FeedBackController {
         return "feedback/feedBack360";
     }
 
-    // CARGA DE DATOS POR ROL (métodos privados)
     //PROFESOR
     private void cargarDocente(PortalUserDetails userDetails,
             Integer idSeccionmateria,
@@ -86,7 +85,6 @@ public class FeedBackController {
 
         Long idDocente = userDetails.getIdUsuario();
 
-        // ✅ Secciones-materia del docente para el selector
         model.addAttribute("seccionMaterias",
                 seccionMateriaService.listarResumenPorDocente(idDocente));
 
@@ -168,7 +166,7 @@ public class FeedBackController {
         model.addAttribute("periodos", periodoService.listarResumen());
     }
 
-    // POST /feedBack/registrar — solo PROFESOR
+    // POST /feedBack/registrar
     @PostMapping("/registrar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','PROFESOR')")
     @ResponseBody
@@ -194,7 +192,7 @@ public class FeedBackController {
         }
     }
 
-    // GET /feedBack/pdf — descarga PDF encargado / estudiante
+    // GET /feedBack/pdf
     @GetMapping("/pdf")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','ENCARGADO','ESTUDIANTE')")
     public ResponseEntity<byte[]> descargarPdf(

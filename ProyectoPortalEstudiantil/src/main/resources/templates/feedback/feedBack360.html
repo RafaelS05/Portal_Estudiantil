@@ -12,7 +12,7 @@
 
             <section id="contenido">
 
-                <!-- ROL: ADMINISTRADOR                    -->
+                <!--ADMINISTRADOR                    -->
                 <div th:if="${rolActual == 'ADMINISTRADOR'}">
 
                     <div class="row g-3 mb-4">
@@ -84,7 +84,7 @@
 
                     <div class="tab-content border border-top-0 rounded-bottom bg-white p-3 p-md-4 mb-2">
 
-                        <!-- TAB: Evaluaciones -->
+                        <!--Evaluaciones -->
                         <div class="tab-pane fade show active" id="tab-todos" role="tabpanel">
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                                 <h6 class="fw-bold mb-0"><i class="bi bi-table me-1 text-primary"></i>Historial Completo</h6>
@@ -144,7 +144,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB: Promedios -->
+                        <!--Promedios -->
                         <div class="tab-pane fade" id="tab-promedios" role="tabpanel">
                             <div class="row g-4">
                                 <div class="col-md-6">
@@ -178,7 +178,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB: Alertas -->
+                        <!--Alertas -->
                         <div class="tab-pane fade" id="tab-alertas" role="tabpanel">
                             <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i>Estudiantes con calificación ≤ 2</h6>
                             <div th:each="fb : ${alertas}"
@@ -207,7 +207,7 @@
                             </div>
                         </div>
 
-                        <!-- TAB: Comparativa -->
+                        <!-- Comparativa -->
                         <div class="tab-pane fade" id="tab-comparativa" role="tabpanel">
                             <h6 class="fw-bold mb-3"><i class="bi bi-arrow-left-right me-1 text-primary"></i>Comparativa entre Períodos</h6>
                             <form th:action="@{/feedback/feedBack360}" method="get" class="row g-3 align-items-end mb-4 p-3 bg-light rounded-3">
@@ -274,7 +274,7 @@
                 </div><!-- /ADMINISTRADOR -->
 
 
-                <!-- ROL: PROFESOR                         -->
+                <!--PROFESOR                         -->
                 <div th:if="${rolActual == 'PROFESOR'}">
 
                     <div class="card border-0 shadow-sm mb-4">
@@ -340,7 +340,7 @@
                 </div><!-- /PROFESOR -->
 
 
-                <!-- ROL: ESTUDIANTE                       -->
+                <!--ESTUDIANTE                       -->
                 <div th:if="${rolActual == 'ESTUDIANTE'}">
 
                     <div class="row g-3 mb-4">
@@ -421,9 +421,7 @@
                 </div><!-- /ESTUDIANTE -->
 
 
-                <!-- ══════════════════════════════════════ -->
-                <!-- ROL: ENCARGADO                        -->
-                <!-- ══════════════════════════════════════ -->
+                <!--ENCARGADO                        -->
                 <div th:if="${rolActual == 'ENCARGADO'}">
 
                     <div class="row g-3 mb-4">
@@ -503,7 +501,7 @@
                 </div><!-- /ENCARGADO -->
 
 
-                <!-- ════════ MODAL: Registrar Evaluaciones ════════ -->
+                <!-- ════════ Registrar Evaluaciones ════════ -->
                 <div class="modal fade" id="modalEvaluar" tabindex="-1">
                     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div class="modal-content border-0 shadow">
@@ -602,7 +600,7 @@
                     </div>
                 </div>
 
-                <!-- ════════ MODAL: Ver Comentario ════════ -->
+                <!-- ════════ Ver Comentario ════════ -->
                 <div class="modal fade" id="modalComentario" tabindex="-1">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content border-0 shadow">
@@ -623,10 +621,7 @@
                 </div>
 
                 <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
-
             </section><!-- /#contenido -->
-
-        </div><!-- cierre th:replace wrapper -->
-
+        </div>
     </body>
 </html>
