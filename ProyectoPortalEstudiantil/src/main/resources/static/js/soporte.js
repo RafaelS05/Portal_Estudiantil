@@ -9,7 +9,6 @@ function setStar(el) {
     });
 }
 
-/* ── Estado del stepper ─────────────────────── */
 let pasoActual = 1;
 
 /* ── Actualiza visual del stepper ───────────── */
@@ -51,7 +50,6 @@ function actualizarStepper() {
     }
 }
 
-/* ── Muestra el paso indicado ───────────────── */
 function mostrarPaso(n) {
     [1, 2, 3].forEach(function (i) {
         document.getElementById('paso' + i).style.display = i === n ? 'block' : 'none';
@@ -60,7 +58,6 @@ function mostrarPaso(n) {
     actualizarStepper();
 }
 
-/* ── Reset al abrir el modal ────────────────── */
 function resetModal() {
     document.getElementById('formNuevoTicket').reset();
     ['inputTitulo', 'inputDesc', 'selectCat'].forEach(function (id) {
@@ -72,7 +69,6 @@ function resetModal() {
     actualizarContador('inputDesc', 'ccDesc', 800);
 }
 
-/* ── Validación paso 1 ──────────────────────── */
 function validarPaso1() {
     let ok = true;
     const titulo = document.getElementById('inputTitulo');
@@ -96,14 +92,12 @@ function validarPaso1() {
     return ok;
 }
 
-/* ── Validación paso 2 ──────────────────────── */
 function validarPaso2() {
     const sel = document.querySelector('input[name="prioridad"]:checked');
     document.getElementById('errPrioridad').style.display = sel ? 'none' : 'block';
     return !!sel;
 }
 
-/* ── Rellenar resumen (paso 3) ──────────────── */
 function rellenarResumen() {
     const titulo = document.getElementById('inputTitulo').value.trim() || '—';
     const catEl = document.getElementById('selectCat');
@@ -115,7 +109,6 @@ function rellenarResumen() {
     document.getElementById('cd-prio').textContent = prio;
 }
 
-/* ── Navegación ─────────────────────────────── */
 function pasoSiguiente() {
     if (pasoActual === 1 && !validarPaso1())
         return;
@@ -135,7 +128,6 @@ function pasoAnterior() {
         mostrarPaso(pasoActual - 1);
 }
 
-/* ── Contadores de caracteres ───────────────── */
 function actualizarContador(inputId, counterId, max) {
     const len = document.getElementById(inputId).value.length;
     const el = document.getElementById(counterId);
@@ -150,5 +142,54 @@ document.getElementById('inputDesc').addEventListener('input', function () {
     actualizarContador('inputDesc', 'ccDesc', 800);
 });
 
-/* ── Init ───────────────────────────────────── */
+/* ─────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', actualizarStepper);
+
+    function previewImagen(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+
+        // Validar tipo
+        if (!['image/png','image/jpeg'].includes(file.type)) {
+            alert('Solo se permiten imágenes PNG o JPG.');
+            limpiarPreview(); return;
+        }
+        // Validar tamaño
+        if (file.size > 5 * 1024 * 1024) {
+            alert('El archivo no puede superar los 5 MB.');
+            limpiarPreview(); return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = e => {
+            document.getElementById('previewImg').src     = e.target.result;
+            document.getElementById('previewNombre').textContent = file.name;
+            document.getElementById('previewTamano').textContent =
+                '(' + (file.size / 1024).toFixed(0) + ' KB)';
+            document.getElementById('previewContainer').style.display = 'block';
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('btnSubir').disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function limpiarPreview() {
+        document.getElementById('inputArchivo').value    = '';
+        document.getElementById('previewImg').src        = '';
+        document.getElementById('previewContainer').style.display = 'none';
+        document.getElementById('dropZone').style.display         = 'block';
+        document.getElementById('btnSubir').disabled = true;
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        document.getElementById('dropZone').style.borderColor = '#c8d0e0';
+        const input = document.getElementById('inputArchivo');
+        input.files = event.dataTransfer.files;
+        previewImagen(input);
+    }
+
+    function abrirImagen(src) {
+        document.getElementById('imagenAmpliada').src = src;
+        new bootstrap.Modal(document.getElementById('modalImagen')).show();
+    }

@@ -1,9 +1,11 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Ticket;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TicketAdjunto;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TicketEvaluacionSoporte;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.FileStorageService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.TicketAdjuntoService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.TicketCategoriaService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.TicketEvaluacionService;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -38,8 +41,9 @@ public class TicketController {
     private TicketEvaluacionService evaluacionService;
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private FileStorageService fileService;
 
-    // LISTADO — admin ve todos, los demás solo los suyos
     private String nombreCompleto(Long idUsuario) {
         Usuario u = usuarioService.obtenerUsuario(idUsuario);
         return (u.getNombre() + " "
@@ -80,14 +84,14 @@ public class TicketController {
                         id -> nombreCompleto(id)
                 ));
 
-        model.addAttribute("tickets",          tickets);
-        model.addAttribute("categorias",        categoriaService.listarActivas());
-        model.addAttribute("nombresUsuarios",   nombresUsuarios);
+        model.addAttribute("tickets", tickets);
+        model.addAttribute("categorias", categoriaService.listarActivas());
+        model.addAttribute("nombresUsuarios", nombresUsuarios);
         model.addAttribute("nombresCategorias", mapaCategoriasActivas());
-        model.addAttribute("esAdmin",           esAdmin);
-        model.addAttribute("idEstado",          idEstado);
-        model.addAttribute("idCategoria",       idCategoria);
-        model.addAttribute("pageTitle",         "Soporte Técnico");
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("idEstado", idEstado);
+        model.addAttribute("idCategoria", idCategoria);
+        model.addAttribute("pageTitle", "Soporte Técnico");
 
         return "soporte/listado";
     }
@@ -103,18 +107,19 @@ public class TicketController {
 
         boolean esAdmin = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRADOR"));
-        Long idUsuario  = userDetails.getIdUsuario();
+        Long idUsuario = userDetails.getIdUsuario();
+        
 
-        model.addAttribute("ticket",            ticket);
-        model.addAttribute("adjuntos",          adjuntoService.listarPorTicket(id));
-        model.addAttribute("evaluacion",        evaluacionService.buscarPorTicket(id).orElse(null));
-        model.addAttribute("categorias",        categoriaService.listarActivas());
+        model.addAttribute("ticket", ticket);
+        model.addAttribute("adjuntos", adjuntoService.listarPorTicket(id));
+        model.addAttribute("evaluacion", evaluacionService.buscarPorTicket(id).orElse(null));
+        model.addAttribute("categorias", categoriaService.listarActivas());
         model.addAttribute("nombresCategorias", mapaCategoriasActivas());
         model.addAttribute("nombreReporta",     nombreCompleto(ticket.getIdUsuarioReportaFk()));
-        model.addAttribute("esAdmin",           esAdmin);
-        model.addAttribute("idUsuario",         idUsuario);
-        model.addAttribute("yaEvaluo",          evaluacionService.yaEvaluo(idUsuario, id));
-        model.addAttribute("pageTitle",         "Detalle de Ticket #" + id);
+        model.addAttribute("esAdmin", esAdmin);
+        model.addAttribute("idUsuario", idUsuario);
+        model.addAttribute("yaEvaluo", evaluacionService.yaEvaluo(idUsuario, id));
+        model.addAttribute("pageTitle", "Detalle de Ticket #" + id);
 
         return "soporte/detalle";
     }
@@ -187,7 +192,6 @@ public class TicketController {
         }
         return "redirect:/soporte/" + id;
     }
-
     @PostMapping("/{id}/evaluar")
     public String evaluar(
             @PathVariable Long id,
@@ -201,6 +205,46 @@ public class TicketController {
             redirectAttributes.addFlashAttribute("mensajeExito", "¡Gracias por evaluar el servicio!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al evaluar: " + e.getMessage());
+        }
+        return "redirect:/soporte/" + id;
+    }
+    
+    
+    @PostMapping("/{id}/adjunto")
+    public String subirAdjunto(
+            @PathVariable Long id,
+            @RequestParam("archivo") MultipartFile archivo,
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal PortalUserDetails userDetails) {
+
+        try {
+            String contentType = archivo.getContentType();
+            if (contentType == null
+                    || !List.of("image/png", "image/jpeg").contains(contentType)) {
+                redirectAttributes.addFlashAttribute("mensajeError",
+                        "Solo se permiten imágenes PNG o JPG.");
+                return "redirect:/soporte/" + id;
+            }
+
+            if (archivo.getSize() > 5 * 1024 * 1024) {
+                redirectAttributes.addFlashAttribute("mensajeError",
+                        "El archivo no puede superar los 5 MB.");
+                return "redirect:/soporte/" + id;
+            }
+
+            String rutaRelativa = fileService.guardar(archivo, id);
+
+            TicketAdjunto adjunto = new TicketAdjunto();
+            adjunto.setRutaArchivo(rutaRelativa);
+            adjunto.setIdUsuarioSubidoFk(userDetails.getIdUsuario());
+            adjunto.setIdTicketFk(id);
+            adjuntoService.insertar(adjunto);
+
+            redirectAttributes.addFlashAttribute("mensajeExito", "Imagen adjuntada correctamente.");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError",
+                    "Error al subir el archivo: " + e.getMessage());
         }
         return "redirect:/soporte/" + id;
     }
