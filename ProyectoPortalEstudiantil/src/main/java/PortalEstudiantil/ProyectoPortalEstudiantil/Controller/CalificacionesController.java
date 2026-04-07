@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 /**
  *
  * @author marjo
@@ -40,37 +39,38 @@ public class CalificacionesController {
     }
 
     @GetMapping("")
-    public String listado(Model model) {
-        var lista = calificacionesService.listarCalificacionesParaVista();
-        model.addAttribute("calificaciones", lista);
-        model.addAttribute("pageTitle", "Calificaciones");
-        return "calificaciones/listado";
+    public String listado() {
+
+        Long seccionDefault = 1L;
+
+        return "redirect:/calificaciones/paginado?seccion="
+                + seccionDefault + "&pagina=1";
     }
-    
+
     @GetMapping("/paginado")
     public String listadoPaginado(
             @RequestParam(required = false) String busqueda,
             @RequestParam(required = false) Long seccion,
             @RequestParam(defaultValue = "1") int pagina,
             Model model) {
-        
+
         int tamanoPagina = 10;
-        
+
         Map<String, Object> resultado = calificacionesService.listarCalificacionesParaVistaPaginado(
                 busqueda, seccion, pagina, tamanoPagina);
-        
+
         model.addAttribute("calificaciones", resultado.get("calificaciones"));
         model.addAttribute("paginaActual", resultado.get("paginaActual"));
         model.addAttribute("totalPaginas", resultado.get("totalPaginas"));
         model.addAttribute("totalElementos", resultado.get("totalElementos"));
         model.addAttribute("tamanoPagina", resultado.get("tamanoPagina"));
-        
+
         model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("busquedaActual", busqueda);
         model.addAttribute("seccionActual", seccion);
         model.addAttribute("pageTitle", "Calificaciones");
-        
-        return "calificaciones/listado-paginado"; 
+
+        return "calificaciones/listado";
     }
 
     @GetMapping("/nuevo")
@@ -79,6 +79,19 @@ public class CalificacionesController {
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("evaluaciones", evaluacionRepository.findAll());
         model.addAttribute("pageTitle", "Nueva Calificación");
+
+        return "calificaciones/modificar";
+    }
+
+    @GetMapping("/modificar/{id}")
+    public String modificar(@PathVariable("id") Long id, Model model) {
+
+        Calificaciones calificacion = calificacionesService.buscarPorId(id);
+
+        model.addAttribute("calificacion", calificacion);
+        model.addAttribute("matriculas", matriculaRepository.findAll());
+        model.addAttribute("evaluaciones", evaluacionRepository.findAll());
+        model.addAttribute("pageTitle", "Modificar Calificación");
 
         return "calificaciones/modificar";
     }
