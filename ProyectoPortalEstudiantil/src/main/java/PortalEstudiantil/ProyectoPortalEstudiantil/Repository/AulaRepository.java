@@ -22,7 +22,7 @@ public interface AulaRepository extends JpaRepository<Aula, Long> {
 
     boolean existsByNumeroIgnoreCase(String numero);
 
-    // UQ(NUMERO) validación duplicado (con excepción del mismo ID)
+    // validación duplicado (con excepción del mismo ID)
     @Query(value = """
         SELECT COUNT(*)
         FROM AULA_TB

@@ -40,7 +40,7 @@ public class MensajeriaController {
 
         Long idUsuario = usuario.getIdUsuario();
 
-        // 🔥 SOLUCIÓN: marcar mensajes como leídos
+        // marcar mensajes como leídos
         service.marcarLeidos(idConversacion, idUsuario);
 
         List<Map<String, Object>> mensajes = service.mensajes(idConversacion);

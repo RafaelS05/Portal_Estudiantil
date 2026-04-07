@@ -123,9 +123,9 @@ public class MensajeriaRepository {
         return id;
     }
 
-    // ------------------------------------------------------------------
+
     //  CONVERSACIONES
-    // ------------------------------------------------------------------
+
 
     public List<Map<String, Object>> listarConversaciones(Long idUsuario) {
         String sql =
@@ -197,9 +197,9 @@ public class MensajeriaRepository {
                 .addValue("p_id_estado",       ESTADO_INACTIVO));
     }
 
-    // ------------------------------------------------------------------
+   
     //  MENSAJES
-    // ------------------------------------------------------------------
+  
 
     public List<Map<String, Object>> listarMensajes(Long idConversacion) {
         String sql =
@@ -250,9 +250,9 @@ public class MensajeriaRepository {
                 .addValue("p_id_estado",  ESTADO_INACTIVO));
     }
 
-    // ------------------------------------------------------------------
+
     //  ARCHIVOS
-    // ------------------------------------------------------------------
+ 
 
     public List<Map<String, Object>> listarArchivos(Long idMensaje) {
         return jdbc.queryForList(
@@ -277,9 +277,9 @@ public class MensajeriaRepository {
                 .addValue("p_id_estado",  ESTADO_INACTIVO));
     }
 
-    // ------------------------------------------------------------------
+
     //  USUARIOS Y TIPOS
-    // ------------------------------------------------------------------
+
 
     public List<Map<String, Object>> listarUsuariosActivos(Long idUsuarioActual) {
         return jdbc.queryForList("""
@@ -303,9 +303,9 @@ public class MensajeriaRepository {
                 Long.class);
     }
 
-    // ------------------------------------------------------------------
+
     //  BADGE NAVBAR
-    // ------------------------------------------------------------------
+
 
     public int contarNoLeidos(Long idUsuario) {
         Integer count = jdbc.queryForObject(
