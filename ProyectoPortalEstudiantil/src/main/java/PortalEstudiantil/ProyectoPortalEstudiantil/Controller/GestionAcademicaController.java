@@ -76,6 +76,7 @@ public class GestionAcademicaController {
         model.addAttribute("materiasActivas", materiaRepository.listarActivas());
         model.addAttribute("aulasActivas", aulaRepository.listarActivas());
         model.addAttribute("totalAsignacionesActivas", seccionMateriaService.contarActivas());
+        model.addAttribute("profesorAsigna", usuarioService.buscarPorTipoYEstado(2L, 1L));
 
         //Horario
         model.addAttribute("horarios", horarioService.listarTodos());

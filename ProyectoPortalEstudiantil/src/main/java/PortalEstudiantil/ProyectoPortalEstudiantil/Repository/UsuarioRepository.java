@@ -21,6 +21,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     long countByIdTipoUsuarioFk(Long idTipoUsuarioFk);
 
+    List<Usuario> findByIdTipoUsuarioFkAndIdEstadoFk(Long idTipoUsuario, Long idEstado);
+    
     // (para la regla del último admin)
     long countByIdTipoUsuarioFkAndIdEstadoFk(Long idTipoUsuarioFk, Long idEstadoFk);
 

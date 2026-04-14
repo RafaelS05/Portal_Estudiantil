@@ -274,7 +274,7 @@
                 </div><!-- /ADMINISTRADOR -->
 
 
-                <!--PROFESOR                         -->
+                <!--PROFESOR -->
                 <div th:if="${rolActual == 'PROFESOR'}">
 
                     <div class="card border-0 shadow-sm mb-4">
@@ -305,11 +305,13 @@
                     </div>
 
                     <div class="card border-0 shadow-sm">
+
                         <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
                             <i class="bi bi-clock-history text-primary"></i>
                             <h6 class="mb-0 fw-bold">Mi Historial de Evaluaciones</h6>
                             <span class="badge bg-primary rounded-pill ms-auto" th:text="${historial != null ? historial.size() : 0}">0</span>
                         </div>
+
                         <div class="card-body p-0">
                             <div th:each="fb : ${historial}"
                                  class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
@@ -529,6 +531,7 @@
                                         </span>
                                     </div>
                                 </div>
+                                
                                 <div class="table-responsive">
                                     <table class="table table-hover align-middle mb-0" id="batchForm">
                                         <thead class="table-light" style="position:sticky;top:0;z-index:1;">
@@ -547,7 +550,6 @@
                                                 th:classappend="${est.idFeedback != null} ? 'table-success' : ''">
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-2">
-                                                        <div class="fb-avatar-sm"><i class="bi bi-person-fill"></i></div>
                                                         <span class="fw-semibold" th:text="${est.nombreEstudiante}">Estudiante</span>
                                                     </div>
                                                 </td>
@@ -564,11 +566,11 @@
                                                         <option value="">— Seleccionar —</option>
                                                         <option th:each="n : ${#numbers.sequence(1,5)}"
                                                                 th:value="${n}"
-                                                                th:text="${n == 1 ? '1 ★ Deficiente' :
-                                                                n == 2 ? '2 ★★ Regular' :
-                                                                n == 3 ? '3 ★★★ Bueno' :
-                                                                n == 4 ? '4 ★★★★ Muy Bueno' :
-                                                                '5 ★★★★★ Excelente'}"
+                                                                th:text="${n == 1 ? '★' :
+                                                                n == 2 ? '★★' :
+                                                                n == 3 ? '★★★' :
+                                                                n == 4 ? '★★★★' :
+                                                                '★★★★★'}"
                                                                 th:selected="${est.calificacion == n}">1</option>
                                                     </select>
                                                 </td>

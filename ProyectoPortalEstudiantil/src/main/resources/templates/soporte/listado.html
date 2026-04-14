@@ -87,14 +87,14 @@
 
                 </div>
 
-                <!-- ── BANNER INFO (usuario no admin) ──────────────────── -->
+                <!-- ── BANNER INFO ──────────────────── -->
                 <div th:unless="${esAdmin}"
                      class="alert banner-info mb-3 d-flex align-items-center gap-2">
                     <i class="fa-solid fa-circle-info fa-lg"></i>
                     <span>Estás viendo únicamente tus incidencias registradas.</span>
                 </div>
 
-                <!-- ── FILTROS + BOTÓN NUEVO ────────────────────────────── -->
+                <!--── FILTROS ────────────────────────────── -->
                 <form th:action="@{/soporte}" method="get"
                       class="d-flex flex-wrap align-items-center gap-2 mb-3 filter-form-row">
 
@@ -119,7 +119,8 @@
                                 th:selected="${idCategoria == cat.idCategoriaTicket}">
                         </option>
                     </select>
-
+                    
+                    <!--── BOTON ────────────────────────────── -->
                     <button th:unless="${esAdmin}" 
                             type="button" class="btn btn-primary ms-auto fw-bold btn-nuevo"
                             data-bs-toggle="modal" data-bs-target="#modalNuevoTicket"
