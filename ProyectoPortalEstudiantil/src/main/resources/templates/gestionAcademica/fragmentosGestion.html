@@ -283,12 +283,12 @@
                                             <i class="fa-solid fa-pen"></i>
                                         </button>
 
-                                        <a class="btn btn-sm btn-outline-info"
-                                           th:href="@{/gestionAcademica/matricula/seccion/{id}(id=${s.idSeccion})}"
-                                           title="Ver estudiantes matriculados">
-                                            <i class="fa-solid fa-user-graduate"></i>
-                                        </a>
-                                        
+                                        <button class="btn btn-sm btn-outline-info"
+        th:attr="data-id=${s.idSeccion}, data-numero=${s.numero}"
+        onclick="verEstudiantes(this)"
+        title="Ver estudiantes">
+    <i class="fa-solid fa-user-graduate"></i>
+</button>
                                         <form th:action="@{/gestionAcademica/seccion/cambiar-estado}" method="post" class="m-0">
                                             <input type="hidden" name="idSeccion" th:value="${s.idSeccion}">
                                             <input type="hidden" name="idEstado"  th:value="${s.activa==1}?2:1">
@@ -793,6 +793,83 @@
         </div>
     </div>
 
+    
+    <div class="modal fade" id="modal-estudiantes-seccion" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-user-graduate me-2 text-info"></i>
+                    Estudiantes — Sección <span id="est-seccion-numero"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-3 border-bottom">
+                    <input type="text" class="form-control form-control-sm"
+                           placeholder="Buscar estudiante…"
+                           oninput="filterTable('tbl-est-modal', this.value)">
+                </div>
+                <div class="table-responsive">
+                    <table id="tbl-est-modal" class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Estudiante</th>
+                                <th class="d-none d-md-table-cell">Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="est-tbody">
+                            <tr th:each="m, iter : ${todasMatriculas}"
+                                th:attr="data-seccion=${m.idSeccionFk}"
+                                class="fila-estudiante d-none">
+                                <td th:text="${iter.count}"></td>
+                                <td class="fw-semibold" th:text="${m.nombreCompleto}"></td>
+                                <td class="d-none d-md-table-cell text-muted small"
+                                    th:text="${m.fechaMatricula}"></td>
+                                <td>
+                                    <span th:class="${m.idEstadoFk==1}
+                                          ?'badge bg-success-subtle text-success'
+                                          :'badge bg-danger-subtle text-danger'"
+                                          th:text="${m.idEstadoFk==1}?'Activa':'Inactiva'">
+                                    </span>
+                                </td>
+                                <td>
+                                    <form th:if="${m.idEstadoFk==1}"
+                                          th:action="@{/gestionAcademica/seccion/desmatricular}"
+                                          method="post" class="m-0"
+                                          onsubmit="return confirm('¿Desmatricular a este estudiante?')">
+                                        <input type="hidden" name="idMatricula" th:value="${m.idMatricula}">
+                                        <input type="hidden" name="idSeccion" th:value="${m.idSeccionFk}">
+                                        <input type="hidden" name="tab" value="secciones">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fa-solid fa-user-minus"></i>
+                                            <span class="d-none d-md-inline ms-1">Desmatricular</span>
+                                        </button>
+                                    </form>
+                                    <span th:unless="${m.idEstadoFk==1}" class="text-muted">—</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="est-vacio" class="text-center text-muted py-4 d-none">
+                    <i class="fa-solid fa-users-slash fa-2x mb-2"></i>
+                    <p class="mb-0">No hay estudiantes matriculados en esta sección.</p>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <span class="text-muted small">
+                    Total: <strong id="est-total">0</strong> estudiante(s)
+                </span>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
 
     <!-- ════════════════════════════════════════════════════════════
          MODALES · AULAS

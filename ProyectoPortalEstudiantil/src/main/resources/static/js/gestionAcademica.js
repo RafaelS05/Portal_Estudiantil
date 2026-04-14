@@ -48,3 +48,19 @@ function llenarEditarHorario(b) {
     document.getElementById('eh-sm').value = b.dataset.sm;
     document.getElementById('eh-aula').value = b.dataset.aula !== 'null' ? b.dataset.aula : '';
 }
+
+function verEstudiantes(btn) {
+    const idSeccion = btn.dataset.id;
+    document.getElementById('est-seccion-numero').textContent = btn.dataset.numero;
+
+    const filas = document.querySelectorAll('.fila-estudiante');
+    filas.forEach(f => f.classList.add('d-none'));
+
+    const visibles = [...filas].filter(f => f.dataset.seccion == idSeccion);
+    visibles.forEach(f => f.classList.remove('d-none'));
+
+    document.getElementById('est-total').textContent = visibles.length;
+    document.getElementById('est-vacio').classList.toggle('d-none', visibles.length > 0);
+
+    new bootstrap.Modal(document.getElementById('modal-estudiantes-seccion')).show();
+}
