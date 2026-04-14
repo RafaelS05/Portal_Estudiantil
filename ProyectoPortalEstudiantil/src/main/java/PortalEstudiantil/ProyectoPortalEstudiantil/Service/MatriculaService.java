@@ -57,4 +57,12 @@ public class MatriculaService {
                 .setParameter("idEstado", idEstado)
                 .executeUpdate();
     }
+
+    @Transactional
+    public void desmatricular(Long idMatricula) {
+        if (idMatricula == null) {
+            throw new IllegalArgumentException("ID de matrícula requerido");
+        }
+        matriculaRepository.desmatricularEstudiante(idMatricula);
+    }
 }

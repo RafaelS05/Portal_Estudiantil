@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
-
     interface MatriculaRow {
 
         Long getIdMatricula();
@@ -97,4 +96,9 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
             nativeQuery = true)
     void cambiarEstadoMatricula(@Param("idMatricula") Long idMatricula,
             @Param("idEstado") Long idEstado);
+
+    @Modifying
+    @Transactional
+    @Query(value = "CALL MATRICULA_DESMATRICULAR(:idMatricula)", nativeQuery = true)
+    void desmatricularEstudiante(@Param("idMatricula") Long idMatricula);
 }

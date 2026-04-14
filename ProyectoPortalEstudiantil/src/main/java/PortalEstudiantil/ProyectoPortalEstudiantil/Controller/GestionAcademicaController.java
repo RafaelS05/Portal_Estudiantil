@@ -65,6 +65,7 @@ public class GestionAcademicaController {
         model.addAttribute("secciones", seccionService.listarResumen());
         model.addAttribute("periodosActivos", periodoRepository.listarActivos());
         model.addAttribute("totalSeccionesActivas", seccionService.contarActivas());
+        model.addAttribute("matriculasPorSeccion", matriculaService.listTodos());
 
         //Aula
         model.addAttribute("aulas", aulaService.listarTodas());
@@ -76,6 +77,7 @@ public class GestionAcademicaController {
         model.addAttribute("materiasActivas", materiaRepository.listarActivas());
         model.addAttribute("aulasActivas", aulaRepository.listarActivas());
         model.addAttribute("totalAsignacionesActivas", seccionMateriaService.contarActivas());
+        model.addAttribute("profesorAsigna", usuarioService.buscarPorTipoYEstado(2L, 1L));
 
         //Horario
         model.addAttribute("horarios", horarioService.listarTodos());

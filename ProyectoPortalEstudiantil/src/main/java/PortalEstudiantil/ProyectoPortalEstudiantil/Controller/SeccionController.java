@@ -1,5 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Seccion;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.MatriculaService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.SeccionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,8 @@ public class SeccionController {
 
     @Autowired
     private SeccionService seccionService;
+    @Autowired
+    private MatriculaService matriculaService;
 
     @PostMapping("/guardar")
     public String guardar(@RequestParam String numero,
@@ -52,4 +56,18 @@ public class SeccionController {
         flash.addFlashAttribute("mensajeExito", msg);
         return "redirect:/gestionAcademica?tab=secciones";
     }
+
+    @PostMapping("/desmatricular")
+    public String desmatricular(@RequestParam Long idMatricula,
+            @RequestParam Long idSeccion,
+            RedirectAttributes flash) {
+        try {
+            matriculaService.desmatricular(idMatricula);
+            flash.addFlashAttribute("mensajeExito", "Estudiante desmatriculado correctamente.");
+        } catch (Exception e) {
+            flash.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/gestionAcademica?tab=secciones";
+    }
+
 }

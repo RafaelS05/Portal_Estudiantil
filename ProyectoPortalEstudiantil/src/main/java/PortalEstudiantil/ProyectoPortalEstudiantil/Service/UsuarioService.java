@@ -293,7 +293,14 @@ public class UsuarioService {
     public List<Usuario> buscarPorTipoUsuario(Long idTipoUsuario) {
         if (idTipoUsuario == null) throw new IllegalArgumentException("El ID del tipo de usuario es obligatorio");
         return usuarioRepository.findByIdTipoUsuarioFk(idTipoUsuario);
+        
     }
+    
+    public List<Usuario> buscarPorTipoYEstado(Long idTipoUsuario, Long idEstado) {
+    if (idTipoUsuario == null) throw new IllegalArgumentException("El tipo de usuario es obligatorio");
+    if (idEstado == null) throw new IllegalArgumentException("El estado es obligatorio");
+    return usuarioRepository.findByIdTipoUsuarioFkAndIdEstadoFk(idTipoUsuario, idEstado);
+}
 
     public List<Usuario> buscarPorEstado(Long idEstado) {
         if (idEstado == null) throw new IllegalArgumentException("El ID del estado es obligatorio");
