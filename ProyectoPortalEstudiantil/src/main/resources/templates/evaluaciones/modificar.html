@@ -5,21 +5,27 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Portal Estudiantil - Evaluaciones</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
         <link rel="stylesheet" th:href="@{/css/layout.css}">
         <link rel="stylesheet" th:href="@{/css/evaluaciones.css}">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     </th:block>
 
     <body>
+
         <div th:replace="~{layout/plantilla :: shell(~{::section#formulario})}">
 
             <section id="formulario">
 
+
                 <div class="page-header">
                     <h4 class="page-title"
-                        th:text="${evaluacion.idEvaluacion != null ? 'Editar Evaluación' : 'Nueva Evaluación'}">
+                        th:text="${evaluacion.idEvaluacion != null ?
+                        'Editar Evaluación' : 'Nueva Evaluación'}">
                     </h4>
 
                     <a th:href="@{/evaluaciones}" class="btn btn-light btn-sm btn-back">
@@ -31,8 +37,11 @@
                 <div class="card form-card">
                     <div class="card-body">
 
-                        <form th:object="${evaluacion}"
-                              th:action="${evaluacion.idEvaluacion == null} ? @{/evaluaciones/guardar} : @{/evaluaciones/actualizar/{id}(id=${evaluacion.idEvaluacion})}"
+                        <form id="formEvaluacion"
+                              th:object="${evaluacion}"
+                              th:action="${evaluacion.idEvaluacion == null}
+                              ? @{/evaluaciones/guardar}
+                              : @{/evaluaciones/actualizar/{id}(id=${evaluacion.idEvaluacion})}"
                               method="post">
 
                             <div class="row g-3">
@@ -41,7 +50,8 @@
                                     <label class="form-label">Tipo de evaluación</label>
                                     <input type="text"
                                            class="form-control form-control-custom"
-                                           th:field="*{tipo}">
+                                           th:field="*{tipo}"
+                                           required>
                                 </div>
 
                                 <div class="col-md-3">
@@ -49,14 +59,16 @@
                                     <input type="number"
                                            step="0.01"
                                            class="form-control form-control-custom"
-                                           th:field="*{porcentaje}">
+                                           th:field="*{porcentaje}"
+                                           required>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">Periodo</label>
                                     <select class="form-select form-control-custom"
-                                            th:field="*{periodo}">
-                                        <option value=""></option>
+                                            th:field="*{periodo}"
+                                            required>
+                                        <option value="">Seleccione</option>
                                         <option th:each="p : ${periodos}"
                                                 th:value="${p.idPeriodo}"
                                                 th:text="${p.nombre}">
@@ -67,8 +79,9 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Sección</label>
                                     <select class="form-select form-control-custom"
-                                            th:field="*{seccionMateria}">
-                                        <option value=""></option>
+                                            th:field="*{seccionMateria}"
+                                            required>
+                                        <option value="">Seleccione</option>
                                         <option th:each="s : ${secciones}"
                                                 th:value="${s.idSeccionMateria}"
                                                 th:text="${s.nombreCompleto}">
@@ -78,12 +91,13 @@
 
                             </div>
 
-                            <div class="form-actions">
+                            <div class="form-actions mt-4">
 
                                 <button type="submit"
                                         class="btn btn-primary btn-save">
                                     <i class="fa-solid fa-save me-1"></i>
-                                    <span th:text="${evaluacion.idEvaluacion != null ? 'Actualizar' : 'Guardar'}"></span>
+                                    <span th:text="${evaluacion.idEvaluacion != null ?
+                                          'Actualizar' : 'Guardar'}"></span>
                                 </button>
 
                                 <a th:href="@{/evaluaciones}"
@@ -98,9 +112,11 @@
                     </div>
                 </div>
 
-                <script th:src="@{/js/evaluaciones.js}"></script>
             </section>
-
         </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{/js/evaluaciones.js}"></script>
+
     </body>
 </html>
