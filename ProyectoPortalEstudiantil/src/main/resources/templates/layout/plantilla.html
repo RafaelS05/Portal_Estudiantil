@@ -6,7 +6,7 @@
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>Portal Estudiantil</title>
-        
+
         <link rel="icon" type="image/x-icon" th:href="@{/img/Escuela_Neftali.png}">
 
         <link rel="stylesheet"
@@ -21,7 +21,7 @@
 
         <script th:src="@{/js/gestionAcademica.js}"></script>
         <link rel="stylesheet" th:href="@{/css/gestionAcademica.css}">
-        
+
         <script th:src="@{/js/feedBack.js}"></script>
         <script th:src="@{/js/soporte.js}"></script>
         <link rel="stylesheet" th:href="@{/css/feedBack.css}">
@@ -157,13 +157,13 @@
                                 <i class="fa-solid fa-comment-dots"></i> Feedback 360
                             </a>
                         </div>
-                        
+
                         <div class="nav-item">
                             <a class="sidebar-link" th:href="@{/aprendizaje-personalizado}">
-                                <i class="fa-solid fa-chalkboard-user"></i> Aprendizaje-Personalizado
+                                <i class="fa-solid fa-bullseye"></i> Aprendizaje-Personalizado
                             </a>
                         </div>
-                        
+
                         <div class="nav-item">
                             <a class="sidebar-link" th:href="@{/soporte}">
                                 <i class="fa-solid fa-chalkboard-user"></i> Soporte
@@ -191,7 +191,7 @@
 
                         <div class="topbar-right d-flex align-items-center gap-2">
 
-                           
+
                             <!-- Usuario autenticado -->
                             <div class="dropdown" sec:authorize="isAuthenticated()">
                                 <a class="chip dropdown-toggle text-decoration-none"
