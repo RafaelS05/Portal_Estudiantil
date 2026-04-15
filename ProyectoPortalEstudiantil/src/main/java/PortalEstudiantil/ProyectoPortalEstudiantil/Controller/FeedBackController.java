@@ -166,7 +166,6 @@ public class FeedBackController {
         model.addAttribute("periodos", periodoService.listarResumen());
     }
 
-    // POST /feedBack/registrar
     @PostMapping("/registrar")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','PROFESOR')")
     @ResponseBody
@@ -192,7 +191,6 @@ public class FeedBackController {
         }
     }
 
-    // GET /feedBack/pdf
     @GetMapping("/pdf")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR','ENCARGADO','ESTUDIANTE')")
     public ResponseEntity<byte[]> descargarPdf(
@@ -274,7 +272,6 @@ public class FeedBackController {
         return ResponseEntity.ok(resp);
     }
 
-    // UTILIDAD
     private double calcularPromedio(List<FeedBackResumen> feedbacks) {
         return feedbacks.stream()
                 .filter(f -> f.getCalificacion() != null)

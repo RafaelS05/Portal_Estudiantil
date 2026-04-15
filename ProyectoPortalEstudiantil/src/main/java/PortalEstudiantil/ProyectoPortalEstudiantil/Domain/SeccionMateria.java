@@ -15,11 +15,14 @@ public class SeccionMateria {
     @Column(name = "ID_SECCIONMATERIA")
     private Long idSeccionMateria;
 
-    @Column(name = "ID_SECCION_FK")
-    private Long idSeccionFk;
+    // Reemplazás el Long por la relación completa
+    @ManyToOne
+    @JoinColumn(name = "ID_SECCION_FK")
+    private Seccion seccion;
 
-    @Column(name = "ID_MATERIA_FK")
-    private Long idMateriaFk;
+    @ManyToOne
+    @JoinColumn(name = "ID_MATERIA_FK")
+    private Materia materia;
 
     @Column(name = "ID_USUARIO_DOCENTE_FK")
     private Long idUsuarioDocenteFk;
@@ -33,8 +36,17 @@ public class SeccionMateria {
 
     @Transient
     public String getNombreCompleto() {
-        String seccion = (idSeccionFk != null) ? "Sección " + idSeccionFk : "Sin sección";
-        String materia = (idMateriaFk != null) ? "Materia " + idMateriaFk : "Sin materia";
-        return seccion + " - " + materia;
+        String seccionNombre = (seccion != null) ? seccion.getNumero() : "Sin sección";
+        String materiaNombre = (materia != null) ? materia.getNombre() : "Sin materia";
+        return seccionNombre + " - " + materiaNombre;
+    }
+
+    // Getters de compatibilidad por si algo usa los IDs directamente
+    public Long getIdSeccionFk() {
+        return seccion != null ? seccion.getIdSeccion() : null;
+    }
+
+    public Long getIdMateriaFk() {
+        return materia != null ? materia.getIdMateria() : null;
     }
 }

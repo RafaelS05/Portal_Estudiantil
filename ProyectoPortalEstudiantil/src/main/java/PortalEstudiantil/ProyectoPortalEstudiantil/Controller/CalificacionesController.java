@@ -8,6 +8,7 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Calificaciones;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EvaluacionRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MatriculaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.CalificacionesService;
+import java.math.BigDecimal;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -97,8 +98,19 @@ public class CalificacionesController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute("calificacion") Calificaciones calificacion) {
-        calificacionesService.guardarCalificaciones(calificacion);
+    public String guardar(
+            @RequestParam("calificacion") BigDecimal calificacion,
+            @RequestParam("matricula") Long idMatricula,
+            @RequestParam("evaluacion") Long idEvaluacion) {
+
+        Calificaciones nueva = new Calificaciones();
+        nueva.setCalificacion(calificacion);
+        nueva.setMatricula(matriculaRepository.findById(idMatricula)
+                .orElseThrow(() -> new RuntimeException("Matrícula no encontrada")));
+        nueva.setEvaluacion(evaluacionRepository.findById(idEvaluacion)
+                .orElseThrow(() -> new RuntimeException("Evaluación no encontrada")));
+
+        calificacionesService.guardarCalificaciones(nueva);
         return "redirect:/calificaciones";
     }
 

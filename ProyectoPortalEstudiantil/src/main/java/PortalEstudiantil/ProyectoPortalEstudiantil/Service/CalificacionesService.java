@@ -48,7 +48,22 @@ public class CalificacionesService {
         if (calificacion.getIdEstadoFk() == null) {
             calificacion.setIdEstadoFk(ESTADO_ACTIVO);
         }
-        calificacionesRepository.save(calificacion);
+
+        Optional<Calificaciones> existente = calificacionesRepository
+                .findByMatriculaAndEvaluacion(
+                        calificacion.getMatricula().getIdMatricula(),
+                        calificacion.getEvaluacion().getIdEvaluacion()
+                );
+
+        if (existente.isPresent()) {
+            Calificaciones calif = existente.get();
+            calif.setCalificacion(calificacion.getCalificacion());
+            calif.setIdEstadoFk(ESTADO_ACTIVO);
+            calificacionesRepository.saveAndFlush(calif); 
+        } else {
+            calificacion.setIdCalificaciones(null);
+            calificacionesRepository.save(calificacion);
+        }
     }
 
     public Calificaciones obtenerPorId(Long id) {

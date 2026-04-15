@@ -37,6 +37,12 @@ public class EvaluacionService {
 
     @Transactional
     public Evaluacion crearEvaluacion(Evaluacion evaluacion) {
+
+        // Agregás esta línea primero
+        if (evaluacion.getPorcentaje() == null) {
+            throw new IllegalArgumentException("El porcentaje es obligatorio");
+        }
+
         if (evaluacion.getPorcentaje().compareTo(BigDecimal.ZERO) < 0
                 || evaluacion.getPorcentaje().compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("El porcentaje debe estar entre 0 y 100");
