@@ -2,10 +2,14 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.TipoUsuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Canton;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Distrito;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.TipoUsuarioRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.CredencialService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.EstudianteService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UsuarioService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UbicacionService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.DireccionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,6 +37,12 @@ public class UsuarioController {
 
     @Autowired
     private CredencialService credencialService;
+
+    @Autowired
+    private UbicacionService ubicacionService;
+
+    @Autowired
+    private DireccionService direccionService;
 
     private Long obtenerTipoId(String nombreTipo) {
         return tipoUsuarioRepository.findByNombreIgnoreCase(nombreTipo)
@@ -113,6 +123,10 @@ public class UsuarioController {
         model.addAttribute("correoLogin", "");
         model.addAttribute("esEstudiante", false);
         model.addAttribute("encargadosVista", List.of());
+        model.addAttribute("provincias", ubicacionService.listarProvincias());
+        model.addAttribute("cantones", List.of());
+        model.addAttribute("distritos", List.of());
+        model.addAttribute("direccion", null);
         return "usuarios/formulario";
     }
 
@@ -143,6 +157,17 @@ public class UsuarioController {
             model.addAttribute("esEstudiante", esEstudiante);
             model.addAttribute("encargadosVista",
                     esEstudiante ? estudianteService.listarEncargadosVista(id) : List.of());
+
+            // Dirección
+            var direccion = direccionService.obtenerPorUsuario(id);
+            model.addAttribute("direccion", direccion);
+            model.addAttribute("provincias", ubicacionService.listarProvincias());
+            model.addAttribute("cantones", direccion != null && direccion.getProvincia() != null
+                    ? ubicacionService.listarCantonesPorProvincia(direccion.getProvincia().getIdProvincia())
+                    : List.of());
+            model.addAttribute("distritos", direccion != null && direccion.getCanton() != null
+                    ? ubicacionService.listarDistritosPorCanton(direccion.getCanton().getIdCanton())
+                    : List.of());
 
             return "usuarios/formulario";
         } catch (Exception e) {
@@ -196,14 +221,21 @@ public class UsuarioController {
             @ModelAttribute Usuario usuario,
             @RequestParam(value = "telefonoNumero", required = false) String telefonoNumero,
             @RequestParam(value = "correoLogin", required = false) String correoLogin,
+            @RequestParam(value = "idProvincia", required = false) Long idProvincia,
+            @RequestParam(value = "idCanton",   required = false) Long idCanton,
+            @RequestParam(value = "idDistrito", required = false) Long idDistrito,
+            @RequestParam(value = "otrasSenas", required = false) String otrasSenas,
             RedirectAttributes redirectAttributes) {
 
         try {
             // 1. Crear el usuario
             Long idNuevo = usuarioService.crearUsuario(usuario);
-            
+
             // 2. Actualizar contacto (teléfono y correo)
             usuarioService.actualizarContacto(idNuevo, telefonoNumero, correoLogin);
+
+            // 3. Guardar dirección si se proporcionó
+            direccionService.guardarDireccion(idNuevo, idProvincia, idCanton, idDistrito, otrasSenas);
 
             // 3. ✅ NUEVO: Generar credencial automáticamente
             String passwordTemporal = null;
@@ -248,12 +280,17 @@ public class UsuarioController {
             @ModelAttribute Usuario usuario,
             @RequestParam(value = "telefonoNumero", required = false) String telefonoNumero,
             @RequestParam(value = "correoLogin", required = false) String correoLogin,
+            @RequestParam(value = "idProvincia", required = false) Long idProvincia,
+            @RequestParam(value = "idCanton",   required = false) Long idCanton,
+            @RequestParam(value = "idDistrito", required = false) Long idDistrito,
+            @RequestParam(value = "otrasSenas", required = false) String otrasSenas,
             RedirectAttributes redirectAttributes) {
 
         try {
             usuario.setIdUsuario(id);
             usuarioService.actualizarUsuario(usuario);
             usuarioService.actualizarContacto(id, telefonoNumero, correoLogin);
+            direccionService.guardarDireccion(id, idProvincia, idCanton, idDistrito, otrasSenas);
 
             redirectAttributes.addFlashAttribute("mensaje", "Usuario actualizado exitosamente");
             redirectAttributes.addFlashAttribute("tipoMensaje", "success");
@@ -384,5 +421,18 @@ public class UsuarioController {
 
     private String n(String s) {
         return s == null ? "" : s;
+    }
+
+ 
+    @GetMapping("/cantones")
+    @ResponseBody
+    public List<Canton> obtenerCantones(@RequestParam Long idProvincia) {
+        return ubicacionService.listarCantonesPorProvincia(idProvincia);
+    }
+
+    @GetMapping("/distritos")
+    @ResponseBody
+    public List<Distrito> obtenerDistritos(@RequestParam Long idCanton) {
+        return ubicacionService.listarDistritosPorCanton(idCanton);
     }
 }

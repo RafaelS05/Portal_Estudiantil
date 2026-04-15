@@ -196,6 +196,57 @@
                                 </div>
                             </div>
 
+                            <div class="col-12 mt-4">
+                                <hr>
+                                <h5 class="mb-3">
+                                    <i class="fa-solid fa-location-dot me-2"></i>
+                                    Ubicación
+                                </h5>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Provincia</label>
+                                <select name="idProvincia" id="provinciaSelect" class="form-select">
+                                    <option value="">Seleccione una provincia</option>
+                                    <option th:each="prov : ${provincias}"
+                                            th:value="${prov.idProvincia}"
+                                            th:text="${prov.nombre}"
+                                            th:selected="${direccion != null and direccion.provincia != null and prov.idProvincia == direccion.provincia.idProvincia}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Cantón</label>
+                                <select name="idCanton" id="cantonSelect" class="form-select">
+                                    <option value="">Seleccione un cantón</option>
+                                    <option th:each="canton : ${cantones}"
+                                            th:value="${canton.idCanton}"
+                                            th:text="${canton.nombre}"
+                                            th:selected="${direccion != null and direccion.canton != null and canton.idCanton == direccion.canton.idCanton}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Distrito</label>
+                                <select name="idDistrito" id="distritoSelect" class="form-select">
+                                    <option value="">Seleccione un distrito</option>
+                                    <option th:each="distrito : ${distritos}"
+                                            th:value="${distrito.idDistrito}"
+                                            th:text="${distrito.nombre}"
+                                            th:selected="${direccion != null and direccion.distrito != null and distrito.idDistrito == direccion.distrito.idDistrito}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Otras señas</label>
+                                <input type="text" name="otrasSenas" class="form-control"
+                                       placeholder="Ej: 100m norte del parque"
+                                       th:value="${direccion != null ? direccion.otrasSenas : ''}">
+                            </div>
+
                             <div class="col-12 d-flex justify-content-between pt-3 border-top mt-4">
                                 <a class="btn btn-outline-secondary" th:href="@{/usuarios}">
                                     <i class="fa-solid fa-times me-1"></i> Cancelar
@@ -220,6 +271,51 @@
                         Los campos marcados con <span class="text-danger">*</span> son obligatorios
                     </p>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const provinciaSelect = document.getElementById('provinciaSelect');
+                        const cantonSelect    = document.getElementById('cantonSelect');
+                        const distritoSelect  = document.getElementById('distritoSelect');
+
+                        if (!provinciaSelect) return;
+
+                        provinciaSelect.addEventListener('change', function () {
+                            const idProvincia = this.value;
+                            cantonSelect.innerHTML = '<option value="">Cargando...</option>';
+                            distritoSelect.innerHTML = '<option value="">Seleccione un distrito</option>';
+
+                            fetch('/usuarios/cantones?idProvincia=' + idProvincia)
+                                .then(r => r.json())
+                                .then(data => {
+                                    cantonSelect.innerHTML = '<option value="">Seleccione un cantón</option>';
+                                    data.forEach(c => {
+                                        const o = document.createElement('option');
+                                        o.value = c.idCanton;
+                                        o.textContent = c.nombre;
+                                        cantonSelect.appendChild(o);
+                                    });
+                                });
+                        });
+
+                        cantonSelect.addEventListener('change', function () {
+                            const idCanton = this.value;
+                            distritoSelect.innerHTML = '<option value="">Cargando...</option>';
+
+                            fetch('/usuarios/distritos?idCanton=' + idCanton)
+                                .then(r => r.json())
+                                .then(data => {
+                                    distritoSelect.innerHTML = '<option value="">Seleccione un distrito</option>';
+                                    data.forEach(d => {
+                                        const o = document.createElement('option');
+                                        o.value = d.idDistrito;
+                                        o.textContent = d.nombre;
+                                        distritoSelect.appendChild(o);
+                                    });
+                                });
+                        });
+                    });
+                </script>
 
             </div>
         </div>
