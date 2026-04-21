@@ -9,6 +9,9 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EvaluacionReposito
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.MatriculaRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.CalificacionesService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  *
@@ -77,10 +81,9 @@ public class CalificacionesController {
     @GetMapping("/nuevo")
     public String nuevaCalificacion(Model model) {
         model.addAttribute("calificacion", new Calificaciones());
-        model.addAttribute("matriculas", matriculaRepository.findAll());
+        model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("evaluaciones", evaluacionRepository.findAll());
         model.addAttribute("pageTitle", "Nueva Calificación");
-
         return "calificaciones/modificar";
     }
 
@@ -118,6 +121,21 @@ public class CalificacionesController {
     public String eliminar(@PathVariable("id") Long id) {
         calificacionesService.eliminar(id);
         return "redirect:/calificaciones";
+    }
+
+    @GetMapping("/matriculas-por-seccion")
+    @ResponseBody
+    public List<Map<String, Object>> matriculasPorSeccion(@RequestParam Long idSeccion) {
+        List<MatriculaRepository.MatriculaRow> matriculas = matriculaRepository.listarPorSeccion(idSeccion);
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        for (MatriculaRepository.MatriculaRow m : matriculas) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", m.getIdMatricula());
+            map.put("nombre", m.getNombreCompleto());
+            resultado.add(map);
+        }
+        return resultado;
     }
 
 }
