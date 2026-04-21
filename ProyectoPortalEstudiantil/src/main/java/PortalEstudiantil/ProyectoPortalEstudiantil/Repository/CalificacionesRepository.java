@@ -22,6 +22,7 @@ public interface CalificacionesRepository extends JpaRepository<Calificaciones, 
 
     @Query("SELECT c FROM Calificaciones c WHERE c.idEstadoFk = :estadoActivo")
     Page<Calificaciones> findAllActivos(@Param("estadoActivo") Long estadoActivo, Pageable pageable);
+    
 
     @Query("SELECT c FROM Calificaciones c WHERE c.idEstadoFk = :estadoActivo AND "
             + "(LOWER(c.matricula.estudiante.nombre) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR "
