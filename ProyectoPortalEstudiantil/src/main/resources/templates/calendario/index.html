@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:replace="~{layout/plantilla :: head}"></head>
+    <body>
+        <style>
+            .fc-toolbar-title {
+                text-transform: capitalize;
+            }
+        </style>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- Encabezado -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h2 class="fw-bold mb-1">
+                            <i class="fa-solid fa-calendar-days text-primary me-2"></i>Calendario Académico
+                        </h2>
+                        <p class="text-muted mb-0 small">Actividades y eventos institucionales programados</p>
+                    </div>
+                    <!-- Botón nuevo evento solo para admin -->
+                    <a th:href="@{/eventos/nuevo}"
+                       sec:authorize="hasRole('ADMINISTRADOR')"
+                       class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Nuevo Evento
+                    </a>
+                </div>
+
+                <!-- Leyenda de colores -->
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <span class="d-flex align-items-center gap-1 small">
+                        <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:#1976d2;"></span>
+                        Reunión
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small">
+                        <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:#388e3c;"></span>
+                        Actividad
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small">
+                        <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:#d32f2f;"></span>
+                        Feriado
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small">
+                        <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:#7b1fa2;"></span>
+                        Examen
+                    </span>
+                    <span class="d-flex align-items-center gap-1 small">
+                        <span class="rounded-circle d-inline-block" style="width:12px;height:12px;background:#f57c00;"></span>
+                        Otro
+                    </span>
+                </div>
+
+                <!-- Calendario -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <div id="calendario"></div>
+                    </div>
+                </div>
+
+                <!-- Modal detalle de evento (se abre al hacer click en un evento) -->
+                <div class="modal fade" id="modalDetalleEvento" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header py-2">
+                                <h6 class="modal-title d-flex align-items-center gap-2">
+                                    <span id="modalEventoIcono"></span>
+                                    <span id="modalEventoTitulo" class="fw-bold"></span>
+                                </h6>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div>
+                                        <small class="text-muted fw-semibold text-uppercase">Fecha</small>
+                                        <p class="mb-0" id="modalEventoFecha"></p>
+                                    </div>
+                                    <div id="modalEventoDescDiv">
+                                        <small class="text-muted fw-semibold text-uppercase">Descripción</small>
+                                        <p class="mb-0" id="modalEventoDesc"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer py-2">
+                                <!-- Botón editar solo para admin -->
+                                <a id="btnEditarEvento"
+                                   th:href="@{/eventos}"
+                                   class="btn btn-sm btn-outline-primary d-none"
+                                   sec:authorize="hasRole('ADMINISTRADOR')">
+                                    <i class="fa-regular fa-pen-to-square me-1"></i>Editar
+                                </a>
+                                <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+        <!-- FullCalendar -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.global.min.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                const calEl = document.getElementById('calendario');
+
+                const calendar = new FullCalendar.Calendar(calEl, {
+                    locale: 'es',
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,listMonth'
+                    },
+                    buttonText: {
+                        today: 'Hoy',
+                        month: 'Mes',
+                        list: 'Lista'
+                    },
+                    // Carga los eventos desde el endpoint AJAX del CalendarioController
+                    events: '/calendario/eventos',
+                    eventTimeFormat: {hour: '2-digit', minute: '2-digit'},
+                    height: 'auto',
+                    // Al hacer click en un evento, abre el modal con su detalle
+                    eventClick: function (info) {
+                        const ev = info.event;
+                        const props = ev.extendedProps;
+
+                        document.getElementById('modalEventoTitulo').textContent = ev.title;
+
+                        // Formatear fecha(s)
+                        const inicio = ev.start ? ev.start.toLocaleDateString('es-CR') : '';
+                        // FullCalendar suma 1 día al end internamente, hay que restar
+                        let fechaTxt = inicio;
+                        if (ev.end) {
+                            const endReal = new Date(ev.end);
+                            endReal.setDate(endReal.getDate() - 1);
+                            const fin = endReal.toLocaleDateString('es-CR');
+                            if (inicio !== fin)
+                                fechaTxt = inicio + ' → ' + fin;
+                        }
+                        document.getElementById('modalEventoFecha').textContent = fechaTxt;
+
+                        // Descripción
+                        const descDiv = document.getElementById('modalEventoDescDiv');
+                        const descEl = document.getElementById('modalEventoDesc');
+                        if (props.description) {
+                            descEl.textContent = props.description;
+                            descDiv.classList.remove('d-none');
+                        } else {
+                            descDiv.classList.add('d-none');
+                        }
+
+                        // Botón editar (solo visible para admin — el sec:authorize ya lo controla)
+                        const btnEditar = document.getElementById('btnEditarEvento');
+                        if (btnEditar) {
+                            btnEditar.href = '/eventos/editar/' + ev.id;
+                            btnEditar.classList.remove('d-none');
+                        }
+
+                        new bootstrap.Modal(document.getElementById('modalDetalleEvento')).show();
+                    }
+                });
+
+                calendar.render();
+            });
+        </script>
+
+    </body>
+</html>

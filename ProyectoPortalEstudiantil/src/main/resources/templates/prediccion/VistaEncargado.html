@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{layout/plantilla :: head}"></head>
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- Cabecera -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-0">
+                            <i class="fa-solid fa-chart-line text-primary me-2"></i>
+                            Análisis y Rendimiento
+                        </h4>
+                    </div>
+                </div>
+
+                <!-- Sin hijos registrados -->
+                <div th:if="${#lists.isEmpty(hijos)}" class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5 text-muted">
+                        <i class="fa-solid fa-user-slash fa-2x mb-3 d-block opacity-25"></i>
+                        No tiene estudiantes asignados en el sistema.
+                    </div>
+                </div>
+
+                <!-- Con hijos -->
+                <div th:if="${not #lists.isEmpty(hijos)}">
+
+                    <!-- Selector de hijo -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body py-3">
+                            <form th:action="@{/prediccion/encargado}" method="get"
+                                  class="row g-2 align-items-end">
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label small fw-semibold mb-1">Estudiante</label>
+                                    <select name="idMatricula" class="form-select form-select-sm"
+                                            onchange="this.form.submit()">
+                                        <option th:each="h : ${hijos}"
+                                                th:value="${h.idMatricula}"
+                                                th:text="${h.nombreEstudiante} + ' — ' + ${h.seccion} + ' · ' + ${h.periodo}"
+                                                th:selected="${h.idMatricula == idMatriculaSel}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Nombre del estudiante seleccionado -->
+                    <div th:if="${hijoSel != null}">
+
+                        <!-- Perfil -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body d-flex align-items-center gap-4 py-4">
+                                <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center
+                                     justify-content-center flex-shrink-0"
+                                     style="width:72px;height:72px;">
+                                    <i class="fa-solid fa-user-graduate fa-2x text-secondary"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1" th:text="${hijoSel['nombreEstudiante']}">Nombre</h5>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary me-2"
+                                          th:text="'Sección ' + ${hijoSel['seccion']}"></span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                          th:text="${hijoSel['periodo']}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- fin th:with -->
+
+                    <!-- Grid: calificaciones + asistencia -->
+                    <div class="row g-4 mb-4">
+
+                        <!-- Calificaciones por materia -->
+                        <div class="col-12 col-lg-8">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <span class="fw-semibold">
+                                        <i class="fa-solid fa-book-open me-2 text-primary"></i>
+                                        Calificaciones por Materia
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${calificaciones == null or #lists.isEmpty(calificaciones)}"
+                                         class="text-muted text-center py-4 small">
+                                        Sin calificaciones registradas en este período.
+                                    </div>
+                                    <div th:if="${calificaciones != null and not #lists.isEmpty(calificaciones)}">
+                                        <div th:each="cal : ${calificaciones}" class="mb-3">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span class="small fw-semibold" th:text="${cal.materia}">Materia</span>
+                                                <span class="small fw-bold"
+                                                      th:classappend="${cal.promedio < 65} ? 'text-danger' :
+                                                      (${cal.promedio < 75} ? 'text-warning' : 'text-success')"
+                                                      th:text="${cal.promedio > 0} ? ${#numbers.formatDecimal(cal.promedio,1,1)} : '—'">
+                                                </span>
+                                            </div>
+                                            <div class="progress" style="height:8px;border-radius:4px;">
+                                                <div class="progress-bar"
+                                                     th:classappend="${cal.promedio < 65} ? 'bg-danger' :
+                                                     (${cal.promedio < 75} ? 'bg-warning' : 'bg-success')"
+                                                     th:style="'width:' + ${cal.promedio} + '%'"
+                                                     style="border-radius:4px;transition:width .5s ease;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Asistencia -->
+                        <div class="col-12 col-lg-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <span class="fw-semibold">
+                                        <i class="fa-solid fa-calendar-check me-2 text-primary"></i>
+                                        Asistencia
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${asistencia == null or asistencia['total'] == 0}"
+                                         class="text-muted text-center py-4 small">
+                                        Sin registros de asistencia.
+                                    </div>
+                                    <div th:if="${asistencia != null and asistencia['total'] > 0}">
+                                        <!-- Donut visual simple con texto central -->
+                                        <div class="text-center mb-4">
+                                            <div class="position-relative d-inline-block">
+                                                <svg viewBox="0 0 36 36" style="width:110px;height:110px;transform:rotate(-90deg)">
+                                                <circle cx="18" cy="18" r="15.9" fill="none"
+                                                        stroke="#e9ecef" stroke-width="3"/>
+                                                <circle cx="18" cy="18" r="15.9" fill="none"
+                                                        stroke="#0d6efd" stroke-width="3"
+                                                        stroke-dasharray="100"
+                                                        th:attr="stroke-dashoffset=${100 - pctAsistencia}"
+                                                        style="transition:stroke-dashoffset .5s ease;"/>
+                                                </svg>
+                                                <div class="position-absolute top-50 start-50 translate-middle text-center"
+                                                     style="transform:translate(-50%,-50%);">
+                                                    <div class="fw-bold fs-5" th:text="${pctAsistencia} + '%'">0%</div>
+                                                    <div class="text-muted" style="font-size:10px;">asistencia</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Detalle -->
+                                        <div class="row g-2 text-center small">
+                                            <div class="col-6">
+                                                <div class="rounded-3 p-2 bg-success bg-opacity-10">
+                                                    <div class="fw-bold text-success"
+                                                         th:text="${asistencia['presentes']}">0</div>
+                                                    <div class="text-muted">Presentes</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="rounded-3 p-2 bg-danger bg-opacity-10">
+                                                    <div class="fw-bold text-danger"
+                                                         th:text="${asistencia['ausentes']}">0</div>
+                                                    <div class="text-muted">Ausencias</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="rounded-3 p-2 bg-warning bg-opacity-10">
+                                                    <div class="fw-bold text-warning"
+                                                         th:text="${asistencia['tardes']}">0</div>
+                                                    <div class="text-muted">Tardías</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="rounded-3 p-2 bg-info bg-opacity-10">
+                                                    <div class="fw-bold text-info"
+                                                         th:text="${asistencia['justificados']}">0</div>
+                                                    <div class="text-muted">Justificadas</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- fin row -->
+
+                    <!-- Panel de Análisis de Rendimiento Académico -->
+                    <div th:if="${nivelRiesgo != null}"
+                         class="card border-0 shadow-sm"
+                         th:classappend="${nivelRiesgo == 'ALTO'} ? 'border-start border-danger border-4' :
+                         (${nivelRiesgo == 'MEDIO'} ? 'border-start border-warning border-4' :
+                         'border-start border-success border-4')">
+                        <div class="card-header border-bottom py-3 d-flex align-items-center justify-content-between"
+                             th:classappend="${nivelRiesgo == 'ALTO'} ? 'bg-danger bg-opacity-10' :
+                             (${nivelRiesgo == 'MEDIO'} ? 'bg-warning bg-opacity-10' :
+                             'bg-success bg-opacity-10')">
+                            <span class="fw-semibold">
+                                <i class="fa-solid fa-brain me-2"></i>
+                                Análisis de Rendimiento Académico
+                            </span>
+                            <span th:switch="${nivelRiesgo}">
+                                <span th:case="'ALTO'"     class="badge bg-danger fs-6">⚠ Riesgo Alto</span>
+                                <span th:case="'MEDIO'"    class="badge bg-warning text-dark fs-6">⚡ Riesgo Medio</span>
+                                <span th:case="'BAJO'"     class="badge bg-success fs-6">✅ Buen Rendimiento</span>
+                                <span th:case="*"          class="badge bg-secondary fs-6">Sin datos</span>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4 align-items-center">
+
+                                <!-- Promedio y mensaje -->
+                                <div class="col-12 col-md-6">
+                                    <div class="mb-3">
+                                        <div class="small text-muted mb-1">Promedio Ponderado Final</div>
+                                        <div class="display-6 fw-bold"
+                                             th:classappend="${nivelRiesgo == 'ALTO'} ? 'text-danger' :
+                                             (${nivelRiesgo == 'MEDIO'} ? 'text-warning' : 'text-success')"
+                                             th:text="${promedio != null and promedio > 0}
+                                             ? ${#numbers.formatDecimal(promedio,1,2)}
+                                             : '—'">
+                                        </div>
+                                        <div class="small text-muted">/ 100 puntos</div>
+                                    </div>
+                                    <p class="small text-muted mb-0" th:text="${mensajeAlerta}"></p>
+                                </div>
+
+                                <!-- Barra visual del promedio -->
+                                <div class="col-12 col-md-6">
+                                    <div class="small text-muted mb-2">Escala de rendimiento</div>
+                                    <!-- Barra con zonas -->
+                                    <div class="position-relative mb-1" style="height:20px;border-radius:10px;overflow:hidden;">
+                                        <div style="background:linear-gradient(to right,#dc3545 0%,#dc3545 64%,
+                                             #fd7e14 64%,#fd7e14 74%,
+                                             #198754 74%,#198754 100%);
+                                             height:100%;width:100%;"></div>
+                                        <!-- Indicador -->
+                                        <div th:if="${promedio != null and promedio > 0}"
+                                             class="position-absolute top-0 bg-white border border-2 border-dark rounded-circle"
+                                             style="width:20px;height:20px;top:0;"
+                                             th:style="'width:20px;height:20px;top:0;left:calc(' + ${promedio} + '% - 10px);'">
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted mt-1">
+                                        <span>0</span>
+                                        <span class="text-danger fw-semibold">65</span>
+                                        <span class="text-warning fw-semibold">75</span>
+                                        <span>100</span>
+                                    </div>
+                                    <!-- Leyenda -->
+                                    <div class="d-flex gap-3 mt-2 small">
+                                        <span><span class="badge bg-danger me-1">&nbsp;</span>Riesgo Alto</span>
+                                        <span><span class="badge bg-warning me-1">&nbsp;</span>Atención</span>
+                                        <span><span class="badge bg-success me-1">&nbsp;</span>Aprobado</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>

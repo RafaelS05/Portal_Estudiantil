@@ -18,9 +18,10 @@ public class PortalUserDetails implements UserDetails {
     private final Integer enabled;
     private final Timestamp bloqueadoHasta;
     private final Long idCredencial;
+    private final Long idUsuario;
 
     public PortalUserDetails(String email, String username, String passwordHash, String role,
-                             Integer enabled, Timestamp bloqueadoHasta, Long idCredencial) {
+            Integer enabled, Timestamp bloqueadoHasta, Long idCredencial, Long idUsuario) {
         this.email = email;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -28,14 +29,19 @@ public class PortalUserDetails implements UserDetails {
         this.enabled = enabled;
         this.bloqueadoHasta = bloqueadoHasta;
         this.idCredencial = idCredencial;
+        this.idUsuario = idUsuario;
     }
 
-    public Long getIdCredencial() { 
-        return idCredencial; 
+    public Long getIdCredencial() {
+        return idCredencial;
     }
-    
-    public String getDisplayName() { 
-        return username; 
+
+    public String getDisplayName() {
+        return username;
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
     }
 
     @Override
@@ -43,31 +49,40 @@ public class PortalUserDetails implements UserDetails {
         String normalized = (role == null ? "USER" : role).toUpperCase().replace(" ", "_");
         return List.of(new SimpleGrantedAuthority("ROLE_" + normalized));
     }
+    
+    public String getRole() {
+    return getAuthorities().stream()
+            .findFirst()
+            .map(a -> a.getAuthority().replace("ROLE_", ""))
+            .orElse("USER");
+}
 
     @Override
-    public String getPassword() { 
-        return passwordHash; 
+    public String getPassword() {
+        return passwordHash;
     }
 
     @Override
-    public String getUsername() { 
+    public String getUsername() {
         return email;
     }
 
     @Override
-    public boolean isAccountNonExpired() { 
-        return true; 
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        if (bloqueadoHasta == null) return true;
+        if (bloqueadoHasta == null) {
+            return true;
+        }
         return bloqueadoHasta.toInstant().isBefore(Instant.now());
     }
 
     @Override
-    public boolean isCredentialsNonExpired() { 
-        return true; 
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
     @Override

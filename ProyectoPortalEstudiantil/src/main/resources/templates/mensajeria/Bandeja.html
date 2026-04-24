@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+<div th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">
+            <i class="fa-solid fa-envelope text-primary me-2"></i>Mensajería Interna
+        </h4>
+        <a th:href="@{/mensajeria/nuevo}" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Nuevo Mensaje
+        </a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show py-2">
+        <i class="fa-solid fa-circle-check me-2"></i><span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show py-2">
+        <i class="fa-solid fa-circle-xmark me-2"></i><span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+
+            <div th:if="${#lists.isEmpty(conversaciones)}" class="text-center py-5 text-muted">
+                <i class="fa-regular fa-envelope-open fa-2x mb-3 d-block opacity-25"></i>
+                No tienes conversaciones aún.
+                <div class="mt-2">
+                    <a th:href="@{/mensajeria/nuevo}" class="btn btn-sm btn-primary">
+                        Enviar primer mensaje
+                    </a>
+                </div>
+            </div>
+
+            <div th:if="${not #lists.isEmpty(conversaciones)}">
+                <div th:each="conv : ${conversaciones}"
+                     class="d-flex align-items-start gap-3 px-4 py-3 border-bottom
+                            position-relative"
+                     style="cursor:pointer;"
+                     th:onclick="|window.location.href='@{/mensajeria/}' + ${conv.idConversacion}|">
+
+                    <!-- Avatar -->
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center
+                                justify-content-center flex-shrink-0"
+                         style="width:46px;height:46px;">
+                        <i class="fa-solid fa-user text-primary"></i>
+                    </div>
+
+                    <!-- Contenido -->
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold small" th:text="${conv.titulo}">Título</span>
+                            <span class="text-muted" style="font-size:11px;"
+                                  th:text="${conv.fechaActualizacion}"></span>
+                        </div>
+                        <div class="text-muted small text-truncate"
+                             th:text="${conv.ultimoMensaje}">Último mensaje...</div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal"
+                                  style="font-size:10px;" th:text="${conv.tipo}"></span>
+                            <span th:if="${conv.noLeidos > 0}"
+                                  class="badge bg-primary rounded-pill"
+                                  style="font-size:10px;"
+                                  th:text="${conv.noLeidos} + ' sin leer'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Eliminar -->
+                    <form th:action="@{/mensajeria/{id}/eliminar(id=${conv.idConversacion})}"
+                          method="post" style="display:inline"
+                          onclick="event.stopPropagation()">
+                        <button type="submit" class="btn btn-sm btn-outline-danger border-0"
+                                title="Eliminar conversación"
+                                onclick="return confirm('¿Eliminar esta conversación?')">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+<footer th:replace="~{layout/plantilla :: footer}"></footer>
+</body>
+</html>

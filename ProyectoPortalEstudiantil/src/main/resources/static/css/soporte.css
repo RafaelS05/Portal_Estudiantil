@@ -1,0 +1,169 @@
+.kpi-icon-box {
+    background: #e8f1fb;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.kpi-icon-box.nuevos    { background: #d0eaff; }
+.kpi-icon-box.proceso   { background: #fff3c4; }
+.kpi-icon-box.resueltos { background: #c8f5d0; }
+
+.banner-info {
+    background: #e3f2fd;
+    border: 1.5px solid #90caf9;
+    border-radius: 12px;
+    color: #0d47a1;
+}
+
+.badge-nuevo     { background: #d0eaff; color: #155fa0; }
+.badge-proceso   { background: #fff3c4; color: #7a5c00; }
+.badge-revision  { background: #fce4ec; color: #880e4f; }
+.badge-resuelto  { background: #c8f5d0; color: #1a6b30; }
+.badge-cerrado   { background: #ede7f6; color: #4a148c; }
+
+.badge-prio-alta  { background: #ffd6d6; color: #b00020; }
+.badge-prio-media { background: #fff3c4; color: #7a5c00; }
+.badge-prio-baja  { background: #d8f5d0; color: #1a6b30; }
+
+.btn-ver-ticket {
+    background: #e8f1fb;
+    color: #1976d2;
+    border-radius: 8px;
+    font-weight: 700;
+    border: none;
+    transition: background 0.15s, transform 0.15s;
+}
+.btn-ver-ticket:hover {
+    background: #d0e4fb;
+    color: #1256a0;
+    transform: translateX(2px);
+}
+
+.modal-content { border: 0 !important; border-radius: 1rem !important; }
+
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .78rem;
+    transition: background .25s, color .25s;
+}
+.step-circle.active   { background: #1976d2; color: #fff; }
+.step-circle.done     { background: #2e7d32; color: #fff; }
+.step-circle.inactive { background: #dee2e6; color: #6b7a99; }
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #dee2e6;
+    border-radius: 2px;
+    margin: 0 0.5rem;
+    transition: background .25s;
+}
+.step-line.done { background: #2e7d32; }
+
+.step-label        { font-size: .85rem; font-weight: 600; transition: color .25s; }
+.step-label.active { color: #1976d2; }
+.step-label.done   { color: #2e7d32; }
+
+.btn-check:checked + label.btn-outline-secondary {
+    border-color: #1976d2;
+    background: #e8f1fb;
+    color: inherit;
+}
+
+.confirm-gradient {
+    background: linear-gradient(135deg, #f0f7ff, #e8f4fe);
+    border: 1.5px solid #90caf9;
+}
+
+.char-count-warning { color: #b00020 !important; }
+
+@media (max-width: 767px) {
+
+    .tickets-table-responsive { display: none !important; }
+    .tickets-cards             { display: flex !important; flex-direction: column; gap: 0; }
+
+    .ticket-card {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background .15s;
+    }
+    .ticket-card:last-child { border-bottom: none; }
+    .ticket-card:active     { background: #f0f7ff; }
+
+    .tc-row-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .tc-titulo {
+        font-weight: 600;
+        font-size: .9rem;
+        color: #1e293b;
+        line-height: 1.3;
+        flex: 1;
+    }
+    .tc-id {
+        font-size: .78rem;
+        color: #94a3b8;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .tc-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 10px;
+    }
+    .tc-row-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .tc-fecha {
+        font-size: .75rem;
+        color: #94a3b8;
+    }
+    .tc-usuario {
+        font-size: .78rem;
+        color: #64748b;
+    }
+
+    .filter-form-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .filter-form-row .form-select { width: 100% !important; }
+    .filter-form-row .btn-nuevo   { width: 100%; margin-left: 0 !important; }
+
+    .modal-dialog { margin: 0 !important; max-width: 100% !important; height: 100dvh; }
+    .modal-content { height: 100dvh !important; border-radius: 0 !important; overflow-y: auto; }
+
+    .step-label { display: none; }
+
+    #prioGrid > div { flex: 0 0 100% !important; max-width: 100% !important; }
+}
+
+@media (min-width: 768px) {
+    .tickets-cards { display: none !important; }
+}
+
+@media (max-width: 575px) {
+    .filter-label-text { display: none; }
+}
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ticket-card  { animation: fadeSlideIn .2s ease both; }
+.alert        { animation: fadeSlideIn .25s ease both; }

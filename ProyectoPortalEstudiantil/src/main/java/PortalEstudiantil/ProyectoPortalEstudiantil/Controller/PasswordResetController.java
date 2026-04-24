@@ -51,7 +51,7 @@ public class PasswordResetController {
         if (validation.getValid() == null || validation.getValid() == 0) {
             redirectAttributes.addFlashAttribute("errorMessage",
                     "El enlace de recuperación es inválido o ha expirado.");
-            return "resetContrasenna/reset-password";
+            return "redirect:resetContrasenna/reset-password";
         }
 
         model.addAttribute("token", token);
@@ -77,14 +77,14 @@ public class PasswordResetController {
         if (!password.equals(confirmPassword)) {
             model.addAttribute("token", token);
             model.addAttribute("errorMessage", "Las contraseñas no coinciden.");
-            return "resetContrasenna//reset-password";
+            return "resetContrasenna/reset-password";
         }
 
         if (!passwordService.isValidPassword(password)) {
             model.addAttribute("token", token);
             model.addAttribute("errorMessage",
                     "La contraseña no cumple con los requisitos de seguridad.");
-            return "resetContrasenna//reset-password";
+            return "resetContrasenna/reset-password";
         }
 
         boolean success = passwordService.resetPassword(token, password);
@@ -98,6 +98,6 @@ public class PasswordResetController {
         model.addAttribute("token", token);
         model.addAttribute("errorMessage",
                 "No se pudo restablecer la contraseña. El enlace puede haber expirado.");
-        return "resetContrasenna//reset-password";
+        return "resetContrasenna/reset-password";
     }
 }

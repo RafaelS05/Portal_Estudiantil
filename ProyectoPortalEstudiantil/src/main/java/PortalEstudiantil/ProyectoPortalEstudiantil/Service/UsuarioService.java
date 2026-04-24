@@ -1,157 +1,284 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Telefono;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Correo;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.TelefonoRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.CorreoRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.EncargadoEstudianteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);
+
+    private static final Long TIPO_ADMIN = 1L;
+    private static final Long TIPO_ESTUDIANTE = 3L;
+    private static final Long TIPO_ENCARGADO = 4L;
+
+    private static final Long ESTADO_ACTIVO = 1L;
+    private static final Long ESTADO_INACTIVO = 2L;
+
+    private final UsuarioRepository usuarioRepository;
+    private final TelefonoRepository telefonoRepository;
+    private final CorreoRepository correoRepository;
+    private final EncargadoEstudianteRepository encargadoEstudianteRepository;
+
+    public UsuarioService(
+            UsuarioRepository usuarioRepository,
+            TelefonoRepository telefonoRepository,
+            CorreoRepository correoRepository,
+            EncargadoEstudianteRepository encargadoEstudianteRepository
+    ) {
+        this.usuarioRepository = usuarioRepository;
+        this.telefonoRepository = telefonoRepository;
+        this.correoRepository = correoRepository;
+        this.encargadoEstudianteRepository = encargadoEstudianteRepository;
+    }
+
+    // ==================== CONTACTO ====================
+
+    public Telefono obtenerTelefono(Long idUsuario) {
+        return telefonoRepository.findByUsuario_IdUsuario(idUsuario);
+    }
+
+    public Correo obtenerCorreoLogin(Long idUsuario) {
+        return correoRepository.findByUsuario_IdUsuarioAndEsLogin(idUsuario, "S");
+    }
+
+    /**
+     * Verifica si un correo ya existe en otro usuario (para evitar duplicados)
+     */
+    private boolean correoExisteEnOtroUsuario(String correo, Long idUsuarioActual) {
+        try {
+            Correo correoExistente = correoRepository.findByCorreo(correo);
+            if (correoExistente == null) {
+                return false; // No existe, OK
+            }
+            // Existe: verificar si es del mismo usuario o de otro
+            return !correoExistente.getUsuario().getIdUsuario().equals(idUsuarioActual);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Transactional
+    public void actualizarContacto(Long idUsuario, String telefonoNumero, String correoLogin) {
+
+        // VALIDAR TELÉFONO
+        if (telefonoNumero != null && !telefonoNumero.trim().isEmpty()) {
+            Telefono tel = obtenerTelefono(idUsuario);
+            if (tel != null && tel.getIdTelefono() != null) {
+                telefonoRepository.modificarTelefono(tel.getIdTelefono(), telefonoNumero.trim(), idUsuario);
+            } else {
+                telefonoRepository.insertarTelefono(telefonoNumero.trim(), idUsuario, 1L);
+            }
+        }
+
+        // VALIDAR CORREO
+        if (correoLogin != null && !correoLogin.trim().isEmpty()) {
+            
+            // ✅ VALIDACIÓN: Verificar si el correo ya existe en otro usuario
+            if (correoExisteEnOtroUsuario(correoLogin.trim(), idUsuario)) {
+                throw new IllegalArgumentException(
+                    "El correo '" + correoLogin.trim() + "' ya está registrado en otro usuario. " +
+                    "Por favor, usa un correo diferente."
+                );
+            }
+
+            Correo c = obtenerCorreoLogin(idUsuario);
+            if (c != null && c.getIdCorreo() != null) {
+                // Actualizar correo existente
+                try {
+                    correoRepository.modificarCorreo(c.getIdCorreo(), correoLogin.trim(), "S", idUsuario);
+                } catch (Exception e) {
+                    // Capturar error de constraint
+                    if (e.getMessage().contains("Duplicate entry") || 
+                        e.getMessage().contains("CORREO_TB_CORREO_UQ")) {
+                        throw new IllegalArgumentException(
+                            "El correo '" + correoLogin.trim() + "' ya está en uso. " +
+                            "Por favor, usa un correo diferente."
+                        );
+                    }
+                    throw e;
+                }
+            } else {
+                // Insertar nuevo correo
+                try {
+                    correoRepository.insertarCorreo(correoLogin.trim(), "S", idUsuario, 1L);
+                } catch (Exception e) {
+                    // Capturar error de constraint
+                    if (e.getMessage().contains("Duplicate entry") || 
+                        e.getMessage().contains("CORREO_TB_CORREO_UQ")) {
+                        throw new IllegalArgumentException(
+                            "El correo '" + correoLogin.trim() + "' ya está en uso. " +
+                            "Por favor, usa un correo diferente."
+                        );
+                    }
+                    throw e;
+                }
+            }
+        }
+    }
+
+    // ==================== CRUD ====================
 
     @Transactional
     public Long crearUsuario(String nombre, String primerApellido, String segundoApellido,
-                            Long idTipoUsuario, Long idEstado) {
-        try {
- 
-            if (nombre == null || nombre.trim().isEmpty()) {
-                throw new IllegalArgumentException("El nombre es obligatorio");
-            }
-            if (primerApellido == null || primerApellido.trim().isEmpty()) {
-                throw new IllegalArgumentException("El primer apellido es obligatorio");
-            }
-            if (idTipoUsuario == null) {
-                throw new IllegalArgumentException("El tipo de usuario es obligatorio");
-            }
-            if (idEstado == null) {
-                throw new IllegalArgumentException("El estado es obligatorio");
-            }
-            
+                             Long idTipoUsuario, Long idEstado) {
 
-            usuarioRepository.insertarUsuario(nombre.trim(), primerApellido.trim(), 
-                                             segundoApellido != null ? segundoApellido.trim() : "",
-                                             idTipoUsuario, idEstado);
-            
-          
-            List<Usuario> usuariosRecientes = usuarioRepository.findByNombreContaining(nombre);
-            Usuario usuarioCreado = usuariosRecientes.stream()
-                .filter(u -> u.getPrimerApellido().equals(primerApellido))
-                .findFirst()
-                .orElse(null);
-                
-            if (usuarioCreado != null) {
-                System.out.println("Usuario creado exitosamente con ID: " + usuarioCreado.getIdUsuario());
-                return usuarioCreado.getIdUsuario();
-            }
-            
-            throw new RuntimeException("No se pudo obtener el ID del usuario creado");
-            
-        } catch (Exception e) {
-            System.err.println("Error al crear usuario: " + e.getMessage());
-            throw new RuntimeException("Error en la creación del usuario: " + e.getMessage(), e);
+        if (nombre == null || nombre.trim().isEmpty()) throw new IllegalArgumentException("El nombre es obligatorio");
+        if (primerApellido == null || primerApellido.trim().isEmpty()) throw new IllegalArgumentException("El primer apellido es obligatorio");
+        if (idTipoUsuario == null) throw new IllegalArgumentException("El tipo de usuario es obligatorio");
+        if (idEstado == null) throw new IllegalArgumentException("El estado es obligatorio");
+
+        Long nuevoId = usuarioRepository.insertarUsuarioRetornaId(
+                nombre.trim(),
+                primerApellido.trim(),
+                segundoApellido != null ? segundoApellido.trim() : "",
+                idTipoUsuario,
+                idEstado
+        );
+
+        if (nuevoId == null || nuevoId == 0) {
+            throw new RuntimeException("El stored procedure no retornó un ID válido");
         }
+
+        log.info("Usuario creado exitosamente con ID: {}", nuevoId);
+        return nuevoId;
     }
 
- 
     @Transactional
     public Long crearUsuario(Usuario usuario) {
         return crearUsuario(
-            usuario.getNombre(),
-            usuario.getPrimerApellido(),
-            usuario.getSegundoApellido(),
-            usuario.getIdTipoUsuarioFk(),
-            usuario.getIdEstadoFk()
+                usuario.getNombre(),
+                usuario.getPrimerApellido(),
+                usuario.getSegundoApellido(),
+                usuario.getIdTipoUsuarioFk(),
+                usuario.getIdEstadoFk()
         );
     }
 
- 
     @Transactional
     public void actualizarUsuario(Long idUsuario, String nombre, String primerApellido,
-                                 String segundoApellido, Long idTipoUsuario) {
-        try {
-  
-            if (!usuarioRepository.existsById(idUsuario)) {
-                throw new RuntimeException("No existe un usuario con ID: " + idUsuario);
-            }
-            
-            if (nombre == null || nombre.trim().isEmpty()) {
-                throw new IllegalArgumentException("El nombre es obligatorio");
-            }
-            if (primerApellido == null || primerApellido.trim().isEmpty()) {
-                throw new IllegalArgumentException("El primer apellido es obligatorio");
-            }
-            
-            usuarioRepository.modificarUsuario(idUsuario, nombre.trim(), primerApellido.trim(),
-                                              segundoApellido != null ? segundoApellido.trim() : "",
-                                              idTipoUsuario);
-            
-            System.out.println("Usuario ID " + idUsuario + " actualizado exitosamente");
-            
-        } catch (Exception e) {
-            System.err.println("Error al actualizar usuario: " + e.getMessage());
-            throw new RuntimeException("Error en la actualización del usuario: " + e.getMessage(), e);
-        }
+                                  String segundoApellido, Long idTipoUsuario) {
+
+        if (!usuarioRepository.existsById(idUsuario)) throw new RuntimeException("No existe un usuario con ID: " + idUsuario);
+        if (nombre == null || nombre.trim().isEmpty()) throw new IllegalArgumentException("El nombre es obligatorio");
+        if (primerApellido == null || primerApellido.trim().isEmpty()) throw new IllegalArgumentException("El primer apellido es obligatorio");
+
+        usuarioRepository.modificarUsuario(
+                idUsuario,
+                nombre.trim(),
+                primerApellido.trim(),
+                segundoApellido != null ? segundoApellido.trim() : "",
+                idTipoUsuario
+        );
+
+        log.info("Usuario ID {} actualizado exitosamente", idUsuario);
     }
 
     @Transactional
     public void actualizarUsuario(Usuario usuario) {
-        if (usuario.getIdUsuario() == null) {
-            throw new IllegalArgumentException("El ID del usuario es obligatorio para actualizar");
-        }
-        
+        if (usuario.getIdUsuario() == null) throw new IllegalArgumentException("El ID del usuario es obligatorio para actualizar");
         actualizarUsuario(
-            usuario.getIdUsuario(),
-            usuario.getNombre(),
-            usuario.getPrimerApellido(),
-            usuario.getSegundoApellido(),
-            usuario.getIdTipoUsuarioFk()
+                usuario.getIdUsuario(),
+                usuario.getNombre(),
+                usuario.getPrimerApellido(),
+                usuario.getSegundoApellido(),
+                usuario.getIdTipoUsuarioFk()
         );
     }
 
+    // ==================== ESTADO (CON RESTRICCIONES) ====================
+
     @Transactional
     public void cambiarEstadoUsuario(Long idUsuario, Long idEstado) {
-        try {
-          
-            if (!usuarioRepository.existsById(idUsuario)) {
-                throw new RuntimeException("No existe un usuario con ID: " + idUsuario);
-            }
-            
-            if (idEstado == null) {
-                throw new IllegalArgumentException("El estado es obligatorio");
-            }
-            
-         
-            usuarioRepository.cambiarEstadoUsuario(idUsuario, idEstado);
-            
-            String estadoTexto = idEstado == 1L ? "ACTIVADO" : "DESACTIVADO";
-            System.out.println("✅ Usuario ID " + idUsuario + " " + estadoTexto);
-            
-        } catch (Exception e) {
-            System.err.println("❌ Error al cambiar estado del usuario: " + e.getMessage());
-            throw new RuntimeException("Error al cambiar estado: " + e.getMessage(), e);
-        }
-    }
 
+        if (!usuarioRepository.existsById(idUsuario)) {
+            throw new RuntimeException("No existe un usuario con ID: " + idUsuario);
+        }
+        if (idEstado == null) {
+            throw new IllegalArgumentException("El estado es obligatorio");
+        }
+
+        // Solo validamos restricciones si se quiere poner INACTIVO
+        if (ESTADO_INACTIVO.equals(idEstado)) {
+
+            Usuario usuario = obtenerUsuario(idUsuario);
+            Long tipo = usuario.getIdTipoUsuarioFk();
+
+            // Regla 1: No desactivar el único admin activo
+            if (TIPO_ADMIN.equals(tipo)) {
+                long adminsActivos = usuarioRepository.countByIdTipoUsuarioFkAndIdEstadoFk(TIPO_ADMIN, ESTADO_ACTIVO);
+                if (adminsActivos <= 1) {
+                    throw new IllegalArgumentException(
+                        "No se puede desactivar el único administrador activo del sistema. " +
+                        "Debe existir al menos un administrador activo."
+                    );
+                }
+            }
+
+            // Regla 2: Estudiante con relación activa => NO desactivar
+            if (TIPO_ESTUDIANTE.equals(tipo)) {
+                long rel = encargadoEstudianteRepository.countRelacionesActivasPorEstudiante(idUsuario);
+                if (rel > 0) {
+                    throw new IllegalArgumentException(
+                        "No se puede desactivar este estudiante porque tiene " + rel + 
+                        " encargado(s) vinculado(s). " +
+                        "Primero desvincule los encargados."
+                    );
+                }
+            }
+
+            // Regla 3: Encargado con relación activa => NO desactivar
+            if (TIPO_ENCARGADO.equals(tipo)) {
+                long rel = encargadoEstudianteRepository.countRelacionesActivasPorEncargado(idUsuario);
+                if (rel > 0) {
+                    throw new IllegalArgumentException(
+                        "No se puede desactivar este encargado porque está vinculado a " + rel + 
+                        " estudiante(s). " +
+                        "Primero desvincule los estudiantes."
+                    );
+                }
+            }
+        }
+
+        usuarioRepository.cambiarEstadoUsuario(idUsuario, idEstado);
+
+        log.info("Usuario ID {} estado cambiado a {}", idUsuario,
+                ESTADO_ACTIVO.equals(idEstado) ? "ACTIVO" : "INACTIVO");
+    }
 
     @Transactional
     public void activarUsuario(Long idUsuario) {
-        cambiarEstadoUsuario(idUsuario, 1L);
+        cambiarEstadoUsuario(idUsuario, ESTADO_ACTIVO);
     }
 
     @Transactional
     public void desactivarUsuario(Long idUsuario) {
-        cambiarEstadoUsuario(idUsuario, 2L);
+        cambiarEstadoUsuario(idUsuario, ESTADO_INACTIVO);
     }
 
+    @Transactional
+    public void eliminarUsuario(Long idUsuario) {
+        // eliminación lógica = desactivar (aplica mismas reglas)
+        desactivarUsuario(idUsuario);
+        log.info("Usuario ID {} desactivado (eliminación lógica)", idUsuario);
+    }
+
+    // ==================== CONSULTAS ====================
+
     public Usuario obtenerUsuario(Long idUsuario) {
-        Optional<Usuario> usuario = usuarioRepository.findById(idUsuario);
-        return usuario.orElseThrow(() -> 
-            new RuntimeException("Usuario no encontrado con ID: " + idUsuario));
+        return usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + idUsuario));
     }
 
     public List<Usuario> obtenerTodosUsuarios() {
@@ -159,48 +286,30 @@ public class UsuarioService {
     }
 
     public List<Usuario> buscarPorNombre(String nombre) {
-        if (nombre == null || nombre.trim().isEmpty()) {
-            throw new IllegalArgumentException("El término de búsqueda es obligatorio");
-        }
+        if (nombre == null || nombre.trim().isEmpty()) throw new IllegalArgumentException("El término de búsqueda es obligatorio");
         return usuarioRepository.findByNombreContaining(nombre.trim());
     }
 
-
     public List<Usuario> buscarPorTipoUsuario(Long idTipoUsuario) {
-        if (idTipoUsuario == null) {
-            throw new IllegalArgumentException("El ID del tipo de usuario es obligatorio");
-        }
+        if (idTipoUsuario == null) throw new IllegalArgumentException("El ID del tipo de usuario es obligatorio");
         return usuarioRepository.findByIdTipoUsuarioFk(idTipoUsuario);
+        
     }
+    
+    public List<Usuario> buscarPorTipoYEstado(Long idTipoUsuario, Long idEstado) {
+    if (idTipoUsuario == null) throw new IllegalArgumentException("El tipo de usuario es obligatorio");
+    if (idEstado == null) throw new IllegalArgumentException("El estado es obligatorio");
+    return usuarioRepository.findByIdTipoUsuarioFkAndIdEstadoFk(idTipoUsuario, idEstado);
+}
 
     public List<Usuario> buscarPorEstado(Long idEstado) {
-        if (idEstado == null) {
-            throw new IllegalArgumentException("El ID del estado es obligatorio");
-        }
+        if (idEstado == null) throw new IllegalArgumentException("El ID del estado es obligatorio");
         return usuarioRepository.findByIdEstadoFk(idEstado);
     }
 
-    public List<Usuario> obtenerUsuariosActivos() {
-        return buscarPorEstado(1L); 
-    }
-
-
-    public List<Usuario> obtenerUsuariosInactivos() {
-        return buscarPorEstado(2L);
-    }
-
     public List<Usuario> buscarPorNombreCompleto(String nombreCompleto) {
-        if (nombreCompleto == null || nombreCompleto.trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre completo es obligatorio");
-        }
+        if (nombreCompleto == null || nombreCompleto.trim().isEmpty()) throw new IllegalArgumentException("El nombre completo es obligatorio");
         return usuarioRepository.findByNombreCompletoContaining(nombreCompleto.trim());
-    }
-
-    public boolean existeUsuario(Long idUsuario) {
-        if (idUsuario == null) {
-            return false;
-        }
-        return usuarioRepository.existsById(idUsuario);
     }
 
     public long contarTotalUsuarios() {
@@ -208,46 +317,10 @@ public class UsuarioService {
     }
 
     public long contarUsuariosPorEstado(Long idEstado) {
-        return usuarioRepository.findByIdEstadoFk(idEstado).size();
+        return usuarioRepository.countByIdEstadoFk(idEstado);
     }
 
     public long contarUsuariosPorTipo(Long idTipoUsuario) {
-        return usuarioRepository.findByIdTipoUsuarioFk(idTipoUsuario).size();
-    }
-
-    public String obtenerInformacionUsuario(Long idUsuario) {
-        Usuario usuario = obtenerUsuario(idUsuario);
-        return String.format("Usuario ID: %d - %s %s %s (Tipo: %d, Estado: %d)",
-            usuario.getIdUsuario(),
-            usuario.getNombre(),
-            usuario.getPrimerApellido(),
-            usuario.getSegundoApellido() != null ? usuario.getSegundoApellido() : "",
-            usuario.getIdTipoUsuarioFk(),
-            usuario.getIdEstadoFk());
-    }
-
-    @Transactional
-    public void eliminarUsuario(Long idUsuario) {
-        try {
-            if (!usuarioRepository.existsById(idUsuario)) {
-                throw new RuntimeException("No existe un usuario con ID: " + idUsuario);
-            }
-            
-            usuarioRepository.deleteById(idUsuario);
-            System.out.println("✅ Usuario ID " + idUsuario + " eliminado exitosamente");
-            
-        } catch (Exception e) {
-            System.err.println("❌ Error al eliminar usuario: " + e.getMessage());
-            throw new RuntimeException("No se pudo eliminar el usuario: " + e.getMessage(), e);
-        }
-    }
-
-    public boolean validarDatosUsuario(Usuario usuario) {
-        if (usuario == null) return false;
-        if (usuario.getNombre() == null || usuario.getNombre().trim().isEmpty()) return false;
-        if (usuario.getPrimerApellido() == null || usuario.getPrimerApellido().trim().isEmpty()) return false;
-        if (usuario.getIdTipoUsuarioFk() == null) return false;
-        if (usuario.getIdEstadoFk() == null) return false;
-        return true;
+        return usuarioRepository.countByIdTipoUsuarioFk(idTipoUsuario);
     }
 }

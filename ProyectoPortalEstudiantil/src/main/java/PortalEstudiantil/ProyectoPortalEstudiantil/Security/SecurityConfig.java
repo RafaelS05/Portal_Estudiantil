@@ -1,6 +1,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Security;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.PortalUserDetailsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -10,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -19,9 +22,11 @@ public class SecurityConfig {
     private final LoginSuccessHandler loginSuccessHandler;
     private final LoginFailureHandler loginFailureHandler;
 
-    public SecurityConfig(PortalUserDetailsService userDetailsService,
+    public SecurityConfig(
+            PortalUserDetailsService userDetailsService,
             LoginSuccessHandler loginSuccessHandler,
-            LoginFailureHandler loginFailureHandler) {
+            LoginFailureHandler loginFailureHandler
+    ) {
         this.userDetailsService = userDetailsService;
         this.loginSuccessHandler = loginSuccessHandler;
         this.loginFailureHandler = loginFailureHandler;
@@ -51,16 +56,27 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index", "/login", "/error","/resetContrasenna/**").permitAll()
+                .requestMatchers(
+                    "/",
+                    "/index",
+                    "/login",
+                    "/error",
+                    "/img/**",
+                    "/uploads/**",
+                    "/resetContrasenna/**",
+                    "/gestionAcademica/**",
+                    "/reportes/**",
+                    "/feedback/**"
+                ).permitAll()
                 .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .usernameParameter("email") //
-                .passwordParameter("password") // 
-                .successHandler(loginSuccessHandler) // 
-                .failureHandler(loginFailureHandler) // 
+                .usernameParameter("email")      // tu input name="email"
+                .passwordParameter("password")   // tu input name="password"
+                .successHandler(loginSuccessHandler)
+                .failureHandler(loginFailureHandler)
                 .permitAll()
                 )
                 .logout(logout -> logout
@@ -72,5 +88,18 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Configuration
+    public class webConfig implements WebMvcConfigurer {
+
+        @Value("${app.uploads.path}")
+        private String uploadsPath;
+
+        @Override
+        public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            registry.addResourceHandler("/uploads/**")
+                    .addResourceLocations("file:" + uploadsPath + "/");
+        }
     }
 }

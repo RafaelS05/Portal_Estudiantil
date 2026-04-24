@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<th:block th:fragment="head">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Portal Estudiantil – Pase de Lista</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/gestionAcademica.css}">
+</th:block>
+
+<th:block th:fragment="contenido">
+    <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
+        <section id="contenido">
+
+            <!-- ── Alertas flash ──────────────────────────────────────── -->
+            <div th:if="${mensajeExito}"
+                 class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <span th:text="${mensajeExito}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${mensajeError}"
+                 class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fa-solid fa-circle-xmark me-2"></i>
+                <span th:text="${mensajeError}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ── Cabecera ───────────────────────────────────────────── -->
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <a th:href="@{/asistencias}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fa-solid fa-list-check text-primary me-2"></i>Pase de Lista
+                    </h2>
+                    <p class="text-muted mb-0 small">
+                        Registra la asistencia del día para una sección-materia
+                    </p>
+                </div>
+            </div>
+
+            <!-- ── Selector de sección y fecha ───────────────────────── -->
+            <div class="card tbl-card mb-4">
+                <div class="card-body">
+                    <form th:action="@{/asistencias/paseLista}" method="get"
+                          class="row g-2 align-items-end">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label small fw-semibold">Sección-Materia (ID)</label>
+                            <input type="number" name="idSeccionMateria"
+                                   class="form-control"
+                                   placeholder="ID de la sección-materia"
+                                   th:value="${idSeccionMateria}"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label small fw-semibold">Fecha</label>
+                            <input type="date" name="fecha"
+                                   class="form-control"
+                                   th:value="${fecha}"
+                                   required>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa-solid fa-users me-1"></i>Cargar Estudiantes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ── Tabla de pase de lista (solo si hay registros) ────── -->
+            <div th:if="${registros != null}">
+
+                <!-- Sin estudiantes -->
+                <div th:if="${#lists.isEmpty(registros)}"
+                     class="alert alert-info">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    No hay estudiantes matriculados en la sección-materia indicada,
+                    o aún no se han registrado matrículas.
+                </div>
+
+                <!-- Con estudiantes -->
+                <div th:unless="${#lists.isEmpty(registros)}" class="card tbl-card">
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <span class="fw-semibold">
+                            <i class="fa-solid fa-users me-1 text-primary"></i>
+                            <span th:text="${#lists.size(registros)}">0</span> estudiantes
+                        </span>
+                        <!-- Botones de selección masiva -->
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-success"
+                                    onclick="marcarTodos(7)">
+                                <i class="fa-solid fa-check me-1"></i>Todos Presentes
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="marcarTodos(8)">
+                                <i class="fa-solid fa-xmark me-1"></i>Todos Ausentes
+                            </button>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/asistencias/paseLista/guardar}" method="post">
+                        <input type="hidden" name="idSeccionMateria" th:value="${idSeccionMateria}">
+                        <input type="hidden" name="fecha" th:value="${fecha}">
+
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Estudiante</th>
+                                    <th>Materia</th>
+                                    <th>Sección</th>
+                                    <th class="text-center">Estado</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="r, iter : ${registros}">
+                                    <td class="text-muted small"
+                                        th:text="${iter.index + 1}"></td>
+                                    <td class="fw-semibold"
+                                        th:text="${r.nombreEstudiante}"></td>
+                                    <td th:text="${r.nombreMateria}"></td>
+                                    <td><span class="chip-sec"
+                                              th:text="${r.numeroSeccion}"></span></td>
+                                    <td class="text-center" style="min-width:240px">
+                                        <!--
+                                            El name sigue el patrón estado_{idMatricula}
+                                            que el controller parseará con allParams.
+                                        -->
+                                        <div class="btn-group estado-grupo"
+                                             th:attr="data-matricula=${r.idMatriculaFk}"
+                                             role="group">
+                                            <input type="radio"
+                                                   class="btn-check"
+                                                   th:name="'estado_' + ${r.idMatriculaFk}"
+                                                   th:id="'pres_' + ${r.idMatriculaFk}"
+                                                   value="1"
+                                                   th:checked="${r.idEstadoFk == 7 or r.idEstadoFk == null}">
+                                            <label class="btn btn-sm btn-outline-success"
+                                                   th:for="'pres_' + ${r.idMatriculaFk}">
+                                                <i class="fa-solid fa-check me-1"></i>Presente
+                                            </label>
+
+                                            <input type="radio"
+                                                   class="btn-check"
+                                                   th:name="'estado_' + ${r.idMatriculaFk}"
+                                                   th:id="'aus_' + ${r.idMatriculaFk}"
+                                                   value="2"
+                                                   th:checked="${r.idEstadoFk == 8}">
+                                            <label class="btn btn-sm btn-outline-danger"
+                                                   th:for="'aus_' + ${r.idMatriculaFk}">
+                                                <i class="fa-solid fa-xmark me-1"></i>Ausente
+                                            </label>
+
+                                            <input type="radio"
+                                                   class="btn-check"
+                                                   th:name="'estado_' + ${r.idMatriculaFk}"
+                                                   th:id="'just_' + ${r.idMatriculaFk}"
+                                                   value="3"
+                                                   th:checked="${r.idEstadoFk == 10}">
+                                            <label class="btn btn-sm btn-outline-warning"
+                                                   th:for="'just_' + ${r.idMatriculaFk}">
+                                                <i class="fa-solid fa-file-circle-check me-1"></i>Justificado
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer d-flex justify-content-end gap-2">
+                            <a th:href="@{/asistencias}" class="btn btn-light">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk me-1"></i>Guardar Pase de Lista
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div><!-- /registros -->
+
+        </section>
+    </div>
+</th:block>
+
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script th:inline="javascript">
+    /**
+     * Marca todos los radios de la página con el idEstado dado.
+     * idEstado: 1=Presente, 2=Ausente, 3=Justificado
+     */
+    function marcarTodos(idEstado) {
+        document.querySelectorAll('input[type="radio"][value="' + idEstado + '"]')
+                .forEach(radio => { radio.checked = true; });
+    }
+</script>

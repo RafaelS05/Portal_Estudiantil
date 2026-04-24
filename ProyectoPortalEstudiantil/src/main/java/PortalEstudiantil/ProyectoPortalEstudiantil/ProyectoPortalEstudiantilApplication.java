@@ -29,9 +29,9 @@ public class ProyectoPortalEstudiantilApplication {
             
            
         }
-         //BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        //String raw = "Admin123!";
-        //String hash = encoder.encode(raw);
-        //System.out.println(hash);
+//         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+//        String raw = "Admin123!";
+//        String hash = encoder.encode(raw);
+//        System.out.println(hash);
     }
 }

@@ -1,5 +1,8 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Correo;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Direccion;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Telefono;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;

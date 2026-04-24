@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::section})}">
+            <section>
+
+                <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    <span th:text="${mensajeExito}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                    <i class="fa-solid fa-circle-xmark me-2"></i>
+                    <span th:text="${mensajeError}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a th:href="@{/soporte}" class="text-decoration-none">
+                                <i class="fa-solid fa-headset me-1"></i>Soporte Técnico
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active"
+                            th:text="'Ticket #' + ${ticket.idTicket}"></li>
+                    </ol>
+                </nav>
+
+                <div class="row g-4">
+
+                    <div class="col-12 col-lg-8">
+
+                        <!-- Header del ticket -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+
+                                <div class="d-flex align-items-start justify-content-between mb-3">
+                                    <div>
+                                        <span class="text-muted fw-semibold small"
+                                              th:text="'#' + ${ticket.idTicket}"></span>
+                                        <h4 class="fw-bold mb-1" th:text="${ticket.titulo}"></h4>
+                                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                                            <span th:switch="${ticket.idEstadoFk}">
+                                                <span th:case="1" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#d0eaff;color:#155fa0">Nuevo</span>
+                                                <span th:case="2" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#fff3c4;color:#7a5c00">En proceso</span>
+                                                <span th:case="3" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#fce4ec;color:#880e4f">En revisión</span>
+                                                <span th:case="4" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#c8f5d0;color:#1a6b30">Resuelto</span>
+                                                <span th:case="5" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#ede7f6;color:#4a148c">Cerrado</span>
+                                            </span>
+                                            <span th:switch="${ticket.prioridad}">
+                                                <span th:case="'Alta'" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#ffd6d6;color:#b00020">Alta</span>
+                                                <span th:case="'Media'" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#fff3c4;color:#7a5c00">Media</span>
+                                                <span th:case="'Baja'" class="badge rounded-pill px-3 py-2 fw-bold"
+                                                      style="background:#d8f5d0;color:#1a6b30">Baja</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <a th:href="@{/soporte}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <i class="fa-solid fa-arrow-left me-1"></i> Volver
+                                    </a>
+                                </div>
+
+                                <!-- Datos generales -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-muted small fw-semibold">Categoría</div>
+                                        <div class="fw-bold small"
+                                             th:text="${nombresCategorias[ticket.idCategoriaFk]}">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-muted small fw-semibold">Fecha de registro</div>
+                                        <div class="fw-bold small"
+                                             th:text="${#temporals.format(ticket.fechaCreacion,'dd/MM/yyyy')}">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-muted small fw-semibold">Fecha de cierre</div>
+                                        <div class="fw-bold small"
+                                             th:text="${ticket.fechaCierre != null ?
+                                             #temporals.format(ticket.fechaCierre,'dd/MM/yyyy') : 'Pendiente'}">—</div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="text-muted small fw-semibold">Última actualización</div>
+                                        <div class="fw-bold small"
+                                             th:text="${#temporals.format(ticket.fechaModificacion,'dd/MM/yyyy HH:mm')}">—</div>
+                                    </div>
+                                </div>
+
+                                <!-- Descripción -->
+                                <div class="rounded-3 p-3" style="background:#f7f9fd">
+                                    <div class="text-muted small fw-semibold mb-1">
+                                        <i class="fa-solid fa-file-lines me-1"></i>Descripción
+                                    </div>
+                                    <p class="mb-0 small" th:text="${ticket.comentario}">Sin descripción.</p>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ── ADJUNTOS ─────────────────────────────────────────── -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa-solid fa-paperclip me-2" style="color:#1976d2"></i>
+                                    Archivos adjuntos
+                                </h6>
+
+                                <!-- Imágenes existentes -->
+                                <div th:if="${#lists.isEmpty(adjuntos)}"
+                                     class="text-muted small text-center py-3">
+                                    <i class="fa-solid fa-folder-open opacity-25 fa-2x mb-2 d-block"></i>
+                                    No hay archivos adjuntos.
+                                </div>
+
+                                <div th:unless="${#lists.isEmpty(adjuntos)}"
+                                     class="row g-3 mb-3">
+                                    <div th:each="adj : ${adjuntos}" class="col-6 col-md-4">
+                                        <div class="card border-0 rounded-3 overflow-hidden shadow-sm">
+                                            <img th:src="@{'/uploads' + ${adj.rutaArchivo}}"
+                                                 class="img-fluid"
+                                                 style="height:140px;object-fit:cover;cursor:pointer"
+                                                 onclick="abrirImagen(this.src)"/>
+                                            <div class="card-body p-2 text-center">
+                                                <small class="text-muted fw-semibold"
+                                                       th:text="${adj.rutaArchivo.substring(adj.rutaArchivo.lastIndexOf('/') + 1)}">
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Formulario subida — solo usuarios no admin -->
+                                <div th:unless="${esAdmin}">
+                                    <hr class="my-3"/>
+                                    <p class="fw-bold small mb-2">
+                                        <i class="fa-solid fa-cloud-arrow-up me-1" style="color:#1976d2"></i>
+                                        Adjuntar imagen de evidencia
+                                    </p>
+
+                                    <form th:action="@{/soporte/{id}/adjunto(id=${ticket.idTicket})}"
+                                          method="post" enctype="multipart/form-data" id="formAdjunto">
+
+                                        <div class="border border-2 border-dashed rounded-3 p-4 text-center mb-3"
+                                             id="dropZone"
+                                             style="border-color:#c8d0e0!important;background:#f7f9fd;cursor:pointer"
+                                             onclick="document.getElementById('inputArchivo').click()"
+                                             ondragover="event.preventDefault();this.style.borderColor='#1976d2'"
+                                             ondragleave="this.style.borderColor='#c8d0e0'"
+                                             ondrop="handleDrop(event)">
+                                            <i class="fa-solid fa-image fa-2x mb-2" style="color:#1976d2"></i>
+                                            <p class="mb-0 small fw-semibold text-muted">
+                                                Arrastre una imagen aquí o haga clic para seleccionar
+                                            </p>
+                                            <small class="text-muted">PNG, JPG, JPEG · máx. 5 MB</small>
+                                        </div>
+
+                                        <input type="file" id="inputArchivo" name="archivo"
+                                               accept="image/png,image/jpeg"
+                                               style="display:none"
+                                               onchange="previewImagen(this)"/>
+
+                                        <div id="previewContainer" style="display:none" class="mb-3">
+                                            <div class="position-relative d-inline-block">
+                                                <img id="previewImg"
+                                                     class="rounded-3 border"
+                                                     style="max-height:180px;max-width:100%;object-fit:cover"/>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 rounded-circle"
+                                                        style="width:24px;height:24px;padding:0;font-size:.7rem"
+                                                        onclick="limpiarPreview()">
+                                                    <i class="fa-solid fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div class="mt-1">
+                                                <small class="text-muted fw-semibold" id="previewNombre"></small>
+                                                <small class="text-muted ms-2" id="previewTamano"></small>
+                                            </div>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-sm fw-bold"
+                                                id="btnSubir" disabled>
+                                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Subir imagen
+                                        </button>
+
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Modal visor de imagen -->
+                        <div class="modal fade" id="modalImagen" tabindex="-1">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content border-0 bg-transparent shadow-none">
+                                    <div class="modal-body p-0 text-center">
+                                        <img id="imagenAmpliada" src="" class="img-fluid rounded-3"
+                                             style="max-height:85vh"/>
+                                    </div>
+                                    <div class="modal-footer border-0 justify-content-center pt-2">
+                                        <button class="btn btn-light btn-sm fw-bold"
+                                                data-bs-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <!-- ════════════════════════════════════════════════════════
+                    ═════════════════════════════════════════════════════════ -->
+                    <div class="col-12 col-lg-4">
+
+                        <div th:if="${esAdmin}" class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa-solid fa-sliders me-2" style="color:#1976d2"></i>
+                                    Gestión del ticket
+                                </h6>
+
+                                <form th:action="@{/soporte/{id}/estado(id=${ticket.idTicket})}" method="post"
+                                      class="mb-3">
+                                    <label class="form-label fw-bold small">Cambiar estado</label>
+                                    <div class="input-group input-group-sm">
+                                        <select name="idEstado" class="form-select">
+                                            <option value="1" th:selected="${ticket.idEstadoFk == 1}">Nuevo</option>
+                                            <option value="2" th:selected="${ticket.idEstadoFk == 2}">En proceso</option>
+                                            <option value="3" th:selected="${ticket.idEstadoFk == 3}">En revisión</option>
+                                            <option value="4" th:selected="${ticket.idEstadoFk == 4}">Resuelto</option>
+                                            <option value="5" th:selected="${ticket.idEstadoFk == 5}">Cerrado</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-primary fw-bold">
+                                            <i class="fa-solid fa-check"></i>
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <form th:if="${!esAdmin}" th:action="@{/soporte/{id}/modificar(id=${ticket.idTicket})}" method="post"
+                                      class="mb-3">
+                                    <label class="form-label fw-bold small">Actualizar comentario</label>
+                                    <textarea name="comentario" class="form-control form-control-sm mb-2"
+                                              rows="3" maxlength="800"
+                                              th:text="${ticket.comentario}"
+                                              placeholder="Agregar nota de seguimiento..."></textarea>
+                                    <input type="hidden" name="titulo"             th:value="${ticket.titulo}"/>
+                                    <input type="hidden" name="prioridad"          th:value="${ticket.prioridad}"/>
+                                    <input type="hidden" name="idUsuarioReportaFk" th:value="${ticket.idUsuarioReportaFk}"/>
+                                    <input type="hidden" name="idUsuarioTecnicoFk" th:value="${ticket.idUsuarioTecnicoFk}"/>
+                                    <input type="hidden" name="idCategoriaFk"      th:value="${ticket.idCategoriaFk}"/>
+                                    <input type="hidden" name="fechaCierre"
+                                           th:value="${ticket.fechaCierre != null ?
+                                           #temporals.format(ticket.fechaCierre,'yyyy-MM-dd') : ''}"/>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm fw-bold w-100">
+                                        <i class="fa-solid fa-floppy-disk me-1"></i> Guardar nota
+                                    </button>
+                                </form>
+
+                                <hr class="my-3"/>
+
+                                <form th:action="@{/soporte/{id}/cerrar(id=${ticket.idTicket})}" method="post"
+                                      onsubmit="return confirm('¿Confirma que desea cerrar este ticket?')">
+                                    <button type="submit" class="btn btn-danger btn-sm fw-bold w-100"
+                                            th:disabled="${ticket.idEstadoFk == 5}">
+                                        <i class="fa-solid fa-lock me-1"></i> Cerrar ticket
+                                    </button>
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <!-- ── PANEL USUARIO confirmar resolución ─────────────── -->
+                        <div th:unless="${esAdmin}" class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa-solid fa-circle-info me-2" style="color:#1976d2"></i>
+                                    Estado de tu incidencia
+                                </h6>
+
+                                <div th:if="${ticket.idEstadoFk == 4}">
+                                    <div class="alert alert-success rounded-3 small mb-3">
+                                        <i class="fa-solid fa-circle-check me-1"></i>
+                                        Tu incidencia fue marcada como <strong>Resuelta</strong>.
+                                        Por favor confirma si el problema fue solucionado.
+                                    </div>
+                                    <form th:action="@{/soporte/{id}/confirmar(id=${ticket.idTicket})}" method="post"
+                                          class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-success fw-bold btn-sm">
+                                            <i class="fa-solid fa-thumbs-up me-1"></i> Confirmar resolución
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div th:if="${ticket.idEstadoFk == 5}">
+                                    <div class="alert alert-secondary rounded-3 small mb-0">
+                                        <i class="fa-solid fa-lock me-1"></i>
+                                        Este ticket está <strong>Cerrado</strong>.
+                                    </div>
+                                </div>
+
+                                <div th:if="${ticket.idEstadoFk < 4}">
+                                    <div class="alert alert-info rounded-3 small mb-0">
+                                        <i class="fa-solid fa-hourglass-half me-1"></i>
+                                        Tu incidencia está siendo atendida. Te notificaremos cuando esté resuelta.
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ── PANEL INFORMACIÓN DEL REPORTE ─────────────────── -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fa-solid fa-circle-info me-2" style="color:#6b7a99"></i>
+                                    Información del reporte
+                                </h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <div>
+                                        <div class="text-muted small fw-semibold">Reportado por</div>
+                                        <div class="fw-bold small" th:text="${nombreReporta}">—</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+    </body>
+</html>

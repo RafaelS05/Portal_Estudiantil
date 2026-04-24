@@ -1,8 +1,11 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.*;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.InformacionPersonalService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.UbicacionService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +28,10 @@ public class InformacionPersonalController {
 
     // MOSTRAR PERFIL
     @GetMapping
-    public String verPerfil(Model model) {
+    public String verPerfil(Model model,
+            @AuthenticationPrincipal PortalUserDetails userDetails) { // ← CAMBIADO
 
-        Long idUsuario = 1L; // luego se obtiene del usuario logueado
+        Long idUsuario = service.obtenerIdUsuarioPorEmail(userDetails.getUsername()); // ← CAMBIADO
 
         Usuario usuario = service.obtenerUsuario(idUsuario);
         Telefono telefono = service.obtenerTelefono(idUsuario);
@@ -62,6 +66,20 @@ public class InformacionPersonalController {
         model.addAttribute("contenido", "informacion_personal");
         model.addAttribute("pageTitle", "Información personal");
 
+        // ← AGREGADO: sección hijos para Encargados (ID tipo 4)
+        if (usuario != null && Long.valueOf(4L).equals(usuario.getIdTipoUsuarioFk())) {
+            List<EncargadoEstudiante> relaciones = service.obtenerHijosVinculados(idUsuario);
+            List<Usuario> hijos = relaciones.stream()
+                    .map(r -> service.obtenerUsuario(r.getIdUsuarioEstudianteFk()))
+                    .filter(u -> u != null)
+                    .toList();
+            model.addAttribute("relaciones", relaciones);
+            model.addAttribute("hijos", hijos);
+            model.addAttribute("esEncargado", true);
+        } else {
+            model.addAttribute("esEncargado", false);
+        }
+
         return "informacion_personal/informacion_personal";
     }
 
@@ -74,8 +92,12 @@ public class InformacionPersonalController {
             @RequestParam(required = false) Long idProvincia,
             @RequestParam(required = false) Long idCanton,
             @RequestParam(required = false) Long idDistrito,
-            @RequestParam(required = false) String otrasSenas
+            @RequestParam(required = false) String otrasSenas,
+            @AuthenticationPrincipal PortalUserDetails userDetails // ← AGREGADO
     ) {
+        // ← AGREGADO: forzar el ID del usuario logueado por seguridad
+        Long idUsuario = service.obtenerIdUsuarioPorEmail(userDetails.getUsername());
+        usuario.setIdUsuario(idUsuario);
 
         service.actualizarInformacion(
                 usuario,
@@ -86,7 +108,6 @@ public class InformacionPersonalController {
                 idDistrito,
                 otrasSenas
         );
-
         return "redirect:/informacion-personal";
     }
 

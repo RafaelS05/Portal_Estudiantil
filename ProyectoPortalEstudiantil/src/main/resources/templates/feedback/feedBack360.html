@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}">
+        <meta charset="UTF-8"/>
+        <title>Feedback 360°</title>
+    </head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
+
+            <section id="contenido">
+
+                <!--ADMINISTRADOR                    -->
+                <div th:if="${rolActual == 'ADMINISTRADOR'}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-xl-3">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Total Evaluaciones</div>
+                                        <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Promedio General</div>
+                                        <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #ea4335!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Alertas (≤ 2★)</div>
+                                        <div class="fb-kpi-value" th:text="${totalAlertas ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #fa7b17!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Secciones activas</div>
+                                        <div class="fb-kpi-value" th:text="${promediosPorSeccion?.size() ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="nav nav-tabs mb-0" id="adminTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-todos" type="button">
+                                <i class="bi bi-list-ul me-1"></i>Evaluaciones
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-promedios" type="button">
+                                <i class="bi bi-bar-chart-fill me-1"></i>Promedios
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-alertas" type="button">
+                                <i class="bi bi-exclamation-circle-fill me-1"></i>Alertas
+                                <span class="badge bg-danger rounded-pill ms-1" th:text="${totalAlertas ?: 0}">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-comparativa" type="button">
+                                <i class="bi bi-arrow-left-right me-1"></i>Comparativa
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content border border-top-0 rounded-bottom bg-white p-3 p-md-4 mb-2">
+
+                        <!--Evaluaciones -->
+                        <div class="tab-pane fade show active" id="tab-todos" role="tabpanel">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                <h6 class="fw-bold mb-0"><i class="bi bi-table me-1 text-primary"></i>Historial Completo</h6>
+                                <a th:href="@{/feedback/pdf-admin}" class="btn btn-sm btn-outline-primary fw-bold">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF
+                                </a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-muted fb-th">#</th>
+                                            <th class="text-muted fb-th">Estudiante</th>
+                                            <th class="text-muted fb-th">Docente</th>
+                                            <th class="text-muted fb-th">Materia</th>
+                                            <th class="text-muted fb-th">Sección</th>
+                                            <th class="text-muted fb-th">Calificación</th>
+                                            <th class="text-muted fb-th">Nivel</th>
+                                            <th class="text-muted fb-th">Comentario</th>
+                                            <th class="text-muted fb-th">Fecha</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="fb, i : ${todosFeedbacks}" th:classappend="${fb.alerta} ? 'table-danger' : ''">
+                                            <td class="text-muted" th:text="${i.count}">1</td>
+                                            <td>
+                                                <span th:if="${fb.alerta}" class="badge bg-danger me-1">⚠</span>
+                                                <span class="fw-semibold" th:text="${fb.nombreEstudiante}">Estudiante</span>
+                                            </td>
+                                            <td th:text="${fb.nombreDocente}">Docente</td>
+                                            <td th:text="${fb.nombreMateria}">Materia</td>
+                                            <td><span class="badge bg-secondary rounded-pill" th:text="${fb.nombreSeccion}">A</span></td>
+                                            <td>
+                                                <span th:each="n : ${#numbers.sequence(1,5)}">
+                                                    <i th:class="${n <= fb.calificacion} ? 'bi bi-star-fill fb-star-on' : 'bi bi-star fb-star-off'"></i>
+                                                </span>
+                                            </td>
+                                            <td><span th:class="'badge fb-nivel-' + ${fb.calificacion}" th:text="${fb.nivelCalificacion}">Bueno</span></td>
+                                            <td style="max-width:180px;">
+                                                <span th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
+                                                      class="text-truncate d-block"
+                                                      th:text="${#strings.abbreviate(fb.comentario, 45)}"
+                                                      th:title="${fb.comentario}">—</span>
+                                                <span th:if="${fb.comentario == null or #strings.isEmpty(fb.comentario)}"
+                                                      class="text-muted fst-italic small">Sin comentario</span>
+                                            </td>
+                                            <td class="text-nowrap text-muted small"
+                                                th:text="${#temporals.format(fb.fechaEvaluacion,'dd/MM/yyyy')}">—</td>
+                                        </tr>
+                                        <tr th:if="${todosFeedbacks == null or #lists.isEmpty(todosFeedbacks)}">
+                                            <td colspan="9" class="text-center text-muted py-5">
+                                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>No hay evaluaciones registradas aún.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!--Promedios -->
+                        <div class="tab-pane fade" id="tab-promedios" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-diagram-3-fill me-1 text-primary"></i>Por Sección</h6>
+                                    <div th:each="item : ${promediosPorSeccion}" class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-semibold small" th:text="'Sección ' + ${item['seccion']}">A</span>
+                                            <span class="fw-bold small text-primary" th:text="${item['promedio']} + ' / 5'">0.0</span>
+                                        </div>
+                                        <div class="progress" style="height:8px;">
+                                            <div class="progress-bar bg-primary" th:style="'width:' + (${item['promedio']} * 20) + '%'"></div>
+                                        </div>
+                                        <small class="text-muted" th:text="${item['total']} + ' evaluaciones'"></small>
+                                    </div>
+                                    <p th:if="${promediosPorSeccion == null or #lists.isEmpty(promediosPorSeccion)}" class="text-muted fst-italic small">Sin datos.</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold mb-3"><i class="bi bi-person-badge-fill me-1 text-primary"></i>Por Docente</h6>
+                                    <div th:each="item : ${promediosPorDocente}" class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="fw-semibold small" th:text="${item['docente']}">Docente</span>
+                                            <span class="fw-bold small text-primary" th:text="${item['promedio']} + ' / 5'">0.0</span>
+                                        </div>
+                                        <div class="progress" style="height:8px;">
+                                            <div class="progress-bar" style="background:#34a853;" th:style="'width:' + (${item['promedio']} * 20) + '%'"></div>
+                                        </div>
+                                        <small class="text-muted" th:text="${item['total']} + ' evaluaciones'"></small>
+                                    </div>
+                                    <p th:if="${promediosPorDocente == null or #lists.isEmpty(promediosPorDocente)}" class="text-muted fst-italic small">Sin datos.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Alertas -->
+                        <div class="tab-pane fade" id="tab-alertas" role="tabpanel">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i>Estudiantes con calificación ≤ 2</h6>
+                            <div th:each="fb : ${alertas}"
+                                 class="d-flex align-items-center gap-3 p-3 mb-2 rounded-3 border-start border-danger border-4"
+                                 style="background:#fff5f5;">
+                                <i class="bi bi-exclamation-circle-fill text-danger fs-5 flex-shrink-0"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold small" th:text="${fb.nombreEstudiante}">Estudiante</div>
+                                    <div class="text-muted" style="font-size:.78rem;">
+                                        <span th:text="${fb.nombreMateria}">Materia</span> &bull;
+                                        Sección <span th:text="${fb.nombreSeccion}">A</span> &bull;
+                                        Docente: <span th:text="${fb.nombreDocente}">Docente</span>
+                                    </div>
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    <div>
+                                        <span th:each="n : ${#numbers.sequence(1,5)}">
+                                            <i th:class="${n <= fb.calificacion} ? 'bi bi-star-fill' : 'bi bi-star'" style="color:#ea4335;font-size:.85rem;"></i>
+                                        </span>
+                                    </div>
+                                    <span th:class="'badge fb-nivel-' + ${fb.calificacion}" th:text="${fb.nivelCalificacion}"></span>
+                                </div>
+                            </div>
+                            <div th:if="${alertas == null or #lists.isEmpty(alertas)}" class="alert alert-success border-0 d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill fs-5"></i> Sin alertas. ¡Excelente desempeño!
+                            </div>
+                        </div>
+
+                        <!-- Comparativa -->
+                        <div class="tab-pane fade" id="tab-comparativa" role="tabpanel">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-arrow-left-right me-1 text-primary"></i>Comparativa entre Períodos</h6>
+                            <form th:action="@{/feedback/feedBack360}" method="get" class="row g-3 align-items-end mb-4 p-3 bg-light rounded-3">
+                                <input type="hidden" name="activeTab" value="comparativa"/>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small">Período 1</label>
+                                    <select name="periodo1" class="form-select form-select-sm" required>
+                                        <option value="">Seleccionar período...</option>
+                                        <option th:each="p : ${periodos}"
+                                                th:value="${p.idPeriodo}"
+                                                th:text="${p.nombre}"
+                                                th:selected="${p.idPeriodo == periodo1}">Período</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small">Período 2</label>
+                                    <select name="periodo2" class="form-select form-select-sm" required>
+                                        <option value="">Seleccionar período...</option>
+                                        <option th:each="p : ${periodos}"
+                                                th:value="${p.idPeriodo}"
+                                                th:text="${p.nombre}"
+                                                th:selected="${p.idPeriodo == periodo2}">Período</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">
+                                        <i class="bi bi-search me-1"></i>Comparar
+                                    </button>
+                                </div>
+                            </form>
+                            <div th:if="${errorComparativa}" class="alert alert-warning border-0">
+                                <i class="bi bi-exclamation-triangle me-1"></i><span th:text="${errorComparativa}"></span>
+                            </div>
+                            <div th:if="${comparativa != null and !#lists.isEmpty(comparativa)}" class="table-responsive">
+                                <table class="table table-hover table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-muted fb-th">Período</th>
+                                            <th class="text-muted fb-th">Sección</th>
+                                            <th class="text-muted fb-th">Promedio</th>
+                                            <th class="text-muted fb-th">Total</th>
+                                            <th class="text-muted fb-th">Desempeño</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${comparativa}">
+                                            <td><span class="badge bg-primary rounded-pill" th:text="${item['periodo']}">Período</span></td>
+                                            <td class="fw-semibold" th:text="'Sección ' + ${item['seccion']}">A</td>
+                                            <td><span class="fw-bold text-primary" th:text="${item['promedio']}">0.0</span> <small class="text-muted">/ 5</small></td>
+                                            <td th:text="${item['total']}">0</td>
+                                            <td style="min-width:130px;">
+                                                <div class="progress" style="height:8px;">
+                                                    <div class="progress-bar bg-primary" th:style="'width:' + (${item['promedio']} * 20) + '%'"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p th:if="${comparativa == null or #lists.isEmpty(comparativa)}" class="text-muted fst-italic small">Seleccioná dos períodos distintos para ver la comparativa.</p>
+                        </div>
+
+                    </div>
+                </div><!-- /ADMINISTRADOR -->
+
+
+                <!--PROFESOR -->
+                <div th:if="${rolActual == 'PROFESOR'}">
+
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-1 text-primary"></i>Seleccionar Sección-Materia para Evaluar</h6>
+                            <form th:action="@{/feedback/feedBack360}" method="get" class="row g-2 align-items-end">
+                                <div class="col-md-8 col-12">
+                                    <label class="form-label fw-bold small">Sección-Materia</label>
+                                    <select name="idSeccionmateria" class="form-select"
+                                            onchange="this.form.submit()">
+                                        <option value="">— Seleccionar —</option>
+                                        <option th:each="sm : ${seccionMaterias}"
+                                                th:value="${sm.idSeccionMateria}"
+                                                th:text="${sm.nombreMateria + ' — Sección ' + sm.numeroSeccion}"
+                                                th:selected="${sm.idSeccionMateria == idSeccionmateriaSeleccionada}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-12" th:if="${estudiantes != null and !#lists.isEmpty(estudiantes)}">
+                                    <button type="button" class="btn btn-primary fw-bold w-100"
+                                            data-bs-toggle="modal" data-bs-target="#modalEvaluar">
+                                        <i class="bi bi-pencil-square me-10"></i>Registrar Evaluaciones
+                                        <span class="badge bg-white text-primary ms-1" th:text="${estudiantes.size()}">0</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+
+                        <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
+                            <i class="bi bi-clock-history text-primary"></i>
+                            <h6 class="mb-0 fw-bold">Mi Historial de Evaluaciones</h6>
+                            <span class="badge bg-primary rounded-pill ms-auto" th:text="${historial != null ? historial.size() : 0}">0</span>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <div th:each="fb : ${historial}"
+                                 class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
+                                 th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
+                                <div class="flex-grow-1" style="min-width:0;">
+                                    <div class="fw-bold text-truncate" th:text="${fb.nombreEstudiante}">Estudiante</div>
+                                    <div class="text-muted small text-truncate" th:text="${fb.nombreMateria} + ' — Sección ' + ${fb.nombreSeccion}">Info</div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span th:each="n : ${#numbers.sequence(1,5)}">
+                                        <i th:class="${n <= fb.calificacion} ? 'bi bi-star-fill fb-star-on' : 'bi bi-star fb-star-off'"></i>
+                                    </span>
+                                </div>
+                                <span th:class="'badge fb-nivel-' + ${fb.calificacion} + ' flex-shrink-0'" th:text="${fb.nivelCalificacion}"></span>
+                                <button class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                                        th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
+                                        th:data-comentario="${fb.comentario}"
+                                        onclick="verComentario(this)" title="Ver comentario">
+                                    <i class="bi bi-chat-text">Comentarios</i>
+                                </button>
+                            </div>
+                            <div th:if="${historial == null or #lists.isEmpty(historial)}" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>Aún no has registrado evaluaciones.
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /PROFESOR -->
+
+
+                <!--ESTUDIANTE                       -->
+                <div th:if="${rolActual == 'ESTUDIANTE'}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Mi Promedio</div>
+                                        <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Evaluaciones Recibidas</div>
+                                        <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
+                        <form th:action="@{/feedback/feedBack360}" method="get" class="d-flex gap-2 align-items-end">
+                            <div>
+                                <label class="form-label fw-bold small mb-1">Filtrar por materia</label>
+                                <select name="idMateria" class="form-select form-select-sm"
+                                        onchange="this.form.submit()" style="min-width:180px;">
+                                    <option value="">Todas las materias</option>
+                                    <option th:each="m : ${materias}"
+                                            th:value="${m.idMateria}"
+                                            th:text="${m.nombre}"
+                                            th:selected="${m.idMateria == idMateriaFiltro}">Materia</option>
+                                </select>
+                            </div>
+                        </form>
+                        <a th:href="@{/feedback/pdf(idMateria=${idMateriaFiltro})}" class="btn btn-outline-primary btn-sm fw-bold">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Descargar resultados
+                        </a>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
+                            <i class="bi bi-person-check-fill text-primary"></i>
+                            <h6 class="mb-0 fw-bold">Mis Evaluaciones 360°</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:each="fb : ${feedbacks}"
+                                 class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
+                                 th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
+                                <div class="flex-grow-1" style="min-width:0;">
+                                    <div class="fw-bold text-truncate" th:text="${fb.nombreDocente}">Docente</div>
+                                    <div class="text-muted small text-truncate"
+                                         th:text="${fb.nombreMateria} + ' — Sec. ' + ${fb.nombreSeccion} + ' — ' + ${#temporals.format(fb.fechaEvaluacion,'dd/MM/yyyy')}">Info</div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span th:each="n : ${#numbers.sequence(1,5)}">
+                                        <i th:class="${n <= fb.calificacion} ? 'bi bi-star-fill fb-star-on' : 'bi bi-star fb-star-off'"></i>
+                                    </span>
+                                </div>
+                                <span th:class="'badge fb-nivel-' + ${fb.calificacion} + ' flex-shrink-0'" th:text="${fb.nivelCalificacion}"></span>
+                                <button class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                                        th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
+                                        th:data-comentario="${fb.comentario}"
+                                        onclick="verComentario(this)" title="Ver comentario">
+                                    <i class="bi bi-chat-text">Comentarios</i>
+                                </button>
+                            </div>
+                            <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>No hay evaluaciones registradas aún.
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /ESTUDIANTE -->
+
+
+                <!--ENCARGADO                        -->
+                <div th:if="${rolActual == 'ENCARGADO'}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1a73e8!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Promedio de mi hijo/a</div>
+                                        <div class="fb-kpi-value" th:text="${promedioGeneral ?: '0.0'}">0.0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #34a853!important;">
+                                <div class="card-body d-flex align-items-center gap-3 py-3">
+                                    <div>
+                                        <div class="fb-kpi-label">Total Evaluaciones</div>
+                                        <div class="fb-kpi-value" th:text="${totalEvaluaciones ?: 0}">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 align-items-end mb-4">
+                        <form th:action="@{/feedback/feedBack360}" method="get" class="d-flex gap-2 align-items-end">
+                            <div>
+                                <label class="form-label fw-bold small mb-1">Filtrar por materia</label>
+                                <select name="idMateria" class="form-select form-select-sm"
+                                        onchange="this.form.submit()" style="min-width:180px;">
+                                    <option value="">Todas las materias</option>
+                                    <option th:each="m : ${materias}"
+                                            th:value="${m.idMateria}"
+                                            th:text="${m.nombre}"
+                                            th:selected="${m.idMateria == idMateriaFiltro}">Materia</option>
+                                </select>
+                            </div>
+                        </form>
+                        <a th:href="@{/feedback/pdf(idMateria=${idMateriaFiltro})}" class="btn btn-outline-primary btn-sm fw-bold">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Descargar resultados
+                        </a>
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
+                            <i class="bi bi-people-fill text-primary"></i>
+                            <h6 class="mb-0 fw-bold">Retroalimentación de mi hijo/a</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:each="fb : ${feedbacks}"
+                                 class="d-flex align-items-center gap-3 px-4 py-3 border-bottom fb-historial-row"
+                                 th:classappend="${fb.alerta} ? ' fb-alerta-row' : ''">
+                                <div class="flex-grow-1" style="min-width:0;">
+                                    <div class="fw-bold text-truncate" th:text="${fb.nombreDocente}">Docente</div>
+                                    <div class="text-muted small text-truncate" th:text="${fb.nombreMateria} + ' — Sección ' + ${fb.nombreSeccion}">Info</div>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span th:each="n : ${#numbers.sequence(1,5)}">
+                                        <i th:class="${n <= fb.calificacion} ? 'bi bi-star-fill fb-star-on' : 'bi bi-star fb-star-off'"></i>
+                                    </span>
+                                </div>
+                                <span th:class="'badge fb-nivel-' + ${fb.calificacion} + ' flex-shrink-0'" th:text="${fb.nivelCalificacion}"></span>
+                                <button class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                                        th:if="${fb.comentario != null and !#strings.isEmpty(fb.comentario)}"
+                                        th:data-comentario="${fb.comentario}"
+                                        onclick="verComentario(this)" title="Ver comentario">
+                                    <i class="bi bi-chat-text">Comentarios</i>
+                                </button>
+                            </div>
+                            <div th:if="${feedbacks == null or #lists.isEmpty(feedbacks)}" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-2 d-block mb-2"></i>Aún no hay evaluaciones para mostrar.
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /ENCARGADO -->
+
+
+                <!-- ════════ Registrar Evaluaciones ════════ -->
+                <div class="modal fade" id="modalEvaluar" tabindex="-1">
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header text-white" style="background:linear-gradient(90deg,#1a73e8,#0b62d6);">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Registrar Evaluaciones</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <input type="hidden" id="idSeccionmateria" th:value="${idSeccionmateriaSeleccionada}"/>
+                                <div class="px-4 py-3 border-bottom bg-light d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="badge bg-primary rounded-pill">
+                                        <i class="bi bi-journal-bookmark me-1"></i>
+                                        Sección-Materia #<span th:text="${idSeccionmateriaSeleccionada}">—</span>
+                                    </span>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-people me-1"></i>
+                                        <span th:text="${estudiantes != null ? estudiantes.size() : 0}">0</span> estudiantes
+                                    </span>
+                                    <div class="ms-auto d-flex gap-1 flex-wrap">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                            <i class="bi bi-check2 me-1"></i>Verde = evaluado
+                                        </span>
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                            <i class="bi bi-clock me-1"></i>Amarillo = pendiente
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0" id="batchForm">
+                                        <thead class="table-light" style="position:sticky;top:0;z-index:1;">
+                                            <tr>
+                                                <th class="text-muted fb-th ps-4">Estudiante</th>
+                                                <th class="text-muted fb-th">Estado</th>
+                                                <th class="text-muted fb-th" style="width:160px;">Calificación</th>
+                                                <th class="text-muted fb-th" style="width:110px;">Nivel</th>
+                                                <th class="text-muted fb-th">Comentario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="est : ${estudiantes}"
+                                                th:data-idmatricula="${est.idMatricula}"
+                                                th:data-idfeedback="${est.idFeedback}"
+                                                th:classappend="${est.idFeedback != null} ? 'table-success' : ''">
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="fw-semibold" th:text="${est.nombreEstudiante}">Estudiante</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span th:if="${est.idFeedback != null}" class="badge bg-success-subtle text-success border border-success-subtle">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>Evaluado
+                                                    </span>
+                                                    <span th:if="${est.idFeedback == null}" class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                                        <i class="bi bi-clock-fill me-1"></i>Pendiente
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <select class="form-select form-select-sm cal-input" required style="width:145px;">
+                                                        <option value="">— Seleccionar —</option>
+                                                        <option th:each="n : ${#numbers.sequence(1,5)}"
+                                                                th:value="${n}"
+                                                                th:text="${n == 1 ? '★' :
+                                                                n == 2 ? '★★' :
+                                                                n == 3 ? '★★★' :
+                                                                n == 4 ? '★★★★' :
+                                                                '★★★★★'}"
+                                                                th:selected="${est.calificacion == n}">1</option>
+                                                    </select>
+                                                </td>
+                                                <td><span class="badge nivel-label fb-nivel-3">—</span></td>
+                                                <td>
+                                                    <textarea class="form-control form-control-sm comentario-input"
+                                                              rows="1" placeholder="Observación (opcional)"
+                                                              th:text="${est.comentario}"
+                                                              style="min-width:180px;resize:vertical;"></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div th:if="${estudiantes == null or #lists.isEmpty(estudiantes)}" class="text-center text-muted py-5">
+                                        <i class="bi bi-people fs-2 d-block mb-2"></i>No hay estudiantes en esta sección-materia.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light border-top">
+                                <span class="me-auto small text-muted"><i class="bi bi-info-circle me-1"></i>Calificá a todos antes de guardar.</span>
+                                <button type="button" class="btn btn-outline-secondary fw-bold" onclick="limpiarFormulario()">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
+                                </button>
+                                <button type="button" class="btn btn-primary fw-bold px-4" onclick="guardarBatch()">
+                                    <i class="bi bi-save-fill me-1"></i>Guardar Evaluaciones
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════════ Ver Comentario ════════ -->
+                <div class="modal fade" id="modalComentario" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow">
+                            <div class="modal-header" style="background:linear-gradient(90deg,#1a73e8,#0b62d6);">
+                                <h5 class="modal-title text-white fw-bold"><i class="bi bi-chat-text-fill me-2"></i>Comentario</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <p id="modalComentarioTexto" class="mb-0 lh-lg" style="color:#334155;"></p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button class="btn btn-outline-secondary btn-sm fw-bold" data-bs-dismiss="modal">
+                                    <i class="bi bi-x me-1"></i>Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastContainer"></div>
+            </section><!-- /#contenido -->
+        </div>
+    </body>
+</html>

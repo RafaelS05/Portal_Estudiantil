@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <head th:replace="~{layout/plantilla :: head}"></head>
+
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
+
+                <!-- Cabecera -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="fw-bold mb-0">
+                            <i class="fa-solid fa-file-circle-plus text-primary me-2"></i>
+                            <span th:text="${titulo}">Nueva Boleta</span>
+                        </h4>
+
+                    </div>
+                    <a th:href="@{/reportes}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Volver
+                    </a>
+                </div>
+
+                <div class="row g-4 justify-content-center">
+                    <div class="col-12 col-lg-10 col-xl-9">
+
+                        <!-- PASO 1: Buscar estudiante -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <span class="fw-semibold">
+                                    <i class="fa-solid fa-magnifying-glass me-2 text-primary"></i>
+                                    Paso 1 — Buscar Estudiante
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <form th:action="${urlBusqueda}" method="get" class="row g-2 align-items-end">
+                                    <div class="col-12 col-md-9">
+                                        <label class="form-label small fw-semibold mb-1">
+                                            Nombre o apellido del estudiante
+                                        </label>
+                                        <input type="text" name="busquedaEstudiante" class="form-control"
+                                               placeholder="Ej: Rafael, Solano, Alex..."
+                                               th:value="${busquedaEstudiante}" autofocus>
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fa-solid fa-magnifying-glass me-1"></i>Buscar
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div th:if="${errorBusqueda}" class="alert alert-warning mt-3 mb-0 py-2 small">
+                                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                                    <span th:text="${errorBusqueda}"></span>
+                                </div>
+
+                                <!-- Tabla de resultados con correo y promedio -->
+                                <div th:if="${estudiantes != null and not #lists.isEmpty(estudiantes)}" class="mt-3">
+                                    <p class="small text-muted mb-2">
+                                        <i class="fa-solid fa-circle-info me-1"></i>
+                                        Selecciona al estudiante correcto. El promedio se calculará automáticamente.
+                                    </p>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-sm align-middle mb-0 border rounded-3 overflow-hidden">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th class="ps-3">Estudiante</th>
+                                                    <th>Correo</th>
+                                                    <th>Sección</th>
+                                                    <th>Período</th>
+                                                    <th class="text-center">Promedio actual</th>
+                                                    <th class="text-center">Seleccionar</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="est : ${estudiantes}"
+                                                    th:id="'fila-' + ${est.idMatricula}"
+                                                    class="fila-estudiante"
+                                                    th:data-idmatricula="${est.idMatricula}"
+                                                    th:data-idperiodo="${est.idPeriodo}"
+                                                    th:data-nombre="${est.nombreEstudiante}"
+                                                    th:data-correo="${est.correo}"
+                                                    th:data-seccion="${est.nombreSeccion}"
+                                                    th:data-periodo="${est.nombrePeriodo}"
+                                                    th:data-promedio="${est.promedio}"
+                                                    style="cursor:pointer;">
+                                                    <td class="ps-3 fw-semibold small" th:text="${est.nombreEstudiante}"></td>
+                                                    <td class="small text-muted" th:text="${est.correo}"></td>
+                                                    <td>
+                                                        <span class="badge bg-secondary bg-opacity-10 text-secondary fw-normal"
+                                                              th:text="${est.nombreSeccion}"></span>
+                                                    </td>
+                                                    <td class="small" th:text="${est.nombrePeriodo}"></td>
+                                                    <td class="text-center">
+                                                        <span th:if="${est.promedio != null and est.promedio > 0}"
+                                                              th:class="${est.promedio >= 70} ? 'badge bg-success' : 'badge bg-danger'"
+                                                              th:text="${#numbers.formatDecimal(est.promedio, 1, 2)}"></span>
+                                                        <span th:if="${est.promedio == null or est.promedio == 0}"
+                                                              class="text-muted small">Sin notas</span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-primary btn-seleccionar"
+                                                                th:data-idmatricula="${est.idMatricula}"
+                                                                th:data-idperiodo="${est.idPeriodo}"
+                                                                th:data-nombre="${est.nombreEstudiante}"
+                                                                th:data-correo="${est.correo}"
+                                                                th:data-seccion="${est.nombreSeccion}"
+                                                                th:data-periodo="${est.nombrePeriodo}"
+                                                                th:data-promedio="${est.promedio}"
+                                                                onclick="seleccionarEstudiante(this)">
+                                                            <i class="fa-solid fa-check"></i> Seleccionar
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PASO 2: Datos del reporte -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom py-3">
+                                <span class="fw-semibold">
+                                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>
+                                    Paso 2 — Datos del Reporte
+                                </span>
+                            </div>
+                            <div class="card-body p-4">
+
+                                <!-- Resumen estudiante seleccionado -->
+                                <div id="resumenEstudiante"
+                                     class="alert alert-primary d-flex align-items-start gap-3 mb-4 d-none">
+                                    <i class="fa-solid fa-user-graduate fa-lg mt-1"></i>
+                                    <div class="w-100">
+                                        <div class="fw-semibold" id="resumenNombre"></div>
+                                        <div class="small opacity-75">
+                                            <span id="resumenCorreo"></span> ·
+                                            Sección <span id="resumenSeccion"></span> ·
+                                            <span id="resumenPeriodo"></span>
+                                        </div>
+                                        <div class="mt-1 small">
+                                            Promedio calculado:
+                                            <strong id="resumenPromedio" class="ms-1"></strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="sinEstudiante" class="alert alert-secondary mb-4">
+                                    <i class="fa-solid fa-circle-info me-2"></i>
+                                    Busca y selecciona un estudiante en el Paso 1 para continuar.
+                                </div>
+
+                                <form th:action="${accion}" method="post" id="formReporte" novalidate>
+                                    <input type="hidden" id="idMatricula" name="idMatricula"
+                                           th:value="${reporte.idMatriculaFk}">
+                                    <input type="hidden" id="idPeriodo" name="idPeriodo"
+                                           th:value="${reporte.idPeriodoFk}">
+                                    <!-- Promedio calculado automáticamente desde la BD -->
+                                    <input type="hidden" id="promedioPonderado" name="promedioPonderado"
+                                           th:value="${reporte.promedioPonderado}">
+
+                                    <!-- Tipo de reporte -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-semibold">
+                                            <i class="fa-solid fa-tag me-1 text-primary"></i>
+                                            Tipo de Reporte <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="d-flex gap-4 mt-1">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="idTipoReporte" id="tipoBoleta" value="1"
+                                                       th:checked="${reporte.idTipoReporteFk == null or reporte.idTipoReporteFk == 1}">
+                                                <label class="form-check-label" for="tipoBoleta">
+                                                    <i class="fa-solid fa-file-circle-check text-primary me-1"></i>
+                                                    Boleta de Notas
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio"
+                                                       name="idTipoReporte" id="tipoHistorial" value="2"
+                                                       th:checked="${reporte.idTipoReporteFk == 2}">
+                                                <label class="form-check-label" for="tipoHistorial">
+                                                    <i class="fa-solid fa-boxes-stacked text-info me-1"></i>
+                                                    Historial Académico
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones -->
+                                    <div class="d-flex gap-2 pt-3 border-top">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="fa-solid fa-floppy-disk me-1"></i>
+                                            <span th:text="${btnTexto}">Guardar</span>
+                                        </button>
+                                        <a th:href="@{/reportes}" class="btn btn-outline-secondary px-4">
+                                            <i class="fa-solid fa-xmark me-1"></i>Cancelar
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <script>
+                    function seleccionarEstudiante(btn) {
+                        // Llenar campos ocultos
+                        document.getElementById('idMatricula').value = btn.dataset.idmatricula;
+                        document.getElementById('idPeriodo').value = btn.dataset.idperiodo;
+                        document.getElementById('promedioPonderado').value = btn.dataset.promedio || '0';
+
+                        // Mostrar resumen
+                        document.getElementById('resumenNombre').textContent = btn.dataset.nombre;
+                        document.getElementById('resumenCorreo').textContent = btn.dataset.correo;
+                        document.getElementById('resumenSeccion').textContent = btn.dataset.seccion;
+                        document.getElementById('resumenPeriodo').textContent = btn.dataset.periodo;
+
+                        const prom = parseFloat(btn.dataset.promedio || '0');
+                        const promEl = document.getElementById('resumenPromedio');
+                        if (prom > 0) {
+                            promEl.textContent = prom.toFixed(2) + ' / 100';
+                            promEl.className = prom >= 70 ? 'ms-1 text-success' : 'ms-1 text-danger';
+                        } else {
+                            promEl.textContent = 'Sin calificaciones registradas';
+                            promEl.className = 'ms-1 text-muted';
+                        }
+
+                        document.getElementById('resumenEstudiante').classList.remove('d-none');
+                        document.getElementById('sinEstudiante').classList.add('d-none');
+
+                        // Marcar fila activa
+                        document.querySelectorAll('.fila-estudiante').forEach(f => f.classList.remove('table-primary'));
+                        const fila = document.getElementById('fila-' + btn.dataset.idmatricula);
+                        if (fila)
+                            fila.classList.add('table-primary');
+
+                        // Cambiar botones
+                        document.querySelectorAll('.btn-seleccionar').forEach(b => {
+                            b.classList.remove('btn-primary');
+                            b.classList.add('btn-outline-primary');
+                            b.innerHTML = '<i class="fa-solid fa-check"></i> Seleccionar';
+                        });
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Seleccionado';
+                    }
+
+                    document.getElementById('formReporte').addEventListener('submit', function (e) {
+                        if (!document.getElementById('idMatricula').value) {
+                            e.preventDefault();
+                            alert('Debe buscar y seleccionar un estudiante antes de guardar.');
+                        }
+                    });
+                </script>
+
+            </div>
+        </div>
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+    </body>
+</html>

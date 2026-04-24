@@ -1,59 +1,115 @@
 <section class="perfil-container" xmlns:th="http://www.thymeleaf.org">
 
-    <form th:action="@{/informacion-personal/guardar}"
-          th:object="${usuario}"
-          method="post">
+    <!-- PERFIL HEADER -->
+    <div class="perfil-card text-center">
+        <div class="perfil-avatar mb-2">
+            <i class="fa-regular fa-user fa-3x"></i>
+        </div>
+        <h4 th:text="${usuario.nombre + ' ' + usuario.primerApellido}"></h4>
+    </div>
 
-        <!-- PERFIL -->
-        <div class="perfil-card text-center">
-            <div class="perfil-avatar mb-2">
-                <i class="fa-regular fa-user fa-3x"></i>
+    <!-- ============================================ -->
+    <!-- VISTA LECTURA (visible por defecto)          -->
+    <!-- ============================================ -->
+    <div class="datos-card mt-4" id="vistaLectura">
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Nombre</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${usuario.nombre}"></p>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Primer apellido</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${usuario.primerApellido}"></p>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Segundo apellido</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${usuario.segundoApellido}"></p>
             </div>
 
-            <h4 th:text="*{nombre + ' ' + primerApellido}"></h4>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Correo</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${correo != null ? correo.correo : 'Sin correo'}"></p>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Teléfono</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${telefono != null ? telefono.numero : 'Sin teléfono'}"></p>
+            </div>
 
-            <!-- ID USUARIO -->
-            <input type="hidden" th:field="*{idUsuario}">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Provincia</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${direccion != null && direccion.provincia != null ? direccion.provincia.nombre : 'No registrada'}"></p>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Cantón</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${direccion != null && direccion.canton != null ? direccion.canton.nombre : 'No registrado'}"></p>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Distrito</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${direccion != null && direccion.distrito != null ? direccion.distrito.nombre : 'No registrado'}"></p>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-semibold">Otras señas</label>
+                <p class="form-control-plaintext border rounded px-2"
+                   th:text="${direccion != null && direccion.otrasSenas != null ? direccion.otrasSenas : 'No registradas'}"></p>
+            </div>
+
         </div>
 
-        <!-- DATOS PERSONALES -->
+        <div class="text-center mt-3">
+            <button type="button" class="btn btn-outline-primary" onclick="activarEdicion()">
+                <i class="fa-solid fa-pen me-1"></i> Editar información
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- VISTA EDICIÓN (oculta por defecto)           -->
+    <!-- ============================================ -->
+    <form th:action="@{/informacion-personal/guardar}"
+          th:object="${usuario}"
+          method="post"
+          id="vistaEdicion"
+          style="display:none;">
+
+        <input type="hidden" th:field="*{idUsuario}">
+
         <div class="datos-card mt-4">
             <div class="row g-3">
 
-                <!-- Nombre y apellidos -->
                 <div class="col-md-4">
                     <label class="form-label">Nombre</label>
                     <input class="form-control" th:field="*{nombre}">
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label">Primer apellido</label>
                     <input class="form-control" th:field="*{primerApellido}">
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label">Segundo apellido</label>
                     <input class="form-control" th:field="*{segundoApellido}">
                 </div>
 
-                <!-- Correo y teléfono -->
                 <div class="col-md-6">
                     <label class="form-label">Correo</label>
-                    <input class="form-control"
-                           type="email"
-                           name="correo"
-                           th:value="${correo.correo}">
+                    <input class="form-control" type="email" name="correo"
+                           th:value="${correo != null ? correo.correo : ''}">
                 </div>
-
                 <div class="col-md-6">
                     <label class="form-label">Teléfono</label>
-                    <input class="form-control"
-                           type="text"
-                           name="numero"
-                           th:value="${telefono.numero}">
+                    <input class="form-control" type="text" name="numero"
+                           th:value="${telefono != null ? telefono.numero : ''}">
                 </div>
 
-                <!-- DIRECCIÓN -->
                 <div class="col-md-4">
                     <label class="form-label">Provincia</label>
                     <select class="form-control" name="idProvincia" id="provinciaSelect">
@@ -61,11 +117,10 @@
                         <option th:each="prov : ${provincias}"
                                 th:value="${prov.idProvincia}"
                                 th:text="${prov.nombre}"
-                                th:selected="${prov.idProvincia} == ${direccion.provincia != null ? direccion.provincia.idProvincia : 0}">
+                                th:selected="${prov.idProvincia} == ${direccion != null && direccion.provincia != null ? direccion.provincia.idProvincia : 0}">
                         </option>
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label">Cantón</label>
                     <select class="form-control" name="idCanton" id="cantonSelect">
@@ -73,11 +128,10 @@
                         <option th:each="canton : ${cantones}"
                                 th:value="${canton.idCanton}"
                                 th:text="${canton.nombre}"
-                                th:selected="${canton.idCanton} == ${direccion.canton != null ? direccion.canton.idCanton : 0}">
+                                th:selected="${canton.idCanton} == ${direccion != null && direccion.canton != null ? direccion.canton.idCanton : 0}">
                         </option>
                     </select>
                 </div>
-
                 <div class="col-md-4">
                     <label class="form-label">Distrito</label>
                     <select class="form-control" name="idDistrito" id="distritoSelect">
@@ -85,39 +139,112 @@
                         <option th:each="distrito : ${distritos}"
                                 th:value="${distrito.idDistrito}"
                                 th:text="${distrito.nombre}"
-                                th:selected="${distrito.idDistrito} == ${direccion.distrito != null ? direccion.distrito.idDistrito : 0}">
+                                th:selected="${distrito.idDistrito} == ${direccion != null && direccion.distrito != null ? direccion.distrito.idDistrito : 0}">
                         </option>
                     </select>
                 </div>
 
-                <div class="col-12 mt-2">
+                <div class="col-12">
                     <label class="form-label">Otras señas</label>
-                    <input type="text"
-                           class="form-control"
-                           name="otrasSenas"
+                    <input type="text" class="form-control" name="otrasSenas"
                            th:value="${direccion != null ? direccion.otrasSenas : ''}">
                 </div>
 
             </div>
         </div>
 
-        <!-- ACCIONES -->
         <div class="acciones mt-4 text-center">
+            <button type="button" class="btn btn-outline-secondary me-2" onclick="cancelarEdicion()">
+                <i class="fa-solid fa-xmark me-1"></i> Cancelar
+            </button>
             <button class="btn btn-primary" type="submit">
-                <i class="fa-solid fa-floppy-disk me-1"></i>
-                Guardar cambios
+                <i class="fa-solid fa-floppy-disk me-1"></i> Guardar cambios
             </button>
         </div>
 
     </form>
 
-    <!-- SCRIPT PARA DROPDOWNS DINÁMICOS -->
-    <script th:inline="javascript">
-        document.addEventListener('DOMContentLoaded', function () {
+    <!-- ============================================ -->
+    <!-- SECCIÓN HIJOS (solo si es Encargado)         -->
+    <!-- ============================================ -->
+    <div class="datos-card mt-4" th:if="${esEncargado}">
+        <h5 class="mb-3">
+            <i class="fa-solid fa-children me-2"></i> Estudiantes vinculados
+        </h5>
 
+        <div th:if="${#lists.isEmpty(hijos)}">
+            <p class="text-muted">No tiene estudiantes vinculados actualmente.</p>
+        </div>
+
+        <div th:each="hijo, iter : ${hijos}"
+             class="border rounded p-3 mb-2">
+
+            <!-- Cabecera colapsable -->
+            <div class="d-flex justify-content-between align-items-center"
+                 style="cursor:pointer;"
+                 th:onclick="'toggleHijo(' + ${iter.index} + ')'">
+                <span>
+                    <i class="fa-solid fa-user-graduate me-2"></i>
+                    <strong th:text="${hijo.nombre + ' ' + hijo.primerApellido + ' ' + hijo.segundoApellido}"></strong>
+                </span>
+                <i class="fa-solid fa-chevron-down" th:id="'icono-hijo-' + ${iter.index}"></i>
+            </div>
+
+            <!-- Detalle oculto -->
+            <div th:id="'detalle-hijo-' + ${iter.index}" style="display:none;" class="mt-3">
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Nombre completo</label>
+                        <p class="form-control-plaintext border rounded px-2"
+                           th:text="${hijo.nombre + ' ' + hijo.primerApellido + ' ' + hijo.segundoApellido}"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Parentesco</label>
+                        <p class="form-control-plaintext border rounded px-2"
+                           th:text="${relaciones[iter.index].parentesco}"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS                                      -->
+    <!-- ============================================ -->
+    <script th:inline="javascript">
+
+        // ---- Toggle edición ----
+        function activarEdicion() {
+            document.getElementById('vistaLectura').style.display = 'none';
+            document.getElementById('vistaEdicion').style.display = 'block';
+        }
+
+        function cancelarEdicion() {
+            document.getElementById('vistaEdicion').style.display = 'none';
+            document.getElementById('vistaLectura').style.display = 'block';
+        }
+
+        // ---- Toggle hijos ----
+        function toggleHijo(index) {
+            const detalle = document.getElementById('detalle-hijo-' + index);
+            const icono   = document.getElementById('icono-hijo-'   + index);
+            if (detalle.style.display === 'none') {
+                detalle.style.display = 'block';
+                icono.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                detalle.style.display = 'none';
+                icono.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+        }
+
+        // ---- Dropdowns dinámicos ----
+        document.addEventListener('DOMContentLoaded', function () {
             const provinciaSelect = document.getElementById('provinciaSelect');
-            const cantonSelect = document.getElementById('cantonSelect');
-            const distritoSelect = document.getElementById('distritoSelect');
+            const cantonSelect    = document.getElementById('cantonSelect');
+            const distritoSelect  = document.getElementById('distritoSelect');
+
+            if (!provinciaSelect) return;
 
             provinciaSelect.addEventListener('change', function () {
                 const idProvincia = this.value;
@@ -125,16 +252,16 @@
                 distritoSelect.innerHTML = '<option value="" disabled selected>Seleccione un distrito</option>';
 
                 fetch('/informacion-personal/cantones?idProvincia=' + idProvincia)
-                        .then(response => response.json())
-                        .then(data => {
-                            cantonSelect.innerHTML = '<option value="" disabled selected>Seleccione un cantón</option>';
-                            data.forEach(c => {
-                                const option = document.createElement('option');
-                                option.value = c.idCanton;
-                                option.textContent = c.nombre;
-                                cantonSelect.appendChild(option);
-                            });
+                    .then(r => r.json())
+                    .then(data => {
+                        cantonSelect.innerHTML = '<option value="" disabled selected>Seleccione un cantón</option>';
+                        data.forEach(c => {
+                            const o = document.createElement('option');
+                            o.value = c.idCanton;
+                            o.textContent = c.nombre;
+                            cantonSelect.appendChild(o);
                         });
+                    });
             });
 
             cantonSelect.addEventListener('change', function () {
@@ -142,19 +269,19 @@
                 distritoSelect.innerHTML = '<option value="" disabled selected>Cargando...</option>';
 
                 fetch('/informacion-personal/distritos?idCanton=' + idCanton)
-                        .then(response => response.json())
-                        .then(data => {
-                            distritoSelect.innerHTML = '<option value="" disabled selected>Seleccione un distrito</option>';
-                            data.forEach(d => {
-                                const option = document.createElement('option');
-                                option.value = d.idDistrito;
-                                option.textContent = d.nombre;
-                                distritoSelect.appendChild(option);
-                            });
+                    .then(r => r.json())
+                    .then(data => {
+                        distritoSelect.innerHTML = '<option value="" disabled selected>Seleccione un distrito</option>';
+                        data.forEach(d => {
+                            const o = document.createElement('option');
+                            o.value = d.idDistrito;
+                            o.textContent = d.nombre;
+                            distritoSelect.appendChild(o);
                         });
+                    });
             });
-
         });
+
     </script>
 
 </section>

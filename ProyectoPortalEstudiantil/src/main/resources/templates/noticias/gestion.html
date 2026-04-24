@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/plantilla :: head}"></head>
+<body>
+<div th:replace="~{layout/plantilla :: shell(~{::content})}">
+    <div th:fragment="content">
+
+        <!-- Alertas flash -->
+        <div th:if="${mensajeExito}"
+             class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <span th:text="${mensajeExito}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${mensajeError}"
+             class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fa-solid fa-circle-xmark me-2"></i>
+            <span th:text="${mensajeError}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Encabezado -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="fa-solid fa-newspaper text-primary me-2"></i>Gestión de Noticias
+                </h2>
+                <p class="text-muted mb-0 small">
+                    Total: <span th:text="${#lists.size(noticias)}">0</span> publicaciones
+                </p>
+            </div>
+            <a th:href="@{/noticias/nuevo}" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-1"></i> Nueva Publicación
+            </a>
+        </div>
+
+        <!-- Tabla -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Título</th>
+                                <th>Publicación</th>
+                                <th>Vencimiento</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="noticia : ${noticias}">
+                                <td>
+                                    <span th:if="${noticia.tipoEvento == 'NOTICIA'}"
+                                          class="badge bg-primary-subtle text-primary">
+                                        <i class="fa-solid fa-newspaper me-1"></i>Noticia
+                                    </span>
+                                    <span th:if="${noticia.tipoEvento == 'ANUNCIO'}"
+                                          class="badge bg-warning-subtle text-warning">
+                                        <i class="fa-solid fa-bullhorn me-1"></i>Anuncio
+                                    </span>
+                                </td>
+                                <td class="fw-semibold" th:text="${noticia.titulo}"></td>
+                                <td class="small text-muted"
+                                    th:text="${#temporals.format(noticia.fechaInicio, 'dd/MM/yyyy')}"></td>
+                                <td class="small text-muted"
+                                    th:text="${noticia.fechaFin != null ? #temporals.format(noticia.fechaFin, 'dd/MM/yyyy') : '—'}"></td>
+                                <td>
+                                    <span th:if="${noticia.idEstadoFk == 1}"
+                                          class="badge bg-success-subtle text-success">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Activa
+                                    </span>
+                                    <span th:unless="${noticia.idEstadoFk == 1}"
+                                          class="badge bg-secondary-subtle text-secondary">
+                                        <i class="fa-solid fa-circle-xmark me-1"></i>Inactiva
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <!-- Editar -->
+                                        <a th:href="@{/noticias/editar/{id}(id=${noticia.idEvento})}"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Editar">
+                                            <i class="fa-regular fa-pen-to-square"></i>
+                                        </a>
+                                        <!-- Desactivar (solo si está activa) -->
+                                        <button th:if="${noticia.idEstadoFk == 1}"
+                                                type="button"
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Desactivar"
+                                                th:onclick="'abrirModalEstado(' + ${noticia.idEvento} + ', false)'"
+                                        >
+                                            <i class="fa-solid fa-eye-slash"></i>
+                                        </button>
+                                        <!-- Activar (solo si está inactiva) -->
+                                        <button th:unless="${noticia.idEstadoFk == 1}"
+                                                type="button"
+                                                class="btn btn-sm btn-outline-success"
+                                                title="Activar"
+                                                th:onclick="'abrirModalEstado(' + ${noticia.idEvento} + ', true)'"
+                                        >
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(noticias)}">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="fa-regular fa-newspaper fa-3x mb-3 d-block"></i>
+                                    <h5>No hay publicaciones aún</h5>
+                                    <p class="mb-0 small">Crea la primera usando el botón superior.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════
+             MODAL — Confirmar cambio de estado
+        ══════════════════════════════════════════════════════ -->
+        <div class="modal fade" id="modalEstado" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header py-2">
+                        <h6 class="modal-title" id="tituloModalEstado">
+                            <i class="fa-solid fa-circle-question text-warning me-2"></i>
+                            Confirmar acción
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center py-3">
+                        <p class="mb-0" id="textoModalEstado">
+                            ¿Está seguro que desea cambiar el estado de esta publicación?
+                        </p>
+                    </div>
+                    <div class="modal-footer py-2 d-flex justify-content-center gap-2">
+                        <button type="button"
+                                class="btn btn-light btn-sm"
+                                data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <!-- Este form se actualiza dinámicamente con el ID correcto -->
+                        <form id="formEstado" method="post">
+                            <button type="submit"
+                                    class="btn btn-sm"
+                                    id="btnConfirmarEstado">
+                                Confirmar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<footer th:replace="~{layout/plantilla :: footer}"></footer>
+
+<script>
+    function abrirModalEstado(idEvento, activar) {
+        const form   = document.getElementById('formEstado');
+        const texto  = document.getElementById('textoModalEstado');
+        const btnConf = document.getElementById('btnConfirmarEstado');
+
+        if (activar) {
+            form.action = '/noticias/activar/' + idEvento;
+            texto.textContent = '¿Desea activar esta publicación? Será visible para todos los usuarios.';
+            btnConf.className = 'btn btn-sm btn-success';
+            btnConf.textContent = 'Activar';
+        } else {
+            form.action = '/noticias/desactivar/' + idEvento;
+            texto.textContent = '¿Desea desactivar esta publicación? Dejará de ser visible en el portal.';
+            btnConf.className = 'btn btn-sm btn-warning';
+            btnConf.textContent = 'Desactivar';
+        }
+
+        new bootstrap.Modal(document.getElementById('modalEstado')).show();
+    }
+</script>
+
+</body>
+</html>
