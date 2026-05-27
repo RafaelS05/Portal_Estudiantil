@@ -3,8 +3,12 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Service;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Horario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.HorarioRepository;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.HorarioRepository.HorarioRow;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.HorarioRepository.SeccionEncargadoRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.SeccionMateriaRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +28,42 @@ public class HorarioService {
 
     public List<HorarioRow> listarTodos() {
         return horarioRepository.listarTodos();
+    }
+
+    // ── Vista de consulta de horarios por sección ────────────────
+
+    public List<HorarioRow> horarioPorSeccion(Long idSeccion) {
+        return horarioRepository.listarActivosPorSeccion(idSeccion);
+    }
+
+    public List<SeccionEncargadoRow> seccionesDeEncargado(Long idEncargado) {
+        return horarioRepository.listarSeccionesDeEncargado(idEncargado);
+    }
+
+    /** Agrupa los bloques de una sección por día de la semana, en orden. */
+    public List<DiaHorario> agruparPorDia(List<HorarioRow> bloques) {
+        Map<Integer, List<HorarioRow>> porDia = new LinkedHashMap<>();
+        for (HorarioRow b : bloques) {
+            porDia.computeIfAbsent(b.getDiaSemana(), k -> new ArrayList<>()).add(b);
+        }
+        List<DiaHorario> dias = new ArrayList<>();
+        porDia.forEach((dia, lista) -> dias.add(new DiaHorario(dia, nombreDia(dia), lista)));
+        return dias;
+    }
+
+    public record DiaHorario(int dia, String nombreDia, List<HorarioRow> bloques) {
+
+        public int getDia() {
+            return dia;
+        }
+
+        public String getNombreDia() {
+            return nombreDia;
+        }
+
+        public List<HorarioRow> getBloques() {
+            return bloques;
+        }
     }
 
     public List<Horario> listarPorSeccionMateria(Long idSeccionMateria) {

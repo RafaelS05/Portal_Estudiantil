@@ -14,9 +14,9 @@ import java.util.Map;
 @Repository
 public class PasswordResetRepository {
     
-    private SimpleJdbcCall requestResetCall;
-    private SimpleJdbcCall validateTokenCall;
-    private SimpleJdbcCall resetPassowrdCall;
+    private final SimpleJdbcCall requestResetCall;
+    private final SimpleJdbcCall validateTokenCall;
+    private final SimpleJdbcCall resetPassowrdCall;
 
     public PasswordResetRepository(DataSource dataSource) {
         this.requestResetCall = new SimpleJdbcCall(dataSource)

@@ -101,6 +101,13 @@
                             </a>
                         </div>
 
+                        <div class="nav-item"
+                             sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR') or hasRole('ENCARGADO')">
+                            <a class="sidebar-link" th:href="@{/horarios}">
+                                <i class="fa-solid fa-table-list"></i> Horarios
+                            </a>
+                        </div>
+
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
                             <a class="sidebar-link" th:href="@{/reportes}">
                                 <i class="fa-solid fa-file-lines"></i> Reportes

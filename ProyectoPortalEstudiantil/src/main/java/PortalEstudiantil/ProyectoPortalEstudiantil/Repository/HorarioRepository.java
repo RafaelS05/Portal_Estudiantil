@@ -40,6 +40,17 @@ public interface HorarioRepository extends JpaRepository<Horario, Long> {
         Long getIdEstadoFk();
     }
 
+    interface SeccionEncargadoRow {
+
+        Long getIdSeccion();
+
+        String getNumeroSeccion();
+
+        String getPeriodo();
+
+        String getNombreEstudiante();
+    }
+
     @Query(value = """
     SELECT
         h.ID_HORARIO              AS idHorario,
@@ -86,6 +97,53 @@ public interface HorarioRepository extends JpaRepository<Horario, Long> {
     ORDER BY s.NUMERO, h.DIA_SEMANA, h.HORA_INICIO
 """, nativeQuery = true)
     List<HorarioRow> listarTodos();
+
+    // Horario activo de una sección (todas sus materias) para la vista de consulta
+    @Query(value = """
+    SELECT
+        h.ID_HORARIO              AS idHorario,
+        h.ID_SECCIONMATERIA_FK    AS idSeccionMateriaFk,
+        s.NUMERO                  AS numeroSeccion,
+        m.NOMBRE                  AS nombreMateria,
+        CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO) AS nombreDocente,
+        h.DIA_SEMANA              AS diaSemana,
+        h.HORA_INICIO             AS horaInicio,
+        h.HORA_FIN                AS horaFin,
+        h.ID_AULA_FK              AS idAulaFk,
+        a.NUMERO                  AS numeroAula,
+        h.ID_ESTADO_FK            AS idEstadoFk
+    FROM HORARIO_TB h
+    JOIN SECCIONMATERIA_TB sm ON sm.ID_SECCIONMATERIA  = h.ID_SECCIONMATERIA_FK
+    JOIN SECCION_TB  s  ON s.ID_SECCION  = sm.ID_SECCION_FK
+    JOIN MATERIA_TB  m  ON m.ID_MATERIA  = sm.ID_MATERIA_FK
+    JOIN USUARIOS_TB u  ON u.ID_USUARIO  = sm.ID_USUARIO_DOCENTE_FK
+    LEFT JOIN AULA_TB a ON a.ID_AULA     = h.ID_AULA_FK
+    WHERE h.ID_ESTADO_FK = 1
+      AND sm.ID_SECCION_FK = :idSeccion
+    ORDER BY h.DIA_SEMANA, h.HORA_INICIO
+""", nativeQuery = true)
+    List<HorarioRow> listarActivosPorSeccion(@Param("idSeccion") Long idSeccion);
+
+    // Secciones donde están matriculados los estudiantes ligados a un encargado
+    @Query(value = """
+    SELECT DISTINCT
+        s.ID_SECCION AS idSeccion,
+        s.NUMERO     AS numeroSeccion,
+        p.NOMBRE     AS periodo,
+        CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+               IFNULL(CONCAT(' ', u.SEGUNDO_APELLIDO), '')) AS nombreEstudiante
+    FROM ENCARGADOESTUDIANTE_TB ee
+    JOIN USUARIOS_TB  u ON u.ID_USUARIO = ee.ID_USUARIO_ESTUDIANTE_FK
+    JOIN MATRICULA_TB m ON m.ID_USUARIO_ESTUDIANTE_FK = u.ID_USUARIO
+                       AND m.ID_ESTADO_FK IN (1, 3)
+    JOIN SECCION_TB   s ON s.ID_SECCION = m.ID_SECCION_FK
+    JOIN PERIODOS_TB  p ON p.ID_PERIODO = s.ID_PERIODO_FK
+    WHERE ee.ID_USUARIO_ENCARGADO_FK = :idEncargado
+      AND ee.ID_ESTADO_FK = 1
+      AND u.ID_ESTADO_FK  = 1
+    ORDER BY p.FECHA_INICIO DESC, nombreEstudiante
+""", nativeQuery = true)
+    List<SeccionEncargadoRow> listarSeccionesDeEncargado(@Param("idEncargado") Long idEncargado);
 
     // Consultas útiles
     @Query(value = """
