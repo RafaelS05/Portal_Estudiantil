@@ -20,8 +20,9 @@
                         <p class="text-muted mb-0 small">Actividades y eventos institucionales programados</p>
                     </div>
                     <!-- Botón nuevo evento solo para admin -->
+                    <!-- Botón nuevo evento para admin y profesor -->
                     <a th:href="@{/eventos/nuevo}"
-                       sec:authorize="hasRole('ADMINISTRADOR')"
+                       sec:authorize="hasAnyRole('ADMINISTRADOR', 'PROFESOR')"
                        class="btn btn-primary">
                         <i class="fa-solid fa-plus me-1"></i> Nuevo Evento
                     </a>
