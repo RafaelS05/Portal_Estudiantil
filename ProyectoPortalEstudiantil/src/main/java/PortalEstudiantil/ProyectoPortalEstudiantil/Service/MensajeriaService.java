@@ -18,8 +18,8 @@ public class MensajeriaService {
 
     @Value("${app.upload.dir}")
     private String uploadDir;
-
-    private final MensajeriaRepository repo;
+    
+    private MensajeriaRepository repo;
 
     public MensajeriaService(MensajeriaRepository repo) {
         this.repo = repo;

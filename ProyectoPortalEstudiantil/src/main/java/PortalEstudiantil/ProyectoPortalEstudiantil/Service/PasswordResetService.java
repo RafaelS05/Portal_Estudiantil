@@ -45,6 +45,7 @@ public class PasswordResetService {
 
         } catch (Exception e) {
             System.err.println("Error en requestPasswordReset: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
