@@ -114,7 +114,15 @@
                             </a>
                         </div>
 
+                        <!-- ANTES -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
+                            <a class="sidebar-link" th:href="@{/estadisticas}">
+                                <i class="fa-solid fa-chart-pie"></i> Estadísticas
+                            </a>
+                        </div>
+
+                        <!-- DESPUÉS -->
+                        <div class="nav-item" sec:authorize="hasAnyRole('ADMINISTRADOR', 'ENCARGADO')">
                             <a class="sidebar-link" th:href="@{/estadisticas}">
                                 <i class="fa-solid fa-chart-pie"></i> Estadísticas
                             </a>
