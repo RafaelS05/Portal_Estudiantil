@@ -2,6 +2,7 @@ package PortalEstudiantil.ProyectoPortalEstudiantil.Domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 @Table(name = "EVENTO_TB")
@@ -18,9 +19,11 @@ public class Evento {
     @Column(name = "DESCRIPCION")
     private String descripcion;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "FECHA_INICIO")
     private LocalDate fechaInicio;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "FECHA_FIN")
     private LocalDate fechaFin;
 

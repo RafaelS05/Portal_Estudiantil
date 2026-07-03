@@ -24,7 +24,6 @@ public class NoticiaController {
     // =========================================================
     // PANTALLA DE INICIO — todos los usuarios la ven
     // =========================================================
-
     // Esta es la pantalla principal del portal.
     // Reemplaza el "Bienvenido al Portal" por el feed de noticias.
     // El badge del topbar también se alimenta desde aquí.
@@ -47,7 +46,6 @@ public class NoticiaController {
     // =========================================================
     // PANEL DE GESTIÓN — solo Administrador
     // =========================================================
-
     // Lista todas las noticias para que el admin las gestione.
     @GetMapping("/noticias")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
@@ -58,10 +56,13 @@ public class NoticiaController {
     }
 
     // Muestra el formulario vacío para crear una nueva noticia.
+    // Muestra el formulario vacío para crear una nueva noticia.
     @GetMapping("/noticias/nuevo")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String formularioNuevo(Model model) {
-        model.addAttribute("evento", new Evento());
+        if (!model.containsAttribute("evento")) {
+            model.addAttribute("evento", new Evento());
+        }
         model.addAttribute("pageTitle", "Nueva Noticia");
         return "noticias/formulario";
     }
@@ -70,7 +71,9 @@ public class NoticiaController {
     @GetMapping("/noticias/editar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String formularioEditar(@PathVariable Long id, Model model) {
-        model.addAttribute("evento", noticiaService.obtenerPorId(id));
+        if (!model.containsAttribute("evento")) {
+            model.addAttribute("evento", noticiaService.obtenerPorId(id));
+        }
         model.addAttribute("pageTitle", "Editar Noticia");
         return "noticias/formulario";
     }
@@ -81,6 +84,34 @@ public class NoticiaController {
     public String guardar(@ModelAttribute Evento evento,
             @AuthenticationPrincipal PortalUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+
+        String errorValidacion = null;
+
+        // La fecha de publicación no puede ser anterior a hoy
+        // (solo aplica al crear una noticia nueva; al editar una ya existente
+        // se permite conservar su fecha original)
+        if (evento.getIdEvento() == null
+                && evento.getFechaInicio() != null
+                && evento.getFechaInicio().isBefore(LocalDate.now())) {
+            errorValidacion = "La fecha de publicación no puede ser anterior a hoy.";
+        }
+
+        // La fecha de vencimiento no puede ser anterior a la de publicación
+        if (errorValidacion == null
+                && evento.getFechaFin() != null && evento.getFechaInicio() != null
+                && evento.getFechaFin().isBefore(evento.getFechaInicio())) {
+            errorValidacion = "La fecha de vencimiento no puede ser anterior a la fecha de publicación.";
+        }
+
+        if (errorValidacion != null) {
+            redirectAttributes.addFlashAttribute("mensajeError", errorValidacion);
+            redirectAttributes.addFlashAttribute("evento", evento);
+
+            return (evento.getIdEvento() == null)
+                    ? "redirect:/noticias/nuevo"
+                    : "redirect:/noticias/editar/" + evento.getIdEvento();
+        }
+
         try {
             if (evento.getIdEvento() == null) {
                 noticiaService.crear(evento, userDetails.getUsername());

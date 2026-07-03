@@ -114,7 +114,15 @@
                             </a>
                         </div>
 
+                        <!-- ANTES -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR')">
+                            <a class="sidebar-link" th:href="@{/estadisticas}">
+                                <i class="fa-solid fa-chart-pie"></i> Estadísticas
+                            </a>
+                        </div>
+
+                        <!-- DESPUÉS -->
+                        <div class="nav-item" sec:authorize="hasAnyRole('ADMINISTRADOR', 'ENCARGADO')">
                             <a class="sidebar-link" th:href="@{/estadisticas}">
                                 <i class="fa-solid fa-chart-pie"></i> Estadísticas
                             </a>
@@ -139,7 +147,7 @@
                             </a>
                         </div>
 
-                        <div class="nav-item">
+                        <div class="nav-item" sec:authorize="hasAnyRole('ADMINISTRADOR', 'PROFESOR')">
                             <a class="sidebar-link" th:href="@{/eventos}">
                                 <i class="fa-solid fa-calendar-plus"></i> Gestión de Eventos
                             </a>
