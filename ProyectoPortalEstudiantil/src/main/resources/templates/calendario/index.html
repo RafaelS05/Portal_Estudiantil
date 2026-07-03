@@ -19,13 +19,27 @@
                         </h2>
                         <p class="text-muted mb-0 small">Actividades y eventos institucionales programados</p>
                     </div>
-                    <!-- Botón nuevo evento solo para admin -->
                     <!-- Botón nuevo evento para admin y profesor -->
                     <a th:href="@{/eventos/nuevo}"
                        sec:authorize="hasAnyRole('ADMINISTRADOR', 'PROFESOR')"
                        class="btn btn-primary">
                         <i class="fa-solid fa-plus me-1"></i> Nuevo Evento
                     </a>
+                </div>
+
+                <!-- Filtro por tipo de evento — disponible para todos los roles -->
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                    <label for="filtroTipo" class="fw-semibold small mb-0">
+                        <i class="fa-solid fa-filter me-1 text-primary"></i>Filtrar por tipo:
+                    </label>
+                    <select id="filtroTipo" class="form-select form-select-sm" style="width:auto; min-width:200px">
+                        <option value="">Todos los eventos</option>
+                        <option value="REUNION">Reunión</option>
+                        <option value="ACTIVIDAD">Actividad</option>
+                        <option value="FERIADO">Feriado</option>
+                        <option value="EXAMEN">Examen</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
                 </div>
 
                 <!-- Leyenda de colores -->
@@ -112,6 +126,7 @@
             document.addEventListener('DOMContentLoaded', function () {
 
                 const calEl = document.getElementById('calendario');
+                const filtroTipo = document.getElementById('filtroTipo');
 
                 const calendar = new FullCalendar.Calendar(calEl, {
                     locale: 'es',
@@ -126,8 +141,24 @@
                         month: 'Mes',
                         list: 'Lista'
                     },
-                    // Carga los eventos desde el endpoint AJAX del CalendarioController
-                    events: '/calendario/eventos',
+                    // Carga los eventos desde el endpoint AJAX del CalendarioController.
+                    // Se usa una función en vez de una URL directa para poder aplicar
+                    // el filtro por tipo antes de pintar los eventos. Esto además
+                    // garantiza que cada vez que FullCalendar navega de mes o se
+                    // cambia el filtro, se piden los datos frescos al servidor
+                    // (siempre actualizados, no queda nada cacheado en el cliente).
+                    events: function (fetchInfo, successCallback, failureCallback) {
+                        fetch('/calendario/eventos')
+                                .then(response => response.json())
+                                .then(data => {
+                                    const tipoSeleccionado = filtroTipo.value;
+                                    const filtrados = tipoSeleccionado
+                                            ? data.filter(ev => ev.tipo === tipoSeleccionado)
+                                            : data;
+                                    successCallback(filtrados);
+                                })
+                                .catch(err => failureCallback(err));
+                    },
                     eventTimeFormat: {hour: '2-digit', minute: '2-digit'},
                     height: 'auto',
                     // Al hacer click en un evento, abre el modal con su detalle
@@ -172,6 +203,12 @@
                 });
 
                 calendar.render();
+
+                // Al cambiar el filtro, se vuelve a pedir los eventos al servidor
+                // y se repintan solo los del tipo seleccionado.
+                filtroTipo.addEventListener('change', function () {
+                    calendar.refetchEvents();
+                });
             });
         </script>
 
