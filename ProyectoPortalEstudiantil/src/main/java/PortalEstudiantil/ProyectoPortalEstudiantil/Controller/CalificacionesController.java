@@ -95,6 +95,7 @@ public class CalificacionesController {
         model.addAttribute("calificacion", calificacion);
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("evaluaciones", evaluacionRepository.findAll());
+        model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("pageTitle", "Modificar Calificación");
 
         return "calificaciones/modificar";
