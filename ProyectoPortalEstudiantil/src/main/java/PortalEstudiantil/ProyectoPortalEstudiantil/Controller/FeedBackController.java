@@ -9,11 +9,13 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Service.MateriaService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.PeriodoService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.SeccionMateriaService;
 import com.lowagie.text.DocumentException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -61,14 +63,10 @@ public class FeedBackController {
         String rol = userDetails.getRole();
 
         switch (rol) {
-            case "PROFESOR" ->
-                cargarDocente(userDetails, idSeccionmateria, model);
-            case "ESTUDIANTE" ->
-                cargarEstudiante(userDetails, idMateria, model);
-            case "ENCARGADO" ->
-                cargarEncargado(userDetails, idMateria, model);
-            case "ADMINISTRADOR" ->
-                cargarAdmin(periodo1, periodo2, model);
+            case "PROFESOR" -> cargarDocente(userDetails, idSeccionmateria, model);
+            case "ESTUDIANTE" -> cargarEstudiante(userDetails, idMateria, model);
+            case "ENCARGADO" -> cargarEncargado(userDetails, idMateria, model);
+            case "ADMINISTRADOR" -> cargarAdmin(periodo1, periodo2, model);
             default -> {
             }
         }
@@ -80,8 +78,8 @@ public class FeedBackController {
 
     //PROFESOR
     private void cargarDocente(PortalUserDetails userDetails,
-            Integer idSeccionmateria,
-            Model model) {
+                               Integer idSeccionmateria,
+                               Model model) {
 
         Long idDocente = userDetails.getIdUsuario();
 
@@ -100,8 +98,8 @@ public class FeedBackController {
 
     //ESTUDIANTE
     private void cargarEstudiante(PortalUserDetails userDetails,
-            Integer idMateria,
-            Model model) {
+                                  Integer idMateria,
+                                  Model model) {
 
         Long idEstudiante = userDetails.getIdUsuario();
 
@@ -120,8 +118,8 @@ public class FeedBackController {
 
     //ENCARGADO
     private void cargarEncargado(PortalUserDetails userDetails,
-            Integer idMateria,
-            Model model) {
+                                 Integer idMateria,
+                                 Model model) {
 
         Long idEncargado = userDetails.getIdUsuario();
 

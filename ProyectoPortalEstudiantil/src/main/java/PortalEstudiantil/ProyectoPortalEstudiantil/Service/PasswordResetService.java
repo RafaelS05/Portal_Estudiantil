@@ -29,24 +29,31 @@ public class PasswordResetService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public boolean requestPasswordReset(String email) {
+    /**
+     * Resultado de la solicitud de recuperación de contraseña (HU.12.4)
+     */
+    public enum ResetRequestStatus {
+        ENLACE_ENVIADO,
+        CORREO_NO_REGISTRADO,
+        ERROR
+    }
+
+    public ResetRequestStatus requestPasswordReset(String email) {
         try {
             ResetPasswordRequest request = resetRepository.requestReset(email);
 
+            // HU.12.4: notificar cuando el correo no está registrado, sin enviar enlace
             if (request.getExists() == null || request.getExists() == 0) {
-                return true;
+                return ResetRequestStatus.CORREO_NO_REGISTRADO;
             }
 
-            //log temporal
-            System.out.println("DEV TOKEN: " + request.getToken());
-
             sendResetEmail(email, request.getToken());
-            return true;
+            return ResetRequestStatus.ENLACE_ENVIADO;
 
         } catch (Exception e) {
             System.err.println("Error en requestPasswordReset: " + e.getMessage());
             e.printStackTrace();
-            return false;
+            return ResetRequestStatus.ERROR;
         }
     }
 

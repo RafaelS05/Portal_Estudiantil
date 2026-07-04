@@ -228,46 +228,46 @@ public class UsuarioController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            // 1. Crear el usuario
-            Long idNuevo = usuarioService.crearUsuario(usuario);
+            // 1. TC-10 (HU.1.1): crear usuario + contacto en UNA transacción.
+            //    Valida el correo duplicado ANTES de insertar, evitando
+            //    usuarios "en blanco" cuando el correo ya existe.
+            Long idNuevo = usuarioService.crearUsuarioConContacto(usuario, telefonoNumero, correoLogin);
 
-            // 2. Actualizar contacto (teléfono y correo)
-            usuarioService.actualizarContacto(idNuevo, telefonoNumero, correoLogin);
-
-            // 3. Guardar dirección si se proporcionó
+            // 2. Guardar dirección si se proporcionó
             direccionService.guardarDireccion(idNuevo, idProvincia, idCanton, idDistrito, otrasSenas);
 
-            // 3. ✅ NUEVO: Generar credencial automáticamente
+            // 3. TC-11 (HU.1.2): generar credenciales únicas (usuario = correo
+            //    de login único + contraseña temporal) y enviarlas por correo.
             String passwordTemporal = null;
             try {
-                passwordTemporal = credencialService.crearCredencialTemporal(
-                        idNuevo, 
-                        correoLogin, 
+                passwordTemporal = credencialService.crearCredencialTemporalYNotificar(
+                        idNuevo,
+                        correoLogin,
                         "SISTEMA"
                 );
             } catch (Exception e) {
                 // Si falla la creación de credencial, registrar pero no fallar todo
-                redirectAttributes.addFlashAttribute("advertencia", 
+                redirectAttributes.addFlashAttribute("advertencia",
                     "Usuario creado pero hubo un error al generar la credencial: " + e.getMessage());
             }
 
             // 4. Mensaje de éxito con contraseña temporal
             if (passwordTemporal != null) {
-                redirectAttributes.addFlashAttribute("mensaje", 
-                    "Usuario creado exitosamente");
+                redirectAttributes.addFlashAttribute("mensaje",
+                    "Usuario creado exitosamente. Se enviaron las credenciales de acceso al correo registrado.");
                 redirectAttributes.addFlashAttribute("passwordTemporal", passwordTemporal);
                 redirectAttributes.addFlashAttribute("correoUsuario", correoLogin);
                 redirectAttributes.addFlashAttribute("tipoMensaje", "success");
             } else {
-                redirectAttributes.addFlashAttribute("mensaje", 
+                redirectAttributes.addFlashAttribute("mensaje",
                     "Usuario creado exitosamente");
                 redirectAttributes.addFlashAttribute("tipoMensaje", "success");
             }
-            
+
             return "redirect:/usuarios";
-            
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensaje", 
+            redirectAttributes.addFlashAttribute("mensaje",
                 "Error al crear usuario: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
             return "redirect:/usuarios/nuevo";
@@ -377,6 +377,25 @@ public class UsuarioController {
         }
 
         return "redirect:/usuarios/editar/" + idUsuario;
+    }
+
+    // ==================== RESTABLECER CONTRASEÑA (HU.12.1) ====================
+    @PostMapping("/restablecer-password/{id}")
+    public String restablecerPassword(@PathVariable Long id,
+            java.security.Principal principal,
+            RedirectAttributes redirectAttributes) {
+        try {
+            String admin = principal != null ? principal.getName() : "ADMIN";
+            credencialService.restablecerPasswordManual(id, admin);
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Se envió una contraseña temporal al correo del usuario");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "Error al restablecer contraseña: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+        }
+        return "redirect:/usuarios/ver/" + id;
     }
 
     // ==================== ACTIVAR / DESACTIVAR / ELIMINAR ====================

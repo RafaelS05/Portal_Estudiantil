@@ -55,6 +55,12 @@
                     <span>Credenciales incorrectas. Por favor intente de nuevo.</span>
                 </div>
 
+                <!-- Alerta cuenta bloqueada -->
+                <div class="error-alert" th:if="${param.bloqueado}">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Su cuenta ha sido bloqueada temporalmente por múltiples intentos fallidos. Intente nuevamente en 15 minutos.</span>
+                </div>
+
                 <!-- Formulario -->
                 <form th:action="@{/login}" method="post" class="login-form">
 
