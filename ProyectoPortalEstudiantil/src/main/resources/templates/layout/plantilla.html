@@ -81,6 +81,11 @@
                                 <i class="fa-solid fa-clipboard-check"></i> Asistencia
                             </a>
                         </div>
+                        <div class="nav-item" sec:authorize="hasRole('ENCARGADO')">
+                            <a class="sidebar-link" th:href="@{/asistencias/historial}">
+                                <i class="fa-solid fa-clipboard-check"></i> Asistencia
+                            </a>
+                        </div>
 
                         <!-- CORREGIDO: sec:authorize en el div, th:href solo con la URL -->
                         <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR')">

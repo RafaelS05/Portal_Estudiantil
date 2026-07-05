@@ -76,10 +76,10 @@
                     <div class="card-body py-3">
                         <form th:action="@{/asistencias}" method="get" class="row g-2 align-items-end">
                             <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Sección-Materia (ID)</label>
-                                <input type="number" name="idSeccionMateria" class="form-control"
-                                       placeholder="ID de la sección-materia"
-                                       th:value="${idSeccionMateria}">
+                                <label class="form-label small fw-semibold">Sección-Materia</label>
+                                <select name="idSeccionMateria" id="filtroSeccionMateria" class="form-select">
+                                    <option value="">Todas las secciones</option>
+                                </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label small fw-semibold">Fecha</label>
@@ -566,6 +566,32 @@
                 new bootstrap.Modal(document.getElementById('modalCambiarEstado')).show();
             }
 
+        </script>
+        <script th:inline="javascript">
+            // Valor seleccionado actualmente (viene del backend al filtrar)
+            const idSeccionMateriaSeleccionada = /*[[${idSeccionMateria}]]*/ null;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                fetch('/asistencias/seccionesMateria')
+                        .then(r => r.json())
+                        .then(data => {
+                            const sel = document.getElementById('filtroSeccionMateria');
+                            data.forEach(sm => {
+                                const opt = document.createElement('option');
+                                opt.value = sm.id;
+                                opt.textContent = sm.nombre;
+                                if (idSeccionMateriaSeleccionada != null &&
+                                        String(sm.id) === String(idSeccionMateriaSeleccionada)) {
+                                    opt.selected = true;
+                                }
+                                sel.appendChild(opt);
+                            });
+                        })
+                        .catch(() => {
+                            const sel = document.getElementById('filtroSeccionMateria');
+                            sel.innerHTML = '<option value="">Error al cargar secciones</option>';
+                        });
+            });
         </script>
 
     </body>
