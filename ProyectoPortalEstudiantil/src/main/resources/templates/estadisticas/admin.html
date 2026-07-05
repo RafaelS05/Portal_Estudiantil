@@ -29,32 +29,47 @@
                     </div>
 
                     <!-- ── Filtro por sección ────────────────────────────────── -->
-                    <div class="d-flex align-items-center gap-3 my-3 flex-wrap">
-                        <form th:action="@{/estadisticas/admin}" method="get"
-                              class="d-flex align-items-center gap-2">
-                            <label class="fw-semibold small mb-0">
-                                <i class="fa-solid fa-filter me-1 text-primary"></i>Ver sección:
-                            </label>
-                            <select name="idSeccion" class="form-select form-select-sm"
-                                    style="width:auto; min-width:180px" onchange="this.form.submit()">
-                                <option value="">Todas las secciones</option>
-                                <option th:each="s : ${secciones}"
-                                        th:value="${s.idSeccion}"
-                                        th:text="'Sección ' + ${s.numero}"
-                                        th:selected="${s.idSeccion == idSeccionActual}">
-                                </option>
-                            </select>
-                            <a th:if="${idSeccionActual != null}"
-                               th:href="@{/estadisticas/admin}"
-                               class="btn btn-sm btn-outline-secondary">
-                                <i class="fa-solid fa-xmark"></i> Limpiar
+                    <!-- ── Filtro por sección + Exportar ────────────────────── -->
+                    <div class="d-flex align-items-center justify-content-between my-3 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <form th:action="@{/estadisticas/admin}" method="get"
+                                  class="d-flex align-items-center gap-2">
+                                <label class="fw-semibold small mb-0">
+                                    <i class="fa-solid fa-filter me-1 text-primary"></i>Ver sección:
+                                </label>
+                                <select name="idSeccion" class="form-select form-select-sm"
+                                        style="width:auto; min-width:180px" onchange="this.form.submit()">
+                                    <option value="">Todas las secciones</option>
+                                    <option th:each="s : ${secciones}"
+                                            th:value="${s.idSeccion}"
+                                            th:text="'Sección ' + ${s.numero}"
+                                            th:selected="${s.idSeccion == idSeccionActual}">
+                                    </option>
+                                </select>
+                                <a th:if="${idSeccionActual != null}"
+                                   th:href="@{/estadisticas/admin}"
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa-solid fa-xmark"></i> Limpiar
+                                </a>
+                            </form>
+                            <span th:if="${idSeccionActual != null}"
+                                  class="badge bg-primary-subtle text-primary px-3 py-2 fs-6">
+                                <i class="fa-solid fa-layer-group me-1"></i>
+                                Mostrando datos de sección seleccionada
+                            </span>
+                        </div>
+
+                        <!-- Exportar (respeta el filtro de sección actual) -->
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/estadisticas/admin/exportar/excel(idSeccion=${idSeccionActual})}"
+                               class="btn btn-sm btn-outline-success">
+                                <i class="fa-solid fa-file-excel me-1"></i> Excel
                             </a>
-                        </form>
-                        <span th:if="${idSeccionActual != null}"
-                              class="badge bg-primary-subtle text-primary px-3 py-2 fs-6">
-                            <i class="fa-solid fa-layer-group me-1"></i>
-                            Mostrando datos de sección seleccionada
-                        </span>
+                            <a th:href="@{/estadisticas/admin/exportar/pdf(idSeccion=${idSeccionActual})}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                            </a>
+                        </div>
                     </div>
 
                     <!-- ── KPI Cards (siempre globales) ─────────────────────── -->
@@ -237,64 +252,64 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script th:inline="javascript">
 
-                                        const seccionLabels = JSON.parse(/*[[${seccionLabels}]]*/ '[]');
-                                        const seccionData = JSON.parse(/*[[${seccionPromedios}]]*/ '[]');
-                                        const materiaLabels = JSON.parse(/*[[${materiaLabels}]]*/ '[]');
-                                        const materiaData = JSON.parse(/*[[${materiaPromedios}]]*/ '[]');
+                        const seccionLabels = JSON.parse(/*[[${seccionLabels}]]*/ '[]');
+                        const seccionData = JSON.parse(/*[[${seccionPromedios}]]*/ '[]');
+                        const materiaLabels = JSON.parse(/*[[${materiaLabels}]]*/ '[]');
+                        const materiaData = JSON.parse(/*[[${materiaPromedios}]]*/ '[]');
 
-                                        // Colores semáforo según promedio
-                                        function colorPorPromedio(val) {
-                                            if (val >= 80)
-                                                return 'rgba(56,142,60,0.75)';
-                                            if (val >= 70)
-                                                return 'rgba(251,192,45,0.75)';
-                                            return 'rgba(211,47,47,0.75)';
-                                        }
+                        // Colores semáforo según promedio
+                        function colorPorPromedio(val) {
+                            if (val >= 80)
+                                return 'rgba(56,142,60,0.75)';
+                            if (val >= 70)
+                                return 'rgba(251,192,45,0.75)';
+                            return 'rgba(211,47,47,0.75)';
+                        }
 
-                                        // ── Gráfico por sección (barras verticales) ──────────────────────
-                                        new Chart(document.getElementById('chartSeccion'), {
-                                            type: 'bar',
-                                            data: {
-                                                labels: seccionLabels,
-                                                datasets: [{
-                                                        label: 'Promedio',
-                                                        data: seccionData,
-                                                        backgroundColor: seccionData.map(colorPorPromedio),
-                                                        borderRadius: 6
-                                                    }]
-                                            },
-                                            options: {
-                                                responsive: true,
-                                                plugins: {legend: {display: false}},
-                                                scales: {
-                                                    y: {min: 0, max: 100, grid: {color: '#f0f0f0'}},
-                                                    x: {grid: {display: false}}
-                                                }
-                                            }
-                                        });
+                        // ── Gráfico por sección (barras verticales) ──────────────────────
+                        new Chart(document.getElementById('chartSeccion'), {
+                            type: 'bar',
+                            data: {
+                                labels: seccionLabels,
+                                datasets: [{
+                                        label: 'Promedio',
+                                        data: seccionData,
+                                        backgroundColor: seccionData.map(colorPorPromedio),
+                                        borderRadius: 6
+                                    }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {legend: {display: false}},
+                                scales: {
+                                    y: {min: 0, max: 100, grid: {color: '#f0f0f0'}},
+                                    x: {grid: {display: false}}
+                                }
+                            }
+                        });
 
-                                        // ── Gráfico por materia (barras horizontales) ────────────────────
-                                        new Chart(document.getElementById('chartMateria'), {
-                                            type: 'bar',
-                                            data: {
-                                                labels: materiaLabels,
-                                                datasets: [{
-                                                        label: 'Promedio',
-                                                        data: materiaData,
-                                                        backgroundColor: materiaData.map(colorPorPromedio),
-                                                        borderRadius: 6
-                                                    }]
-                                            },
-                                            options: {
-                                                indexAxis: 'y',
-                                                responsive: true,
-                                                plugins: {legend: {display: false}},
-                                                scales: {
-                                                    x: {min: 0, max: 100, grid: {color: '#f0f0f0'}},
-                                                    y: {grid: {display: false}}
-                                                }
-                                            }
-                                        });
+                        // ── Gráfico por materia (barras horizontales) ────────────────────
+                        new Chart(document.getElementById('chartMateria'), {
+                            type: 'bar',
+                            data: {
+                                labels: materiaLabels,
+                                datasets: [{
+                                        label: 'Promedio',
+                                        data: materiaData,
+                                        backgroundColor: materiaData.map(colorPorPromedio),
+                                        borderRadius: 6
+                                    }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                plugins: {legend: {display: false}},
+                                scales: {
+                                    x: {min: 0, max: 100, grid: {color: '#f0f0f0'}},
+                                    y: {grid: {display: false}}
+                                }
+                            }
+                        });
 
         </script>
     </body>

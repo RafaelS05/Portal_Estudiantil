@@ -10,6 +10,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("/eventos")
 public class EventoController {
@@ -37,7 +39,9 @@ public class EventoController {
     @GetMapping("/nuevo")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String formularioNuevo(Model model) {
-        model.addAttribute("evento", new Evento());
+        if (!model.containsAttribute("evento")) {
+            model.addAttribute("evento", new Evento());
+        }
         model.addAttribute("pageTitle", "Nuevo Evento");
         return "eventos/formulario";
     }
@@ -46,7 +50,9 @@ public class EventoController {
     @GetMapping("/editar/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public String formularioEditar(@PathVariable Long id, Model model) {
-        model.addAttribute("evento", eventoService.obtenerPorId(id));
+        if (!model.containsAttribute("evento")) {
+            model.addAttribute("evento", eventoService.obtenerPorId(id));
+        }
         model.addAttribute("pageTitle", "Editar Evento");
         return "eventos/formulario";
     }
@@ -57,6 +63,33 @@ public class EventoController {
     public String guardar(@ModelAttribute Evento evento,
             @AuthenticationPrincipal PortalUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+
+        String errorValidacion = null;
+
+        // La fecha de inicio no puede ser anterior a hoy
+        // (solo aplica al crear un evento nuevo; al editar uno ya existente
+        // se permite conservar su fecha original)
+        if (evento.getIdEvento() == null
+                && evento.getFechaInicio() != null
+                && evento.getFechaInicio().isBefore(LocalDate.now())) {
+            errorValidacion = "La fecha de inicio no puede ser anterior a hoy.";
+        }
+
+        // La fecha de fin no puede ser anterior a la de inicio
+        if (errorValidacion == null
+                && evento.getFechaFin() != null && evento.getFechaInicio() != null
+                && evento.getFechaFin().isBefore(evento.getFechaInicio())) {
+            errorValidacion = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+        }
+
+        if (errorValidacion != null) {
+            redirectAttributes.addFlashAttribute("mensajeError", errorValidacion);
+            redirectAttributes.addFlashAttribute("evento", evento);
+            return (evento.getIdEvento() == null)
+                    ? "redirect:/eventos/nuevo"
+                    : "redirect:/eventos/editar/" + evento.getIdEvento();
+        }
+
         try {
             if (evento.getIdEvento() == null) {
                 eventoService.crear(evento, userDetails.getUsername());

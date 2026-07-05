@@ -1,124 +1,171 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/plantilla :: head}"></head>
-<body>
-<div th:replace="~{layout/plantilla :: shell(~{::content})}">
-    <div th:fragment="content">
+    <head th:replace="~{layout/plantilla :: head}"></head>
+    <body>
+        <div th:replace="~{layout/plantilla :: shell(~{::content})}">
+            <div th:fragment="content">
 
-        <!-- Encabezado -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h2 class="fw-bold mb-1"
-                    th:text="${evento.idEvento != null ? 'Editar Publicación' : 'Nueva Publicación'}">
-                </h2>
-                <p class="text-muted mb-0 small">
-                    Complete los campos y guarde para publicar en el portal.
-                </p>
-            </div>
-            <a th:href="@{/noticias}" class="btn btn-outline-secondary btn-sm">
-                <i class="fa-solid fa-arrow-left me-1"></i> Volver
-            </a>
-        </div>
-
-        <!-- Formulario -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <form th:action="@{/noticias/guardar}"
-                      th:object="${evento}"
-                      method="post">
-
-                    <!-- ID oculto: si existe = edición, si no = creación -->
-                    <input type="hidden" th:field="*{idEvento}">
-
-                    <div class="row g-3">
-
-                        <!-- Tipo de publicación -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">
-                                Tipo <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select" th:field="*{tipoEvento}" required>
-                                <option value="">Seleccione un tipo</option>
-                                <option value="NOTICIA">Noticia</option>
-                                <option value="ANUNCIO">Anuncio</option>
-                            </select>
-                            <div class="form-text">
-                                Noticia = información general. Anuncio = comunicado urgente.
-                            </div>
-                        </div>
-
-                        <!-- Fecha de publicación -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">
-                                Fecha de publicación <span class="text-danger">*</span>
-                            </label>
-                            <input type="date"
-                                   class="form-control"
-                                   th:field="*{fechaInicio}"
-                                   required>
-                        </div>
-
-                        <!-- Fecha de vencimiento (opcional) -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">
-                                Fecha de vencimiento
-                                <span class="text-muted fw-normal">(opcional)</span>
-                            </label>
-                            <input type="date"
-                                   class="form-control"
-                                   th:field="*{fechaFin}">
-                            <div class="form-text">
-                                Si no se especifica, la publicación no vence.
-                            </div>
-                        </div>
-
-                        <!-- Título -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">
-                                Título <span class="text-danger">*</span>
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   th:field="*{titulo}"
-                                   placeholder="Ej: Reunión de padres de familia — viernes 21"
-                                   maxlength="120"
-                                   required>
-                            <div class="form-text">Máximo 120 caracteres.</div>
-                        </div>
-
-                        <!-- Descripción -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">
-                                Contenido <span class="text-danger">*</span>
-                            </label>
-                            <textarea class="form-control"
-                                      th:field="*{descripcion}"
-                                      rows="5"
-                                      placeholder="Escriba el contenido del comunicado aquí..."
-                                      maxlength="400"
-                                      required></textarea>
-                            <div class="form-text">Máximo 400 caracteres.</div>
-                        </div>
-
+                <!-- Encabezado -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1"
+                            th:text="${evento.idEvento != null ? 'Editar Publicación' : 'Nueva Publicación'}">
+                        </h2>
+                        <p class="text-muted mb-0 small">
+                            Complete los campos y guarde para publicar en el portal.
+                        </p>
                     </div>
+                    <a th:href="@{/noticias}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-solid fa-arrow-left me-1"></i> Volver
+                    </a>
+                </div>
 
-                    <!-- Botones -->
-                    <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-floppy-disk me-1"></i>
-                            <span th:text="${evento.idEvento != null ? 'Actualizar' : 'Publicar'}"></span>
-                        </button>
-                        <a th:href="@{/noticias}" class="btn btn-outline-secondary">
-                            Cancelar
-                        </a>
+                <!-- Formulario -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form th:action="@{/noticias/guardar}"
+                              th:object="${evento}"
+                              method="post">
+
+                            <!-- ID oculto: si existe = edición, si no = creación -->
+                            <input type="hidden" th:field="*{idEvento}">
+
+                            <div class="row g-3">
+
+                                <!-- Tipo de publicación -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Tipo <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" th:field="*{tipoEvento}" required>
+                                        <option value="">Seleccione un tipo</option>
+                                        <option value="NOTICIA">Noticia</option>
+                                        <option value="ANUNCIO">Anuncio</option>
+                                    </select>
+                                    <div class="form-text">
+                                        Noticia = información general. Anuncio = comunicado urgente.
+                                    </div>
+                                </div>
+
+                                <!-- Fecha de publicación -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Fecha de publicación <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date"
+                                           class="form-control"
+                                           th:field="*{fechaInicio}"
+                                           required>
+                                </div>
+
+                                <!-- Fecha de vencimiento (opcional) -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Fecha de vencimiento
+                                        <span class="text-muted fw-normal">(opcional)</span>
+                                    </label>
+                                    <input type="date"
+                                           class="form-control"
+                                           th:field="*{fechaFin}">
+                                    <div class="form-text">
+                                        Si no se especifica, la publicación no vence.
+                                    </div>
+                                </div>
+
+                                <!-- Título -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Título <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           th:field="*{titulo}"
+                                           placeholder="Ej: Reunión de padres de familia — viernes 21"
+                                           maxlength="120"
+                                           required>
+                                    <div class="form-text">Máximo 120 caracteres.</div>
+                                </div>
+
+                                <!-- Descripción -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Contenido <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control"
+                                              th:field="*{descripcion}"
+                                              rows="5"
+                                              placeholder="Escriba el contenido del comunicado aquí..."
+                                              maxlength="400"
+                                              required></textarea>
+                                    <div class="form-text">Máximo 400 caracteres.</div>
+                                </div>
+
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i>
+                                    <span th:text="${evento.idEvento != null ? 'Actualizar' : 'Publicar'}"></span>
+                                </button>
+                                <a th:href="@{/noticias}" class="btn btn-outline-secondary">
+                                    Cancelar
+                                </a>
+                            </div>
+
+                        </form>
                     </div>
+                </div>
 
-                </form>
             </div>
         </div>
+        <footer th:replace="~{layout/plantilla :: footer}"></footer>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const inputInicio = document.querySelector('[name="fechaInicio"]');
+                const inputFin = document.querySelector('[name="fechaFin"]');
+                const form = inputInicio.closest('form');
+                const esNuevo = document.querySelector('[name="idEvento"]').value === '';
 
-    </div>
-</div>
-<footer th:replace="~{layout/plantilla :: footer}"></footer>
-</body>
+                function hoyISO() {
+                    const hoy = new Date();
+                    const y = hoy.getFullYear();
+                    const m = String(hoy.getMonth() + 1).padStart(2, '0');
+                    const d = String(hoy.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                }
+
+                // Solo bloquea fechas pasadas al crear una noticia nueva
+                if (esNuevo) {
+                    inputInicio.min = hoyISO();
+                }
+
+                function actualizarMinFin() {
+                    if (inputInicio.value) {
+                        inputFin.min = inputInicio.value;
+                        if (inputFin.value && inputFin.value < inputInicio.value) {
+                            inputFin.value = '';
+                        }
+                    } else {
+                        inputFin.removeAttribute('min');
+                    }
+                }
+
+                inputInicio.addEventListener('change', actualizarMinFin);
+                actualizarMinFin(); // corre también al cargar el formulario de edición
+
+                form.addEventListener('submit', function (e) {
+                    if (esNuevo && inputInicio.value && inputInicio.value < hoyISO()) {
+                        e.preventDefault();
+                        alert('La fecha de publicación no puede ser anterior a hoy.');
+                        return;
+                    }
+                    if (inputFin.value && inputInicio.value && inputFin.value < inputInicio.value) {
+                        e.preventDefault();
+                        alert('La fecha de vencimiento no puede ser anterior a la fecha de publicación.');
+                    }
+                });
+            });
+        </script>
+    </body>
 </html>
