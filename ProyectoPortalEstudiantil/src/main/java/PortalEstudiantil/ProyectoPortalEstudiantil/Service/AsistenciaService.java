@@ -163,4 +163,16 @@ public class AsistenciaService {
         cambiarEstado(idAsistencia, ESTADO_JUSTIFICADO);
         log.info("Asistencia ID {} justificada", idAsistencia);
     }
+    
+    // ══════════════════════════════════════════════════════════════════
+    // HISTORIAL DE ASISTENCIA – ENCARGADO
+    // ══════════════════════════════════════════════════════════════════
+    public List<AsistenciaRepository.HijoDropdownRow> obtenerHijosDeEncargado(Long idEncargado) {
+        return asistenciaRepository.listarHijosPorEncargado(idEncargado);
+    }
+
+    public List<AsistenciaRepository.HistorialAsistenciaHijoRow> obtenerHistorialHijo(
+            Long idEncargado, Long idEstudiante) {
+        return asistenciaRepository.listarHistorialPorEncargado(idEncargado, idEstudiante);
+    }
 }

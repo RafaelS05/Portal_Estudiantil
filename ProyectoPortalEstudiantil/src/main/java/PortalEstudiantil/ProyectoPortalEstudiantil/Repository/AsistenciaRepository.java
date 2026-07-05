@@ -338,4 +338,72 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Long> {
             @Param("idAsistencia") Long idAsistencia,
             @Param("idEstado") Long idEstado
     );
+
+    // ← NUEVA PROYECCIÓN: historial de asistencia para el ENCARGADO
+    interface HistorialAsistenciaHijoRow {
+
+        String getFechaAsistencia();
+
+        String getNombreMateria();
+
+        String getNumeroSeccion();
+
+        Long getIdEstadoFk();
+
+        String getEstadoDescripcion();
+
+        String getNombreEstudiante();
+    }
+
+    // ← NUEVA QUERY: historial de asistencia de los hijos de un encargado
+    @Query(value = """
+        SELECT
+            DATE_FORMAT(a.FECHA_ASISTENCIA, '%Y-%m-%d') AS fechaAsistencia,
+            m.NOMBRE                 AS nombreMateria,
+            s.NUMERO                 AS numeroSeccion,
+            a.ID_ESTADO_FK           AS idEstadoFk,
+            e.DESCRIPCION            AS estadoDescripcion,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            )                        AS nombreEstudiante
+        FROM ASISTENCIAS_TB a
+        JOIN MATRICULA_TB       mt ON mt.ID_MATRICULA       = a.ID_MATRICULA_FK
+        JOIN USUARIOS_TB        u  ON u.ID_USUARIO          = mt.ID_USUARIO_ESTUDIANTE_FK
+        JOIN SECCIONMATERIA_TB  sm ON sm.ID_SECCIONMATERIA  = a.ID_SECCIONMATERIA_FK
+        JOIN MATERIA_TB         m  ON m.ID_MATERIA          = sm.ID_MATERIA_FK
+        JOIN SECCION_TB         s  ON s.ID_SECCION          = sm.ID_SECCION_FK
+        JOIN ESTADOS_TB         e  ON e.ID_ESTADO           = a.ID_ESTADO_FK
+        JOIN ENCARGADOESTUDIANTE_TB ee ON ee.ID_USUARIO_ESTUDIANTE_FK = mt.ID_USUARIO_ESTUDIANTE_FK
+        WHERE ee.ID_USUARIO_ENCARGADO_FK = :idEncargado
+          AND ee.ID_ESTADO_FK = 1
+          AND (:idEstudiante IS NULL OR mt.ID_USUARIO_ESTUDIANTE_FK = :idEstudiante)
+        ORDER BY u.PRIMER_APELLIDO, u.NOMBRE, a.FECHA_ASISTENCIA DESC
+    """, nativeQuery = true)
+    List<HistorialAsistenciaHijoRow> listarHistorialPorEncargado(
+            @Param("idEncargado") Long idEncargado,
+            @Param("idEstudiante") Long idEstudiante);
+
+    // ← NUEVA QUERY: lista de hijos de un encargado (para el selector, si tiene más de uno)
+    @Query(value = """
+        SELECT DISTINCT
+            u.ID_USUARIO AS idUsuario,
+            CONCAT(u.NOMBRE, ' ', u.PRIMER_APELLIDO,
+                   CASE WHEN u.SEGUNDO_APELLIDO IS NULL OR u.SEGUNDO_APELLIDO = ''
+                        THEN '' ELSE CONCAT(' ', u.SEGUNDO_APELLIDO) END
+            ) AS nombreCompleto
+        FROM ENCARGADOESTUDIANTE_TB ee
+        JOIN USUARIOS_TB u ON u.ID_USUARIO = ee.ID_USUARIO_ESTUDIANTE_FK
+        WHERE ee.ID_USUARIO_ENCARGADO_FK = :idEncargado
+          AND ee.ID_ESTADO_FK = 1
+        ORDER BY nombreCompleto
+    """, nativeQuery = true)
+    List<HijoDropdownRow> listarHijosPorEncargado(@Param("idEncargado") Long idEncargado);
+
+    interface HijoDropdownRow {
+
+        Long getIdUsuario();
+
+        String getNombreCompleto();
+    }
 }
