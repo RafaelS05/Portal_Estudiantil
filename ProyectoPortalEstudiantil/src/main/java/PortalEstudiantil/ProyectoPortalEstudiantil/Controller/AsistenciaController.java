@@ -1,5 +1,8 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Controller;
 
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository.HijoDropdownRow;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository.HistorialAsistenciaHijoRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository.AsistenciaListadoRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository.PaseListaRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.AsistenciaRepository.SeccionMateriaDropdownRow;
@@ -207,5 +210,30 @@ public class AsistenciaController {
         } catch (DateTimeParseException e) {
             return null;
         }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // HISTORIAL DE ASISTENCIA – ENCARGADO
+    // ══════════════════════════════════════════════════════════════════
+    @GetMapping("/historial")
+    public String historialHijo(
+            @RequestParam(required = false) Long idEstudiante,
+            Model model,
+            @AuthenticationPrincipal PortalUserDetails userDetails) {
+
+        Long idEncargado = asistenciaService.obtenerIdUsuarioPorEmail(userDetails.getUsername());
+
+        List<AsistenciaRepository.HijoDropdownRow> hijos
+                = asistenciaService.obtenerHijosDeEncargado(idEncargado);
+
+        List<AsistenciaRepository.HistorialAsistenciaHijoRow> historial
+                = asistenciaService.obtenerHistorialHijo(idEncargado, idEstudiante);
+
+        model.addAttribute("hijos", hijos);
+        model.addAttribute("historial", historial);
+        model.addAttribute("idEstudiante", idEstudiante);
+        model.addAttribute("pageTitle", "Historial de Asistencia");
+
+        return "asistencias/historial";
     }
 }
