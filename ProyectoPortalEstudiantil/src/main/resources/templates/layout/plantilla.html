@@ -82,8 +82,7 @@
                             </a>
                         </div>
 
-                        <!-- CORREGIDO: sec:authorize en el div, th:href solo con la URL -->
-                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR')">
+                        <div class="nav-item" sec:authorize="hasRole('ADMINISTRADOR') or hasRole('PROFESOR') or hasRole('ENCARGADO')">
                             <a class="sidebar-link" th:href="@{/calificaciones}">
                                 <i class="fa-solid fa-chart-line"></i> Calificaciones
                             </a>

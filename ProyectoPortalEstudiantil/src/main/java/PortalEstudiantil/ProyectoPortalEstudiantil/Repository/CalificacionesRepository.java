@@ -5,6 +5,7 @@
 package PortalEstudiantil.ProyectoPortalEstudiantil.Repository;
 
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Calificaciones;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +23,6 @@ public interface CalificacionesRepository extends JpaRepository<Calificaciones, 
 
     @Query("SELECT c FROM Calificaciones c WHERE c.idEstadoFk = :estadoActivo")
     Page<Calificaciones> findAllActivos(@Param("estadoActivo") Long estadoActivo, Pageable pageable);
-    
 
     @Query("SELECT c FROM Calificaciones c WHERE c.idEstadoFk = :estadoActivo AND "
             + "(LOWER(c.matricula.estudiante.nombre) LIKE LOWER(CONCAT('%', :busqueda, '%')) OR "
@@ -51,4 +51,11 @@ public interface CalificacionesRepository extends JpaRepository<Calificaciones, 
     Optional<Calificaciones> findByMatriculaAndEvaluacion(
             @Param("idMatricula") Long idMatricula,
             @Param("idEvaluacion") Long idEvaluacion);
+
+    @Query("SELECT c FROM Calificaciones c WHERE c.idEstadoFk = :estadoActivo AND "
+            + "c.matricula.estudiante.idUsuario IN :idsEstudiantes")
+    Page<Calificaciones> findByEstudiantesAndActivos(
+            @Param("idsEstudiantes") List<Long> idsEstudiantes,
+            @Param("estadoActivo") Long estadoActivo,
+            Pageable pageable);
 }
