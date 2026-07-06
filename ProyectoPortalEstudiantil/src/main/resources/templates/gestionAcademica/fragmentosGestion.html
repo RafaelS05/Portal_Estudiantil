@@ -187,8 +187,17 @@
             </div>
             <div class="card tbl-card">
                 <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar materia…" oninput="filterTable('tbl-materias',this.value)">
+                    <input type="text" class="form-control form-control-sm tbl-search" data-table="tbl-materias"
+                           style="max-width:220px" placeholder="Buscar materia…"
+                           oninput="aplicarFiltros('tbl-materias')">
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-materias"
+                            data-col="0" style="max-width:200px" onchange="aplicarFiltros('tbl-materias')">
+                        <option value="">Nombre: todas</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm" title="Limpiar filtros"
+                            onclick="limpiarFiltros('tbl-materias')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                     <button class="btn btn-primary btn-sm ms-auto"
                             data-bs-toggle="modal" data-bs-target="#modal-materia-nuevo">
                         <i class="fa-solid fa-plus me-1"></i>Nueva Materia
@@ -256,8 +265,18 @@
             </div>
             <div class="card tbl-card">
                 <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar sección…" oninput="filterTable('tbl-secciones',this.value)">
+                    <input type="text" class="form-control form-control-sm tbl-search" data-table="tbl-secciones"
+                           style="max-width:220px" placeholder="Buscar sección…"
+                           oninput="aplicarFiltros('tbl-secciones')">
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-secciones"
+                            data-col="0" data-mode="grado" style="max-width:180px"
+                            onchange="aplicarFiltros('tbl-secciones')">
+                        <option value="">Todos los grados</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm" title="Limpiar filtros"
+                            onclick="limpiarFiltros('tbl-secciones')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                     <button class="btn btn-primary btn-sm ms-auto"
                             data-bs-toggle="modal" data-bs-target="#modal-seccion-nuevo">
                         <i class="fa-solid fa-plus me-1"></i>Nueva Sección
@@ -390,8 +409,25 @@
             </div>
             <div class="card tbl-card">
                 <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar asignación…" oninput="filterTable('tbl-sm',this.value)">
+                    <input type="text" class="form-control form-control-sm tbl-search" data-table="tbl-sm"
+                           style="max-width:200px" placeholder="Buscar asignación…"
+                           oninput="aplicarFiltros('tbl-sm')">
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-sm"
+                            data-col="0" style="max-width:150px" onchange="aplicarFiltros('tbl-sm')">
+                        <option value="">Sección: todas</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-sm"
+                            data-col="1" style="max-width:170px" onchange="aplicarFiltros('tbl-sm')">
+                        <option value="">Materia: todas</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-sm"
+                            data-col="2" style="max-width:190px" onchange="aplicarFiltros('tbl-sm')">
+                        <option value="">Docente: todos</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm" title="Limpiar filtros"
+                            onclick="limpiarFiltros('tbl-sm')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                     <button class="btn btn-primary btn-sm ms-auto"
                             data-bs-toggle="modal" data-bs-target="#modal-sm-nuevo">
                         <i class="fa-solid fa-plus me-1"></i>Nueva Asignación
@@ -457,8 +493,29 @@
             </div>
             <div class="card tbl-card">
                 <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar horario…" oninput="filterTable('tbl-horarios',this.value)">
+                    <input type="text" class="form-control form-control-sm tbl-search" data-table="tbl-horarios"
+                           style="max-width:180px" placeholder="Buscar horario…"
+                           oninput="aplicarFiltros('tbl-horarios')">
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-horarios"
+                            data-col="0" style="max-width:150px" onchange="aplicarFiltros('tbl-horarios')">
+                        <option value="">Sección: todas</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-horarios"
+                            data-col="2" style="max-width:190px" onchange="aplicarFiltros('tbl-horarios')">
+                        <option value="">Docente: todos</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-horarios"
+                            data-col="3" data-mode="dia" style="max-width:150px" onchange="aplicarFiltros('tbl-horarios')">
+                        <option value="">Día: todos</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-horarios"
+                            data-col="6" style="max-width:140px" onchange="aplicarFiltros('tbl-horarios')">
+                        <option value="">Aula: todas</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm" title="Limpiar filtros"
+                            onclick="limpiarFiltros('tbl-horarios')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                     <button class="btn btn-primary btn-sm ms-auto"
                             data-bs-toggle="modal" data-bs-target="#modal-horario-nuevo">
                         <i class="fa-solid fa-plus me-1"></i>Nuevo Horario
@@ -529,8 +586,22 @@
             </div>
             <div class="card tbl-card">
                 <div class="card-header d-flex align-items-center gap-2 flex-wrap">
-                    <input type="text" class="form-control form-control-sm" style="max-width:280px"
-                           placeholder="Buscar matrícula…" oninput="filterTable('tbl-matriculas',this.value)">
+                    <input type="text" class="form-control form-control-sm tbl-search" data-table="tbl-matriculas"
+                           style="max-width:200px" placeholder="Buscar matrícula…"
+                           oninput="aplicarFiltros('tbl-matriculas')">
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-matriculas"
+                            data-col="0" data-mode="grado" style="max-width:170px"
+                            onchange="aplicarFiltros('tbl-matriculas')">
+                        <option value="">Todos los grados</option>
+                    </select>
+                    <select class="form-select form-select-sm tbl-filter" data-table="tbl-matriculas"
+                            data-col="0" style="max-width:150px" onchange="aplicarFiltros('tbl-matriculas')">
+                        <option value="">Sección: todas</option>
+                    </select>
+                    <button type="button" class="btn btn-light btn-sm" title="Limpiar filtros"
+                            onclick="limpiarFiltros('tbl-matriculas')">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
                     <button class="btn btn-primary btn-sm ms-auto"
                             data-bs-toggle="modal" data-bs-target="#modal-matricula-nuevo">
                         <i class="fa-solid fa-plus me-1"></i>Nueva Matrícula
@@ -1004,13 +1075,13 @@
                         
                         <div class="mb-3">
                             <label class="lbl">Docente</label>
-                            <select name="idUsuarioDocenteFk" class="form-select" required>
+                            <select name="idUsuarioDocenteFk" id="esm-docente" class="form-select" required>
                                 <option value="">Profesor:</option>
                                 <option th:each="p : ${profesorAsigna}"
                                         th:value="${p.idUsuario}" th:text="${p.nombre + ' ' + p.primerApellido + ' ' + p.segundoApellido}"></option>
                             </select>
                         </div>
-                        
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>

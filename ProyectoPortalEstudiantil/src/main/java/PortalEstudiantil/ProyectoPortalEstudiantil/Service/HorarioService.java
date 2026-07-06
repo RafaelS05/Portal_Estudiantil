@@ -78,9 +78,18 @@ public class HorarioService {
         return horarioRepository.findByIdHorario(id);
     }
 
+    // La hora de inicio debe ser anterior a la de fin (formato HH:mm)
+    private void validarHoras(String horaInicio, String horaFin) {
+        if (horaInicio.compareTo(horaFin) >= 0) {
+            throw new IllegalArgumentException(
+                    "La hora de inicio debe ser anterior a la hora de fin.");
+        }
+    }
+
     @Transactional
     public Long insertar(Integer diaSemana, String horaInicio, String horaFin,
             Long idAulaFk, Long idSeccionMateriaFk) {
+        validarHoras(horaInicio, horaFin);
         // Validar duplicado de bloque
         if (horarioRepository.contarDuplicadoBloque(diaSemana, horaInicio, horaFin,
                 idSeccionMateriaFk, null) > 0) {
@@ -98,6 +107,7 @@ public class HorarioService {
     @Transactional
     public void modificar(Long idHorario, Integer diaSemana, String horaInicio, String horaFin,
             Long idAulaFk, Long idSeccionMateriaFk) {
+        validarHoras(horaInicio, horaFin);
         Horario existente = horarioRepository.findByIdHorario(idHorario);
         if (existente == null) {
             throw new IllegalArgumentException("Horario no encontrado: " + idHorario);

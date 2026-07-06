@@ -198,4 +198,23 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 """, nativeQuery = true)
     List<Usuario> listarEstudiantes();
 
+    //Estudiantes sin matrícula activa en un período activo (para nueva matrícula)
+    @Query(value = """
+    SELECT u.*
+    FROM USUARIOS_TB u
+    WHERE u.ID_TIPOUSUARIO_FK = 3
+      AND u.ID_ESTADO_FK = 1
+      AND NOT EXISTS (
+            SELECT 1
+            FROM MATRICULA_TB m
+            JOIN SECCION_TB  s ON s.ID_SECCION = m.ID_SECCION_FK
+            JOIN PERIODOS_TB p ON p.ID_PERIODO = s.ID_PERIODO_FK
+            WHERE m.ID_USUARIO_ESTUDIANTE_FK = u.ID_USUARIO
+              AND m.ID_ESTADO_FK = 1
+              AND p.ID_ESTADO_FK = 1
+      )
+    ORDER BY PRIMER_APELLIDO, NOMBRE
+""", nativeQuery = true)
+    List<Usuario> listarEstudiantesSinMatriculaActiva();
+
 }
