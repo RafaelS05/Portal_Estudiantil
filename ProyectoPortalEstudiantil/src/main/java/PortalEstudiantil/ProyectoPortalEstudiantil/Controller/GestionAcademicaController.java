@@ -88,7 +88,7 @@ public class GestionAcademicaController {
 
         //Matricula
         model.addAttribute("todasMatriculas", matriculaService.listTodos());
-        model.addAttribute("estudiantesActivos", usuarioRepository.listarEstudiantes());
+        model.addAttribute("estudiantesActivos", usuarioRepository.listarEstudiantesSinMatriculaActiva());
         model.addAttribute("totalMatriculasActivas", matriculaService.contarActivas());
 
         //Comunes y js

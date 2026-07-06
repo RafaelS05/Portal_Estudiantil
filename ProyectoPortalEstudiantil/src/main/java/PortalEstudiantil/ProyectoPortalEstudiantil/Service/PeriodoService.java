@@ -31,8 +31,18 @@ public class PeriodoService {
         return periodoRepository.findByIdPeriodo(id);
     }
 
+    // La fecha de inicio debe ser anterior a la de fin
+    private void validarFechas(LocalDate fechaInicio, LocalDate fechaFin) {
+        if (!fechaInicio.isBefore(fechaFin)) {
+            throw new IllegalArgumentException(
+                    "La fecha de inicio debe ser anterior a la fecha de fin.");
+        }
+    }
+
     // Insertar
     public Long insertar(String nombre, LocalDate fechaInicio, LocalDate fechaFin) {
+
+        validarFechas(fechaInicio, fechaFin);
 
         if (periodoRepository.contarNombreDuplicado(nombre, null) > 0) {
             throw new IllegalArgumentException(
@@ -52,6 +62,8 @@ public class PeriodoService {
     // Modificar
     public void modificar(Long idPeriodo, String nombre,
                           LocalDate fechaInicio, LocalDate fechaFin) {
+
+        validarFechas(fechaInicio, fechaFin);
 
         if (periodoRepository.contarNombreDuplicado(nombre, idPeriodo) > 0) {
             throw new IllegalArgumentException(
