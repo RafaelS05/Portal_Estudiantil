@@ -18,7 +18,6 @@
 <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
 <section id="contenido">
 
-    <!-- ===== TÍTULO ===== -->
     <div class="d-flex align-items-center gap-2 mb-4">
         <i class="fa-solid fa-graduation-cap fs-2 text-primary"></i>
         <h1 class="h3 mb-0">Aprendizaje Personalizado</h1>
@@ -26,9 +25,9 @@
               th:text="${totalElementos} + ' estudiantes'"></span>
     </div>
 
-    <!-- ===== BUSCADOR ===== -->
     <form method="get" action="/aprendizaje-personalizado"
-          class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+          class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2"
+          th:unless="${esEstudiante}">
 
         <div class="search-input-group">
             <i class="fa-solid fa-magnifying-glass"></i>

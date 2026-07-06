@@ -15,30 +15,25 @@
     <body>
         <div th:replace="~{layout/plantilla :: shell(~{::section#contenido})}">
             <section id="contenido">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2 class="fw-bold mb-1">Evaluaciones</h2>
-                    </div>
-                 </div>
+
                 <form method="get" action="/evaluaciones/paginado"
                       class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+
                     <div class="search-input-group">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text"
-                               name="busqueda"
-                               class="form-control"
-                               placeholder="Buscar evaluación..."
-                               th:value="${busquedaActual}">
+                        <input type="text" name="busqueda" class="form-control" placeholder="Escriba la evaluación..." th:value="${busquedaActual}">
                     </div>
+
                     <div class="d-flex align-items-center gap-3">
-                        <a th:href="@{/evaluaciones/nuevo}"
-                           class="btn btn-primary btn-sm btn-new">
+                        <a th:href="@{/evaluaciones/nuevo}" class="btn btn-primary btn-sm btn-new">
                             <i class="fa-solid fa-plus me-1"></i>
                             Nueva Evaluación
                         </a>
                     </div>
+
                     <input type="hidden" name="pagina" value="1" />
                 </form>
+
                 <div class="card tbl-card">
                     <div class="table-responsive">
                         <table class="table table-hover custom-table mb-0">
@@ -105,7 +100,7 @@
 
                     <div class="card-footer bg-white d-flex flex-wrap align-items-center justify-content-between py-3">
                         <div class="text-muted small">
-                            Mostrando<span th:text="${#lists.size(evaluaciones)}"></span>
+                            Mostrando <span th:text="${#lists.size(evaluaciones)}"></span>
                             de
                             <span th:text="${totalElementos}"></span>
                             evaluaciones

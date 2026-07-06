@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
+import org.springframework.security.core.Authentication;
 
 /**
  *
@@ -57,12 +59,25 @@ public class CalificacionesController {
             @RequestParam(required = false) String busqueda,
             @RequestParam(required = false) Long seccion,
             @RequestParam(defaultValue = "1") int pagina,
-            Model model) {
+            Model model,
+            Authentication authentication) {
 
         int tamanoPagina = 10;
 
         Map<String, Object> resultado = calificacionesService.listarCalificacionesParaVistaPaginado(
                 busqueda, seccion, pagina, tamanoPagina);
+
+        boolean esEncargado = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ENCARGADO"));
+
+        if (esEncargado) {
+            PortalUserDetails userDetails = (PortalUserDetails) authentication.getPrincipal();
+            resultado = calificacionesService.listarCalificacionesPorEncargado(
+                    userDetails.getIdUsuario(), pagina, tamanoPagina);
+        } else {
+            resultado = calificacionesService.listarCalificacionesParaVistaPaginado(
+                    busqueda, seccion, pagina, tamanoPagina);
+        }
 
         model.addAttribute("calificaciones", resultado.get("calificaciones"));
         model.addAttribute("paginaActual", resultado.get("paginaActual"));
@@ -73,6 +88,8 @@ public class CalificacionesController {
         model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("busquedaActual", busqueda);
         model.addAttribute("seccionActual", seccion);
+        model.addAttribute("esEncargado", esEncargado);
+        
         model.addAttribute("pageTitle", "Calificaciones");
 
         return "calificaciones/listado";
@@ -95,6 +112,7 @@ public class CalificacionesController {
         model.addAttribute("calificacion", calificacion);
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("evaluaciones", evaluacionRepository.findAll());
+        model.addAttribute("secciones", calificacionesService.obtenerTodasLasSecciones());
         model.addAttribute("pageTitle", "Modificar Calificación");
 
         return "calificaciones/modificar";
