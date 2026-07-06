@@ -66,7 +66,7 @@ public class EvaluacionController {
         model.addAttribute("busquedaActual", busqueda);
         model.addAttribute("secciones", seccionMateriaRepository.findAll());
         model.addAttribute("pageTitle", "Evaluaciones");
-        return "evaluaciones/listado-paginado";
+        return "evaluaciones/listado";
     }
 
     @GetMapping("/nuevo")

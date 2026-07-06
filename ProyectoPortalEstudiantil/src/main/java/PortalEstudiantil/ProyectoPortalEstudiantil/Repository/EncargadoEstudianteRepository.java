@@ -20,7 +20,6 @@ public interface EncargadoEstudianteRepository extends JpaRepository<EncargadoEs
     """, nativeQuery = true)
     List<EncargadoEstudiante> listarActivosPorEstudiante(@Param("idEstudiante") Long idEstudiante);
 
-    // ✅ NUEVO: relaciones activas por ENCARGADO
     @Query(value = """
         SELECT ee.*
         FROM ENCARGADOESTUDIANTE_TB ee
@@ -60,7 +59,6 @@ public interface EncargadoEstudianteRepository extends JpaRepository<EncargadoEs
             @Param("idEstado") Long idEstado
     );
 
-    // ✅ MariaDB: devolvemos COUNT (long) para evitar Integer->Boolean cast
     @Query(value = """
         SELECT COUNT(*)
         FROM ENCARGADOESTUDIANTE_TB ee

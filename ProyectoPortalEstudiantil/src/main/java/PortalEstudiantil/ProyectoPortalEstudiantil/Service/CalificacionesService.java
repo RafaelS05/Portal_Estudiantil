@@ -30,13 +30,15 @@ public class CalificacionesService {
     private final EvaluacionRepository evaluacionRepository;
     private final MateriaRepository materiaRepository;
     private final SeccionRepository seccionRepository;
+    private final EncargadoEstudianteRepository encargadoEstudianteRepository;
 
-    public CalificacionesService(CalificacionesRepository calificacionesRepository, MatriculaRepository matriculaRepository, EvaluacionRepository evaluacionRepository, MateriaRepository materiaRepository, SeccionRepository seccionRepository) {
+    public CalificacionesService(CalificacionesRepository calificacionesRepository, MatriculaRepository matriculaRepository, EvaluacionRepository evaluacionRepository, MateriaRepository materiaRepository, SeccionRepository seccionRepository, EncargadoEstudianteRepository encargadoEstudianteRepository) {
         this.calificacionesRepository = calificacionesRepository;
         this.matriculaRepository = matriculaRepository;
         this.evaluacionRepository = evaluacionRepository;
         this.materiaRepository = materiaRepository;
         this.seccionRepository = seccionRepository;
+        this.encargadoEstudianteRepository = encargadoEstudianteRepository;
     }
 
     public List<Calificaciones> listarTodas() {
@@ -59,7 +61,7 @@ public class CalificacionesService {
             Calificaciones calif = existente.get();
             calif.setCalificacion(calificacion.getCalificacion());
             calif.setIdEstadoFk(ESTADO_ACTIVO);
-            calificacionesRepository.saveAndFlush(calif); 
+            calificacionesRepository.saveAndFlush(calif);
         } else {
             calificacion.setIdCalificaciones(null);
             calificacionesRepository.save(calificacion);
@@ -212,6 +214,85 @@ public class CalificacionesService {
         return resultado;
     }
 
+    public Map<String, Object> listarCalificacionesPorEncargado(
+            Long idUsuarioEncargado, int pagina, int tamanoPagina) {
+
+        List<Long> idsEstudiantes = encargadoEstudianteRepository
+                .listarActivosPorEncargado(idUsuarioEncargado)
+                .stream()
+                .map(EncargadoEstudiante::getIdUsuarioEstudianteFk)
+                .toList();
+
+        Pageable pageable = PageRequest.of(pagina - 1, tamanoPagina, Sort.by("idCalificaciones").descending());
+
+        Page<Calificaciones> page;
+        if (idsEstudiantes.isEmpty()) {
+            page = Page.empty(pageable);
+        } else {
+            page = calificacionesRepository.findByEstudiantesAndActivos(idsEstudiantes, ESTADO_ACTIVO, pageable);
+        }
+
+        List<Map<String, Object>> calificacionesMap = new ArrayList<>();
+        Map<Long, String> cacheMaterias = new HashMap<>();
+
+        for (Calificaciones c : page.getContent()) {
+            Map<String, Object> row = new HashMap<>();
+
+            row.put("id", c.getIdCalificaciones());
+            row.put("nota", c.getCalificacion());
+
+            String nombreEstudiante = c.getMatricula().getEstudiante().getNombre() + " "
+                    + c.getMatricula().getEstudiante().getPrimerApellido();
+            row.put("estudiante", nombreEstudiante);
+
+            if (c.getMatricula() != null && c.getMatricula().getSeccion() != null) {
+                row.put("seccion", c.getMatricula().getSeccion().getNombreCompleto());
+                row.put("idSeccion", c.getMatricula().getSeccion().getIdSeccion());
+            } else {
+                row.put("seccion", "Sin sección");
+                row.put("idSeccion", null);
+            }
+
+            if (c.getMatricula() != null && c.getMatricula().getEstudiante() != null
+                    && c.getMatricula().getEstudiante().getCorreos() != null
+                    && !c.getMatricula().getEstudiante().getCorreos().isEmpty()) {
+
+                row.put("correo", c.getMatricula().getEstudiante().getCorreos().get(0).getCorreo());
+            } else {
+                row.put("correo", "Sin correo");
+            }
+
+            String nombreMateria = "Sin materia";
+            if (c.getEvaluacion() != null && c.getEvaluacion().getSeccionMateria() != null) {
+                Long idMateria = c.getEvaluacion().getSeccionMateria().getIdMateriaFk();
+                if (idMateria != null) {
+                    if (cacheMaterias.containsKey(idMateria)) {
+                        nombreMateria = cacheMaterias.get(idMateria);
+                    } else {
+                        Optional<Materia> materiaOpt = materiaRepository.findById(idMateria);
+                        if (materiaOpt.isPresent()) {
+                            nombreMateria = materiaOpt.get().getNombreCompleto();
+                            cacheMaterias.put(idMateria, nombreMateria);
+                        }
+                    }
+                }
+            }
+            row.put("materia", nombreMateria);
+            row.put("evaluacion", c.getEvaluacion().getTipo());
+
+            calificacionesMap.add(row);
+        }
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("calificaciones", calificacionesMap);
+        resultado.put("paginaActual", pagina);
+        resultado.put("totalPaginas", page.getTotalPages());
+        resultado.put("totalElementos", page.getTotalElements());
+        resultado.put("tamanoPagina", tamanoPagina);
+
+        return resultado;
+    }
+
     public List<Map<String, Object>> obtenerTodasLasSecciones() {
         List<Seccion> secciones = seccionRepository.findAll();
         List<Map<String, Object>> listaSecciones = new ArrayList<>();
@@ -230,4 +311,5 @@ public class CalificacionesService {
     public Calificaciones buscarPorId(Long id) {
         return calificacionesRepository.findById(id).orElse(null);
     }
+
 }
