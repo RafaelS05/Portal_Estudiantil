@@ -1,5 +1,13 @@
 <section class="perfil-container" xmlns:th="http://www.thymeleaf.org">
 
+    <!-- MENSAJE DE CONFIRMACIÓN / ERROR -->
+    <div th:if="${mensaje}"
+         th:class="'alert alert-' + ${tipoMensaje != null ? tipoMensaje : 'info'} + ' alert-dismissible fade show'"
+         role="alert">
+        <span th:text="${mensaje}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <!-- PERFIL HEADER -->
     <div class="perfil-card text-center">
         <div class="perfil-avatar mb-2">

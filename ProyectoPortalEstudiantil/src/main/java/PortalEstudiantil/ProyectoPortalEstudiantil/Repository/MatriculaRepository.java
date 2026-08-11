@@ -56,6 +56,19 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
     long contarEstudianteEnSeccion(@Param("idEstudiante") Long idEstudiante,
             @Param("idSeccion") Long idSeccion);
 
+    //Sección donde el estudiante ya tiene matrícula activa en el mismo período
+    @Query(value = """
+        SELECT s.NUMERO FROM MATRICULA_TB m
+        JOIN SECCION_TB s ON s.ID_SECCION = m.ID_SECCION_FK
+        WHERE m.ID_USUARIO_ESTUDIANTE_FK = :idEstudiante
+          AND m.ID_ESTADO_FK = 1
+          AND s.ID_PERIODO_FK = (SELECT ID_PERIODO_FK FROM SECCION_TB
+                                 WHERE ID_SECCION = :idSeccion)
+        LIMIT 1
+    """, nativeQuery = true)
+    String seccionActivaEnMismoPeriodo(@Param("idEstudiante") Long idEstudiante,
+            @Param("idSeccion") Long idSeccion);
+
     //Queries
     @Query(value = """
         SELECT

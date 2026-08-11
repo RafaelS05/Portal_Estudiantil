@@ -123,27 +123,38 @@
                             <div class="col-12 mt-4"><hr><h5><i class="fa-solid fa-location-dot me-2"></i>Ubicación</h5></div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Provincia <span class="text-danger">*</span></label>
-                                <select name="idProvincia" id="provinciaSelect" class="form-select" required>
+                                <label class="form-label">Provincia</label>
+                                <select name="idProvincia" id="provinciaSelect" class="form-select">
                                     <option value="">Seleccione</option>
                                     <option th:each="prov : ${provincias}"
                                             th:value="${prov.idProvincia}"
-                                            th:text="${prov.nombre}">
+                                            th:text="${prov.nombre}"
+                                            th:selected="${direccion != null && direccion.provincia != null && direccion.provincia.idProvincia == prov.idProvincia}">
                                     </option>
                                 </select>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Cantón <span class="text-danger">*</span></label>
-                                <select name="idCanton" id="cantonSelect" class="form-select" required>
+                                <label class="form-label">Cantón</label>
+                                <select name="idCanton" id="cantonSelect" class="form-select">
                                     <option value="">Seleccione</option>
+                                    <option th:each="canton : ${cantones}"
+                                            th:value="${canton.idCanton}"
+                                            th:text="${canton.nombre}"
+                                            th:selected="${direccion != null && direccion.canton != null && direccion.canton.idCanton == canton.idCanton}">
+                                    </option>
                                 </select>
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label">Distrito <span class="text-danger">*</span></label>
-                                <select name="idDistrito" id="distritoSelect" class="form-select" required>
+                                <label class="form-label">Distrito</label>
+                                <select name="idDistrito" id="distritoSelect" class="form-select">
                                     <option value="">Seleccione</option>
+                                    <option th:each="distrito : ${distritos}"
+                                            th:value="${distrito.idDistrito}"
+                                            th:text="${distrito.nombre}"
+                                            th:selected="${direccion != null && direccion.distrito != null && direccion.distrito.idDistrito == distrito.idDistrito}">
+                                    </option>
                                 </select>
                             </div>
 
@@ -153,7 +164,8 @@
                                        name="otrasSenas"
                                        class="form-control"
                                        maxlength="150"
-                                       placeholder="Ej: 100m norte del parque">
+                                       placeholder="Ej: 100m norte del parque"
+                                       th:value="${direccion != null ? direccion.otrasSenas : ''}">
                             </div>
 
                             <!-- BOTONES -->

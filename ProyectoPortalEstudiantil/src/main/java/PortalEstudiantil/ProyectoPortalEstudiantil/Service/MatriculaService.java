@@ -40,6 +40,11 @@ public class MatriculaService {
             throw new IllegalArgumentException(
                     "El estudiante ya está matriculado en esta sección.");
         }
+        String seccionActual = matriculaRepository.seccionActivaEnMismoPeriodo(idEstudiante, idSeccion);
+        if (seccionActual != null) {
+            throw new IllegalArgumentException(
+                    "El estudiante ya se encuentra matriculado en la sección " + seccionActual);
+        }
         entityManager.createNativeQuery(
                 "CALL MATRICULA_INSERTAR(:fecha, :estudiante, :seccion, :estado)")
                 .setParameter("fecha", fechaMatricula)

@@ -75,7 +75,7 @@ public class EvaluacionController {
         model.addAttribute("secciones", seccionMateriaRepository.findAll());
         model.addAttribute("periodos", periodoRepository.findAll());
         model.addAttribute("pageTitle", "Nueva Evaluación");
-        return "evaluaciones/modificar";
+        return "evaluaciones/nuevo";
     }
 
     @PostMapping("/guardar")

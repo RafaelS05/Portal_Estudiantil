@@ -27,11 +27,20 @@ public class PasswordResetController {
     public String procesarRecuperar(@RequestParam("email") String email,
             RedirectAttributes redirectAttributes) {
         System.out.println(" DEBUG: POST /resetContrasenna/recuperar-password - Email: " + email);
-        
         try {
-            passwordService.requestPasswordReset(email);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Si el correo existe en nuestro sistema, recibirás un enlace de recuperación.");
+            PasswordResetService.ResetRequestStatus status = passwordService.requestPasswordReset(email);
+
+            switch (status) {
+                case ENLACE_ENVIADO ->
+                    redirectAttributes.addFlashAttribute("successMessage",
+                            "Se ha enviado un enlace de recuperación a tu correo.");
+                case CORREO_NO_REGISTRADO ->
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Correo no registrado.");
+                default ->
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Ha sucedido un error procesando su solicitud. Porfavor intente nuevamente.");
+            }
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage",

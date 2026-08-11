@@ -110,9 +110,9 @@
                                     </form>
 
                                     <!-- Desactivar -->
-                                    <form th:action="@{'/usuarios/desactivar/' + ${usuario.idUsuario}}" 
+                                    <form th:action="@{'/usuarios/desactivar/' + ${usuario.idUsuario}}"
                                           method="post">
-                                        <button type="submit" 
+                                        <button type="submit"
                                                 class="btn btn-outline-warning w-100"
                                                 th:disabled="${usuario.idEstadoFk == 2}"
                                                 onclick="return confirm('¿Desactivar este usuario?')">
@@ -120,6 +120,15 @@
                                         </button>
                                     </form>
 
+                                    <!-- Restablecer contraseña (HU.12.1) -->
+                                    <form th:action="@{'/usuarios/restablecer-password/' + ${usuario.idUsuario}}"
+                                          method="post">
+                                        <button type="submit"
+                                                class="btn btn-outline-danger w-100"
+                                                onclick="return confirm('¿Restablecer la contraseña de este usuario? Se enviará una contraseña temporal a su correo.')">
+                                            <i class="fa-solid fa-key me-1"></i> Restablecer contraseña
+                                        </button>
+                                    </form>
 
                                 </div>
                             </div>

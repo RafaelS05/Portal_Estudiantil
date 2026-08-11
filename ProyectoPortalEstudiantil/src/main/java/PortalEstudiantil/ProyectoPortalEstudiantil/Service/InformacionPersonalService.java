@@ -4,6 +4,9 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.Usuario;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Domain.*;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +22,10 @@ public class InformacionPersonalService {
     private final CantonRepository cantonRepo;
     private final DistritoRepository distritoRepo;
     private final EncargadoEstudianteRepository encargadoEstudianteRepo; // ← AGREGADO
+    private final JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     public InformacionPersonalService(
             UsuarioRepository usuarioRepo,
@@ -28,8 +35,10 @@ public class InformacionPersonalService {
             ProvinciaRepository provinciaRepo,
             CantonRepository cantonRepo,
             DistritoRepository distritoRepo,
-            EncargadoEstudianteRepository encargadoEstudianteRepo // ← AGREGADO
+            EncargadoEstudianteRepository encargadoEstudianteRepo, // ← AGREGADO
+            JavaMailSender mailSender
     ) {
+        this.mailSender = mailSender;
         this.usuarioRepo = usuarioRepo;
         this.telefonoRepo = telefonoRepo;
         this.correoRepo = correoRepo;
@@ -120,26 +129,62 @@ public class InformacionPersonalService {
         // ==========================
         // DIRECCIÓN
         // ==========================
-        Direccion direccion = direccionRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
+        // TC-8 (HU.11.1): la ubicación es opcional. Solo se guarda si el usuario
+        // proporcionó datos; antes se intentaba insertar con NULLs y la transacción
+        // completa fallaba, obligando a ingresar la ubicación en cada edición.
+        boolean hayUbicacion = idProvincia != null || idCanton != null || idDistrito != null
+                || (otrasSenas != null && !otrasSenas.isBlank());
 
-        if (direccion == null) {
-            direccionRepo.insertarDireccion(
-                    otrasSenas,
-                    usuario.getIdUsuario(),
-                    idProvincia,
-                    idCanton,
-                    idDistrito,
-                    1L
+        if (hayUbicacion) {
+            Direccion direccion = direccionRepo.findByUsuario_IdUsuario(usuario.getIdUsuario());
+
+            if (direccion == null) {
+                direccionRepo.insertarDireccion(
+                        otrasSenas,
+                        usuario.getIdUsuario(),
+                        idProvincia,
+                        idCanton,
+                        idDistrito,
+                        1L
+                );
+            } else {
+                direccionRepo.modificarDireccion(
+                        direccion.getIdDireccion(),
+                        otrasSenas,
+                        usuario.getIdUsuario(),
+                        idProvincia != null ? idProvincia
+                                : (direccion.getProvincia() != null ? direccion.getProvincia().getIdProvincia() : null),
+                        idCanton != null ? idCanton
+                                : (direccion.getCanton() != null ? direccion.getCanton().getIdCanton() : null),
+                        idDistrito != null ? idDistrito
+                                : (direccion.getDistrito() != null ? direccion.getDistrito().getIdDistrito() : null)
+                );
+            }
+        }
+
+        // Notificación de confirmación al nuevo correo (HU.11.1)
+        enviarConfirmacionActualizacion(correoTxt);
+    }
+
+    private void enviarConfirmacionActualizacion(String correoDestino) {
+        if (correoDestino == null || correoDestino.isBlank()) {
+            return;
+        }
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(correoDestino);
+            message.setSubject("Datos actualizados - Portal Estudiantil");
+            message.setText(
+                    "Hola,\n\n"
+                    + "Tus datos personales fueron actualizados correctamente.\n\n"
+                    + "Si no realizaste este cambio, contacta al administrador.\n\n"
+                    + "Saludos,\nPortal Estudiantil"
             );
-        } else {
-            direccionRepo.modificarDireccion(
-                    direccion.getIdDireccion(),
-                    otrasSenas,
-                    usuario.getIdUsuario(),
-                    idProvincia,
-                    idCanton,
-                    idDistrito
-            );
+            mailSender.send(message);
+        } catch (Exception e) {
+            // No fallar la actualización si el correo no se puede enviar
+            System.err.println("No se pudo enviar la confirmación de actualización: " + e.getMessage());
         }
     }
 

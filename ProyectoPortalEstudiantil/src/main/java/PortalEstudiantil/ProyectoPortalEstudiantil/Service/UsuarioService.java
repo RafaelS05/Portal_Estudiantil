@@ -166,6 +166,40 @@ public class UsuarioService {
         );
     }
 
+    /**
+     * Verifica si un correo ya está registrado en el sistema.
+     */
+    public boolean correoYaRegistrado(String correo) {
+        if (correo == null || correo.isBlank()) {
+            return false;
+        }
+        return correoRepository.findByCorreo(correo.trim()) != null;
+    }
+
+    /**
+     * TC-10 (HU.1.1): Crea el usuario junto con su contacto en UNA sola
+     * transacción, validando el correo duplicado ANTES de insertar.
+     * Antes, el usuario se creaba primero y al fallar el correo duplicado
+     * quedaba un usuario huérfano ("en blanco") en la base de datos.
+     */
+    @Transactional
+    public Long crearUsuarioConContacto(Usuario usuario, String telefonoNumero, String correoLogin) {
+
+        if (correoLogin == null || correoLogin.trim().isEmpty()) {
+            throw new IllegalArgumentException("El correo de login es obligatorio");
+        }
+
+        if (correoYaRegistrado(correoLogin)) {
+            throw new IllegalArgumentException(
+                    "El correo '" + correoLogin.trim() + "' ya está registrado en otro usuario. "
+                    + "Por favor, usa un correo diferente. No se creó el usuario.");
+        }
+
+        Long idNuevo = crearUsuario(usuario);
+        actualizarContacto(idNuevo, telefonoNumero, correoLogin);
+        return idNuevo;
+    }
+
     @Transactional
     public void actualizarUsuario(Long idUsuario, String nombre, String primerApellido,
                                   String segundoApellido, Long idTipoUsuario) {

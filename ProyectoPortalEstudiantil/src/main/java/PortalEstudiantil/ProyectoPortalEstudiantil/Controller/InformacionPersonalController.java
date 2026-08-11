@@ -93,21 +93,30 @@ public class InformacionPersonalController {
             @RequestParam(required = false) Long idCanton,
             @RequestParam(required = false) Long idDistrito,
             @RequestParam(required = false) String otrasSenas,
-            @AuthenticationPrincipal PortalUserDetails userDetails // ← AGREGADO
+            @AuthenticationPrincipal PortalUserDetails userDetails, // ← AGREGADO
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes
     ) {
         // ← AGREGADO: forzar el ID del usuario logueado por seguridad
         Long idUsuario = service.obtenerIdUsuarioPorEmail(userDetails.getUsername());
         usuario.setIdUsuario(idUsuario);
 
-        service.actualizarInformacion(
-                usuario,
-                correo,
-                numero,
-                idProvincia,
-                idCanton,
-                idDistrito,
-                otrasSenas
-        );
+        try {
+            service.actualizarInformacion(
+                    usuario,
+                    correo,
+                    numero,
+                    idProvincia,
+                    idCanton,
+                    idDistrito,
+                    otrasSenas
+            );
+            redirectAttributes.addFlashAttribute("mensaje", "Datos actualizados correctamente");
+            redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje",
+                    "No se pudieron actualizar los datos: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+        }
         return "redirect:/informacion-personal";
     }
 

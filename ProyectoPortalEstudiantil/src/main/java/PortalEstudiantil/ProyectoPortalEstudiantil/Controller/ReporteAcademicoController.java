@@ -5,8 +5,13 @@ import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.ReporteAcademicoRe
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.ReporteAcademicoRepository.ReporteDetalleRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Repository.ReporteAcademicoRepository.EstudianteDisponibleRow;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Security.PortalUserDetails;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.ReporteAcademicoCorreoService;
+import PortalEstudiantil.ProyectoPortalEstudiantil.Service.ReporteAcademicoPdfService;
 import PortalEstudiantil.ProyectoPortalEstudiantil.Service.ReporteAcademicoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,8 +27,9 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMINISTRADOR')")
 public class ReporteAcademicoController {
 
-    @Autowired
-    private ReporteAcademicoService reporteService;
+    @Autowired private ReporteAcademicoService        reporteService;
+    @Autowired private ReporteAcademicoPdfService     pdfService;
+    @Autowired private ReporteAcademicoCorreoService  correoService;
 
     // ==================== LISTADO ====================
 
@@ -36,7 +42,6 @@ public class ReporteAcademicoController {
                 ? reporteService.buscarReportes(busqueda.trim())
                 : reporteService.listarReportesActivos();
 
-        // Calcular contadores en Java para evitar errores de SpEL con proyecciones
         long totalBoletas     = reportes.stream()
                 .filter(r -> "BOLETA".equals(r.getNombreTipoReporte())).count();
         long totalHistoriales = reportes.stream()
@@ -66,15 +71,20 @@ public class ReporteAcademicoController {
 
             ReporteDetalleRow cabecera = detalle.get(0);
 
-            model.addAttribute("detalle",          detalle);
-            model.addAttribute("reporte",          reporteService.obtenerReporte(id));
-            model.addAttribute("nombreEstudiante", cabecera.getNombreEstudiante());
-            model.addAttribute("nombreSeccion",    cabecera.getNombreSeccion());
-            model.addAttribute("nombrePeriodo",    cabecera.getNombrePeriodo());
-            model.addAttribute("tipoReporte",      cabecera.getNombreTipoReporte());
-            model.addAttribute("promedio",         cabecera.getPromedioPonderado());
-            model.addAttribute("fechaReporte",     cabecera.getFechaCreacionReporte());
-            model.addAttribute("pageTitle",        "Detalle de Reporte");
+            // Correo del estudiante (primera fila que lo traiga, si existe en la proyección)
+            // Lo obtenemos buscando en el listado de disponibles por nombre
+            String correoEstudiante = obtenerCorreoEstudiante(cabecera.getNombreEstudiante());
+
+            model.addAttribute("detalle",           detalle);
+            model.addAttribute("reporte",           reporteService.obtenerReporte(id));
+            model.addAttribute("nombreEstudiante",  cabecera.getNombreEstudiante());
+            model.addAttribute("nombreSeccion",     cabecera.getNombreSeccion());
+            model.addAttribute("nombrePeriodo",     cabecera.getNombrePeriodo());
+            model.addAttribute("tipoReporte",       cabecera.getNombreTipoReporte());
+            model.addAttribute("promedio",          cabecera.getPromedioPonderado());
+            model.addAttribute("fechaReporte",      cabecera.getFechaCreacionReporte());
+            model.addAttribute("correoEstudiante",  correoEstudiante);
+            model.addAttribute("pageTitle",         "Detalle de Reporte");
             return "reporteacademico/Detalle";
 
         } catch (Exception e) {
@@ -82,6 +92,69 @@ public class ReporteAcademicoController {
             ra.addFlashAttribute("tipoMensaje", "danger");
             return "redirect:/reportes";
         }
+    }
+
+    // ==================== DESCARGAR PDF ====================
+
+    @GetMapping("/pdf/{id}")
+    public ResponseEntity<byte[]> descargarPdf(@PathVariable Long id) {
+        try {
+            List<ReporteDetalleRow> detalle = reporteService.obtenerDetalle(id);
+            if (detalle == null || detalle.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            byte[] pdf = pdfService.generarPdf(detalle);
+
+            ReporteDetalleRow cab = detalle.get(0);
+            String nombre = cab.getNombreEstudiante() != null
+                    ? cab.getNombreEstudiante().replaceAll("\\s+", "_") : "boleta";
+            String filename = "boleta_" + nombre + "_" + id + ".pdf";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdf);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // ==================== ENVIAR POR CORREO ====================
+
+    @PostMapping("/enviar/{id}")
+    public String enviarPorCorreo(
+            @PathVariable Long id,
+            @RequestParam String correoDestino,
+            RedirectAttributes ra) {
+
+        try {
+            List<ReporteDetalleRow> detalle = reporteService.obtenerDetalle(id);
+            if (detalle == null || detalle.isEmpty()) {
+                ra.addFlashAttribute("mensaje",     "Reporte no encontrado");
+                ra.addFlashAttribute("tipoMensaje", "danger");
+                return "redirect:/reportes";
+            }
+
+            boolean enviado = correoService.enviarBoleta(detalle, correoDestino);
+
+            if (enviado) {
+                ra.addFlashAttribute("mensaje",
+                        "Boleta enviada exitosamente a " + correoDestino);
+                ra.addFlashAttribute("tipoMensaje", "success");
+            } else {
+                ra.addFlashAttribute("mensaje",
+                        "No se pudo enviar el correo. Verifique la configuración de email.");
+                ra.addFlashAttribute("tipoMensaje", "danger");
+            }
+
+        } catch (Exception e) {
+            ra.addFlashAttribute("mensaje",     "Error al enviar: " + e.getMessage());
+            ra.addFlashAttribute("tipoMensaje", "danger");
+        }
+
+        return "redirect:/reportes/ver/" + id;
     }
 
     // ==================== FORMULARIO NUEVO ====================
@@ -210,5 +283,27 @@ public class ReporteAcademicoController {
             ra.addFlashAttribute("tipoMensaje", "danger");
         }
         return "redirect:/reportes";
+    }
+
+    // ==================== HELPER PRIVADO ====================
+
+    /**
+     * Intenta obtener el correo del estudiante buscando por nombre.
+     * Devuelve cadena vacía si no lo encuentra.
+     */
+    private String obtenerCorreoEstudiante(String nombreEstudiante) {
+        if (nombreEstudiante == null || nombreEstudiante.isBlank()) return "";
+        try {
+            // Usa la primera parte del nombre para la búsqueda
+            String busqueda = nombreEstudiante.split("\\s+")[0];
+            return reporteService.buscarEstudiantes(busqueda)
+                    .stream()
+                    .filter(e -> nombreEstudiante.equals(e.getNombreEstudiante()))
+                    .findFirst()
+                    .map(e -> e.getCorreo() != null ? e.getCorreo() : "")
+                    .orElse("");
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
